@@ -8,6 +8,8 @@ namespace eval ::dialog_audio:: {
 # unreadable.  The panel could look a lot better too, like using menubuttons
 # instead of regular buttons with tk_popup for pulldown menus.
 
+# There is support for multiple devices but tbh, I have never seen it...
+
 ####################### audio dialog ##################3
 
 proc ::dialog_audio::apply {mytoplevel} {
@@ -133,279 +135,289 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     set audio_callback $callback
     set audio_blocksize $blocksize
 
-    toplevel $mytoplevel -class DialogWindow
+    toplevel $mytoplevel
     wm withdraw $mytoplevel
-    wm title $mytoplevel [_ "Audio Settings"]
+    wm title $mytoplevel "Audio Settings"
     wm group $mytoplevel .
     wm resizable $mytoplevel 0 0
     wm transient $mytoplevel
     wm minsize $mytoplevel 380 320
     $mytoplevel configure -menu $::dialog_menubar
-    $mytoplevel configure -padx 10 -pady 5
     ::pd_bindings::dialog_bindings $mytoplevel "audio"
 
-    # settings
-    labelframe $mytoplevel.settings -text [_ "Settings"] -padx 5 -pady 5 -borderwidth 1
-    pack $mytoplevel.settings -side top -fill x -pady 5
+    ttk::frame $mytoplevel.w -padding 5 
+    set ::audioWin $mytoplevel.w
 
-    frame $mytoplevel.settings.srd
-    pack $mytoplevel.settings.srd -side top -fill x
-    label $mytoplevel.settings.srd.sr_label -text [_ "Sample rate:"]
-    entry $mytoplevel.settings.srd.sr_entry -textvariable audio_sr -width 8
-    label $mytoplevel.settings.srd.d_label -text [_ "Delay (msec):"]
-    entry $mytoplevel.settings.srd.d_entry -textvariable audio_advance -width 4
-    pack $mytoplevel.settings.srd.sr_label $mytoplevel.settings.srd.sr_entry -side left
-    pack $mytoplevel.settings.srd.d_entry $mytoplevel.settings.srd.d_label -side right
-
-    frame $mytoplevel.settings.bsc
-    pack $mytoplevel.settings.bsc -side top -fill x
-    button $mytoplevel.settings.bsc.rate1 -text [_ "48k"] \
-        -command "set audio_sr 48000"
-    button $mytoplevel.settings.bsc.rate2 -text [_ "44.1k"] \
-        -command "set audio_sr 44100"
-    button $mytoplevel.settings.bsc.rate3 -text [_ "96k"] \
-        -command "set audio_sr 96000"
-    pack $mytoplevel.settings.bsc.rate1 \
-        $mytoplevel.settings.bsc.rate2 \
-        $mytoplevel.settings.bsc.rate3 \
-         -side left
-    label $mytoplevel.settings.bsc.bs_label -text [_ "Block size:"]
-    set blocksizes {64 128 256 512 1024 2048}
-    set bsmenu \
-        [eval tk_optionMenu $mytoplevel.settings.bsc.bs_popup audio_blocksize $blocksizes]
-
-    pack $mytoplevel.settings.bsc.bs_popup -side right
-    pack $mytoplevel.settings.bsc.bs_label -side right -padx {0 10}
-    if {$audio_callback >= 0} {
-        frame $mytoplevel.settings.callback
-        pack $mytoplevel.settings.callback -side bottom -fill x
-        checkbutton $mytoplevel.settings.callback.c_button -variable audio_callback \
-            -text [_ "Use callbacks"]
-        pack $mytoplevel.settings.callback.c_button -side right
+# Settings Widgets
+    ttk::labelframe $::audioWin.settings -text " Settings " -padding "3 2 3 3" 
+    
+    ttk::label $::audioWin.settings.sampleRateLabel -text "Sample rate:" 
+    ttk::combobox $::audioWin.settings.sampleRate -textvariable audio_sr -width 8 \
+        -values {44100 48000 882000 96000 176000 192000} 
+    bind $::audioWin.settings.sampleRate <<ComboboxSelected>> { 
+        $::audioWin.settings.sampleRate selection clear
     }
 
-    # input devices
-    labelframe $mytoplevel.inputs -text [_ "Input Devices"] -padx 5 -pady 5 -borderwidth 1
-    pack $mytoplevel.inputs -side top -fill x -pady 5
+    ttk::label $::audioWin.settings.delayLabel -text "Delay (msec):" 
+    ttk::entry $::audioWin.settings.delay -textvariable audio_advance -width 4 
+
+    ttk::label $::audioWin.settings.blockSizeLabel -text "Block size:" 
+    ttk::combobox $::audioWin.settings.blockSize -textvariable audio_blocksize -width 4 \
+        -values {64 128 256 512 1024 2048} 
+    bind $::audioWin.settings.blockSize <<ComboboxSelected>> { 
+        $::audioWin.settings.blockSize selection clear
+    }
+
+# Callbacks (removed from current pd version)
+    # if {$audio_callback >= 0} {
+    #     frame $mytoplevel.settings.callback
+    #     pack $mytoplevel.settings.callback -side bottom -fill x
+    #     checkbutton $mytoplevel.settings.callback.c_button -variable audio_callback \
+    #         -text [_ "Use callbacks"]
+    #     pack $mytoplevel.settings.callback.c_button -side right
+    # }
+
+# Input Widgets
+    ttk::labelframe $::audioWin.inputs -text " Input " -padding "3 2 3 3" 
 
     # input device 1
-    frame $mytoplevel.inputs.in1f
-    pack $mytoplevel.inputs.in1f -side top -fill x
+    ttk::checkbutton $::audioWin.inputs.enableInput -variable audio_inenable1 \
+         ;#-text "1:"
+    ttk::button $::audioWin.inputs.inputSelect -text [lindex $audio_indevlist $audio_indev1] \
+        -command [list audio_popup $mytoplevel $::audioWin.inputs.inputSelect audio_indev1 $audio_indevlist] \
+        -width 18 
+    ttk::label $::audioWin.inputs.numChannelsLabel -text "Channels:" 
+    ttk::entry $::audioWin.inputs.numChannels -textvariable audio_inchan1 -width 3 
 
-    checkbutton $mytoplevel.inputs.in1f.x0 -variable audio_inenable1 \
-        -text "1:" -anchor e
-    button $mytoplevel.inputs.in1f.x1 -text [lindex $audio_indevlist $audio_indev1] \
-        -command [list audio_popup $mytoplevel $mytoplevel.inputs.in1f.x1 audio_indev1 $audio_indevlist]
-    label $mytoplevel.inputs.in1f.l2 -text [_ "Channels:"]
-    entry $mytoplevel.inputs.in1f.x2 -textvariable audio_inchan1 -width 3
-    pack $mytoplevel.inputs.in1f.x0 -side left
-    pack $mytoplevel.inputs.in1f.x1 -side left -fill x -expand 1
-    pack $mytoplevel.inputs.in1f.x2 $mytoplevel.inputs.in1f.l2 -side right
-
+# Multi Input Code (inactive for now)
     # input device 2
-    if {$longform && $multi > 1 && [llength $audio_indevlist] > 1} {
-        frame $mytoplevel.inputs.in2f
-        pack $mytoplevel.inputs.in2f -side top
+    # if {$longform && $multi > 1 && [llength $audio_indevlist] > 1} {
+    #     frame $mytoplevel.inputs.in2f
+    #     pack $mytoplevel.inputs.in2f -side top
 
-        checkbutton $mytoplevel.inputs.in2f.x0 -variable audio_inenable2 \
-            -text "2:" -anchor e
-        button $mytoplevel.inputs.in2f.x1 -text [lindex $audio_indevlist $audio_indev2] \
-            -command [list audio_popup $mytoplevel $mytoplevel.inputs.in2f.x1 audio_indev2 \
-                $audio_indevlist]
-        label $mytoplevel.inputs.in2f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.inputs.in2f.x2 -textvariable audio_inchan2 -width 3
-        pack $mytoplevel.inputs.in2f.x0 -side left
-        pack $mytoplevel.inputs.in2f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.inputs.in2f.x2 $mytoplevel.inputs.in2f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.inputs.in2f.x0 -variable audio_inenable2 \
+    #         -text "2:" -anchor e
+    #     button $mytoplevel.inputs.in2f.x1 -text [lindex $audio_indevlist $audio_indev2] \
+    #         -command [list audio_popup $mytoplevel $mytoplevel.inputs.in2f.x1 audio_indev2 \
+    #             $audio_indevlist]
+    #     label $mytoplevel.inputs.in2f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.inputs.in2f.x2 -textvariable audio_inchan2 -width 3
+    #     pack $mytoplevel.inputs.in2f.x0 -side left
+    #     pack $mytoplevel.inputs.in2f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.inputs.in2f.x2 $mytoplevel.inputs.in2f.l2 -side right
+    # }
 
-    # input device 3
-    if {$longform && $multi > 1 && [llength $audio_indevlist] > 2} {
-        frame $mytoplevel.inputs.in3f
-        pack $mytoplevel.inputs.in3f -side top
+    # # input device 3
+    # if {$longform && $multi > 1 && [llength $audio_indevlist] > 2} {
+    #     frame $mytoplevel.inputs.in3f
+    #     pack $mytoplevel.inputs.in3f -side top
 
-        checkbutton $mytoplevel.inputs.in3f.x0 -variable audio_inenable3 \
-            -text "3:" -anchor e
-        button $mytoplevel.inputs.in3f.x1 -text [lindex $audio_indevlist $audio_indev3] \
-            -command [list audio_popup $mytoplevel $mytoplevel.inputs.in3f.x1 audio_indev3 \
-                $audio_indevlist]
-        label $mytoplevel.inputs.in3f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.inputs.in3f.x2 -textvariable audio_inchan3 -width 3
-        pack $mytoplevel.inputs.in3f.x0 -side left
-        pack $mytoplevel.inputs.in3f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.inputs.in3f.x2 $mytoplevel.inputs.in3f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.inputs.in3f.x0 -variable audio_inenable3 \
+    #         -text "3:" -anchor e
+    #     button $mytoplevel.inputs.in3f.x1 -text [lindex $audio_indevlist $audio_indev3] \
+    #         -command [list audio_popup $mytoplevel $mytoplevel.inputs.in3f.x1 audio_indev3 \
+    #             $audio_indevlist]
+    #     label $mytoplevel.inputs.in3f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.inputs.in3f.x2 -textvariable audio_inchan3 -width 3
+    #     pack $mytoplevel.inputs.in3f.x0 -side left
+    #     pack $mytoplevel.inputs.in3f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.inputs.in3f.x2 $mytoplevel.inputs.in3f.l2 -side right
+    # }
 
-    # input device 4
-    if {$longform && $multi > 1 && [llength $audio_indevlist] > 3} {
-        frame $mytoplevel.inputs.in4f
-        pack $mytoplevel.inputs.in4f -side top
+    # # input device 4
+    # if {$longform && $multi > 1 && [llength $audio_indevlist] > 3} {
+    #     frame $mytoplevel.inputs.in4f
+    #     pack $mytoplevel.inputs.in4f -side top
 
-        checkbutton $mytoplevel.inputs.in4f.x0 -variable audio_inenable4 \
-            -text "4:" -anchor e
-        button $mytoplevel.inputs.in4f.x1 -text [lindex $audio_indevlist $audio_indev4] \
-            -command [list audio_popup $mytoplevel $mytoplevel.inputs.in4f.x1 audio_indev4 \
-                $audio_indevlist]
-        label $mytoplevel.inputs.in4f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.inputs.in4f.x2 -textvariable audio_inchan4 -width 3
-        pack $mytoplevel.inputs.in4f.x0 -side left
-        pack $mytoplevel.inputs.in4f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.inputs.in4f.x2 $mytoplevel.inputs.in4f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.inputs.in4f.x0 -variable audio_inenable4 \
+    #         -text "4:" -anchor e
+    #     button $mytoplevel.inputs.in4f.x1 -text [lindex $audio_indevlist $audio_indev4] \
+    #         -command [list audio_popup $mytoplevel $mytoplevel.inputs.in4f.x1 audio_indev4 \
+    #             $audio_indevlist]
+    #     label $mytoplevel.inputs.in4f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.inputs.in4f.x2 -textvariable audio_inchan4 -width 3
+    #     pack $mytoplevel.inputs.in4f.x0 -side left
+    #     pack $mytoplevel.inputs.in4f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.inputs.in4f.x2 $mytoplevel.inputs.in4f.l2 -side right
+    # }
 
-    # output devices
-    labelframe $mytoplevel.outputs -text [_ "Output Devices"] -padx 5 -pady 5 -borderwidth 1
-    pack $mytoplevel.outputs -side top -fill x -pady 5
+# Output Widgets
+    ttk::labelframe $::audioWin.outputs -text " Output " -padding "3 2 3 3" 
 
     # output device 1
-    frame $mytoplevel.outputs.out1f
-    pack $mytoplevel.outputs.out1f -side top -fill x
+    ttk::checkbutton $::audioWin.outputs.enableOutput -variable audio_outenable1 \
+         ;#-text "1:"
+    # if {$multi == 0} {
+    #     label $mytoplevel.outputs.out1f.l1 \
+    #         -text [_ "(same as input device)..."]
+    # } else {
+        ttk::button $::audioWin.outputs.outputSelect -text [lindex $audio_outdevlist $audio_outdev1] \
+            -command  [list audio_popup $mytoplevel $::audioWin.outputs.outputSelect audio_outdev1 $audio_outdevlist] \
+            -width 18 
+    # }
+    ttk::label $::audioWin.outputs.numChannelsLabel -text "Channels:" 
+    ttk::entry $::audioWin.outputs.numChannels -textvariable audio_outchan1 -width 3 
 
-    checkbutton $mytoplevel.outputs.out1f.x0 -variable audio_outenable1 \
-        -text "1:" -anchor e
-    if {$multi == 0} {
-        label $mytoplevel.outputs.out1f.l1 \
-            -text [_ "(same as input device)..."]
-    } else {
-        button $mytoplevel.outputs.out1f.x1 -text [lindex $audio_outdevlist $audio_outdev1] \
-            -command  [list audio_popup $mytoplevel $mytoplevel.outputs.out1f.x1 audio_outdev1 \
-                $audio_outdevlist]
-    }
-    label $mytoplevel.outputs.out1f.l2 -text [_ "Channels:"]
-    entry $mytoplevel.outputs.out1f.x2 -textvariable audio_outchan1 -width 3
-    if {$multi == 0} {
-        pack $mytoplevel.outputs.out1f.x0 $mytoplevel.outputs.out1f.l1 -side left
-        pack $mytoplevel.outputs.out1f.x2 -side right
-    } else {
-        pack $mytoplevel.outputs.out1f.x0 -side left
-        pack $mytoplevel.outputs.out1f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.outputs.out1f.x2 $mytoplevel.outputs.out1f.l2 -side right
-    }
+# Multi Output Code (inactive for now)
+    # if {$multi == 0} {
+    #     pack $mytoplevel.outputs.enableOutput $mytoplevel.outputs.out1f.l1 -side left
+    #     pack $mytoplevel.outputs.numChannels -side right
+    # } else { These have been moved elsewhere but stay here in case I fuck up
+        # pack $mytoplevel.outputs.enableOutput -side left
+        # pack $mytoplevel.outputs.outputSelect -side left -fill x -expand 1
+        # pack $mytoplevel.outputs.numChannels $mytoplevel.outputs.numChannelsLabel -side right
+    # }
 
     # output device 2
-    if {$longform && $multi > 1 && [llength $audio_outdevlist] > 1} {
-        frame $mytoplevel.outputs.out2f
-        pack $mytoplevel.outputs.out2f -side top
+    # if {$longform && $multi > 1 && [llength $audio_outdevlist] > 1} {
+    #     frame $mytoplevel.outputs.out2f
+    #     pack $mytoplevel.outputs.out2f -side top
 
-        checkbutton $mytoplevel.outputs.out2f.x0 -variable audio_outenable2 \
-            -text "2:" -anchor e
-        button $mytoplevel.outputs.out2f.x1 -text [lindex $audio_outdevlist $audio_outdev2] \
-            -command \
-            [list audio_popup $mytoplevel $mytoplevel.outputs.out2f.x1 audio_outdev2 $audio_outdevlist]
-        label $mytoplevel.outputs.out2f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.outputs.out2f.x2 -textvariable audio_outchan2 -width 3
-        pack $mytoplevel.outputs.out2f.x0 -side left
-        pack $mytoplevel.outputs.out2f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.outputs.out2f.x2 $mytoplevel.outputs.out2f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.outputs.out2f.x0 -variable audio_outenable2 \
+    #         -text "2:" -anchor e
+    #     button $mytoplevel.outputs.out2f.x1 -text [lindex $audio_outdevlist $audio_outdev2] \
+    #         -command \
+    #         [list audio_popup $mytoplevel $mytoplevel.outputs.out2f.x1 audio_outdev2 $audio_outdevlist]
+    #     label $mytoplevel.outputs.out2f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.outputs.out2f.x2 -textvariable audio_outchan2 -width 3
+    #     pack $mytoplevel.outputs.out2f.x0 -side left
+    #     pack $mytoplevel.outputs.out2f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.outputs.out2f.x2 $mytoplevel.outputs.out2f.l2 -side right
+    # }
 
-    # output device 3
-    if {$longform && $multi > 1 && [llength $audio_outdevlist] > 2} {
-        frame $mytoplevel.outputs.out3f
-        pack $mytoplevel.outputs.out3f -side top
+    # # output device 3
+    # if {$longform && $multi > 1 && [llength $audio_outdevlist] > 2} {
+    #     frame $mytoplevel.outputs.out3f
+    #     pack $mytoplevel.outputs.out3f -side top
 
-        checkbutton $mytoplevel.outputs.out3f.x0 -variable audio_outenable3 \
-            -text "3:" -anchor e
-        button $mytoplevel.outputs.out3f.x1 -text [lindex $audio_outdevlist $audio_outdev3] \
-            -command \
-            [list audio_popup $mytoplevel $mytoplevel.outputs.out3f.x1 audio_outdev3 $audio_outdevlist]
-        label $mytoplevel.outputs.out3f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.outputs.out3f.x2 -textvariable audio_outchan3 -width 3
-        pack $mytoplevel.outputs.out3f.x0 -side left
-        pack $mytoplevel.outputs.out3f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.outputs.out3f.x2 $mytoplevel.outputs.out3f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.outputs.out3f.x0 -variable audio_outenable3 \
+    #         -text "3:" -anchor e
+    #     button $mytoplevel.outputs.out3f.x1 -text [lindex $audio_outdevlist $audio_outdev3] \
+    #         -command \
+    #         [list audio_popup $mytoplevel $mytoplevel.outputs.out3f.x1 audio_outdev3 $audio_outdevlist]
+    #     label $mytoplevel.outputs.out3f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.outputs.out3f.x2 -textvariable audio_outchan3 -width 3
+    #     pack $mytoplevel.outputs.out3f.x0 -side left
+    #     pack $mytoplevel.outputs.out3f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.outputs.out3f.x2 $mytoplevel.outputs.out3f.l2 -side right
+    # }
 
-    # output device 4
-    if {$longform && $multi > 1 && [llength $audio_outdevlist] > 3} {
-        frame $mytoplevel.outputs.out4f
-        pack $mytoplevel.outputs.out4f -side top
+    # # output device 4
+    # if {$longform && $multi > 1 && [llength $audio_outdevlist] > 3} {
+    #     frame $mytoplevel.outputs.out4f
+    #     pack $mytoplevel.outputs.out4f -side top
 
-        checkbutton $mytoplevel.outputs.out4f.x0 -variable audio_outenable4 \
-            -text "4:" -anchor e
-        button $mytoplevel.outputs.out4f.x1 -text [lindex $audio_outdevlist $audio_outdev4] \
-            -command \
-            [list audio_popup $mytoplevel $mytoplevel.outputs.out4f.x1 audio_outdev4 $audio_outdevlist]
-        label $mytoplevel.outputs.out4f.l2 -text [_ "Channels:"]
-        entry $mytoplevel.outputs.out4f.x2 -textvariable audio_outchan4 -width 3
-        pack $mytoplevel.outputs.out4f.x0 -side left
-        pack $mytoplevel.outputs.out4f.x1 -side left -fill x -expand 1
-        pack $mytoplevel.outputs.out4f.x2 $mytoplevel.outputs.out4f.l2 -side right
-    }
+    #     checkbutton $mytoplevel.outputs.out4f.x0 -variable audio_outenable4 \
+    #         -text "4:" -anchor e
+    #     button $mytoplevel.outputs.out4f.x1 -text [lindex $audio_outdevlist $audio_outdev4] \
+    #         -command \
+    #         [list audio_popup $mytoplevel $mytoplevel.outputs.out4f.x1 audio_outdev4 $audio_outdevlist]
+    #     label $mytoplevel.outputs.out4f.l2 -text [_ "Channels:"]
+    #     entry $mytoplevel.outputs.out4f.x2 -textvariable audio_outchan4 -width 3
+    #     pack $mytoplevel.outputs.out4f.x0 -side left
+    #     pack $mytoplevel.outputs.out4f.x1 -side left -fill x -expand 1
+    #     pack $mytoplevel.outputs.out4f.x2 $mytoplevel.outputs.out4f.l2 -side right
+    # }
 
-    # If not the "long form" but if "multi" is 2, make a button to
-    # restart with longform set.
-    if {$longform == 0 && $multi > 1} {
-        frame $mytoplevel.longbutton
-        pack $mytoplevel.longbutton -side top -fill x
-        button $mytoplevel.longbutton.b -text [_ "Use Multiple Devices"] \
-            -command  {pdsend "pd audio-properties 1"}
-        pack $mytoplevel.longbutton.b -expand 1 -ipadx 10 -pady 5
-    }
+    # # If not the "long form" but if "multi" is 2, make a button to
+    # # restart with longform set.
+    # if {$longform == 0 && $multi > 1} {
+    #     frame $mytoplevel.longbutton
+    #     pack $mytoplevel.longbutton -side top -fill x
+    #     button $mytoplevel.longbutton.b -text [_ "Use Multiple Devices"] \
+    #         -command  {pdsend "pd audio-properties 1"}
+    #     pack $mytoplevel.longbutton.b -expand 1 -ipadx 10 -pady 5
+    # }
 
-    # save all settings button
-    button $mytoplevel.saveall -text [_ "Save All Settings"] \
-        -command "::dialog_audio::apply $mytoplevel; pdsend \"pd save-preferences\""
-    pack $mytoplevel.saveall -side top -expand 1 -ipadx 10 -pady 5
+# Button Widgets
+    ttk::button $::audioWin.saveall -text "Save All Settings" -width -1 \
+        -command "::dialog_audio::apply $mytoplevel; pdsend \"pd save-preferences\"" \
+        
 
-    # buttons
-    frame $mytoplevel.buttonframe
-    pack $mytoplevel.buttonframe -side top -after $mytoplevel.saveall -pady 2m
-    button $mytoplevel.buttonframe.cancel -text [_ "Cancel"] \
-        -command "::dialog_audio::cancel $mytoplevel"
-    pack $mytoplevel.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
-    button $mytoplevel.buttonframe.apply -text [_ "Apply"] \
-        -command "::dialog_audio::apply $mytoplevel"
-    pack $mytoplevel.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
-    button $mytoplevel.buttonframe.ok -text [_ "OK"] \
-        -command "::dialog_audio::ok $mytoplevel" -default active
-    pack $mytoplevel.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
+    ttk::frame $::audioWin.buttonframe 
+    ttk::button $::audioWin.buttonframe.cancel -text "Cancel" \
+        -command "::dialog_audio::cancel $mytoplevel" \
+        
+    ttk::button $::audioWin.buttonframe.apply -text "Apply" \
+        -command "::dialog_audio::apply $mytoplevel" \
+        
+    ttk::button $::audioWin.buttonframe.ok -text "OK" \
+        -command "::dialog_audio::ok $mytoplevel" -default active \
+        
+
+# Layout
+    grid $::audioWin -column 0 -row 0 -sticky nwes
+
+    grid $::audioWin.settings -column 0 -row 0 -sticky nwes
+    grid $::audioWin.settings.sampleRateLabel -column 0 -row 0 -sticky w
+    grid $::audioWin.settings.sampleRate  -column 1 -row 0 -sticky w
+    grid $::audioWin.settings.delayLabel -column 0 -row 1 -sticky w
+    grid $::audioWin.settings.delay -column 1 -row 1 -sticky w -pady 4
+    grid $::audioWin.settings.blockSizeLabel -column 0 -row 2 -sticky w
+    grid $::audioWin.settings.blockSize -column 1 -row 2 -sticky w
+
+    grid $::audioWin.inputs -column 0 -row 1 -sticky nwes -pady 2
+    grid $::audioWin.inputs.enableInput -column 0 -row 0
+    grid $::audioWin.inputs.inputSelect -column 1 -row 0
+    grid $::audioWin.inputs.numChannelsLabel -column 2 -row 0
+    grid $::audioWin.inputs.numChannels -column 3 -row 0
+
+    grid $::audioWin.outputs -column 0 -row 2 -sticky nwes -pady 2
+    grid $::audioWin.outputs.enableOutput -column 0 -row 0
+    grid $::audioWin.outputs.outputSelect -column 1 -row 0
+    grid $::audioWin.outputs.numChannelsLabel -column 2 -row 0
+    grid $::audioWin.outputs.numChannels -column 3 -row 0
+
+    grid $::audioWin.saveall -column 0 -row 3 -pady 2
+
+    grid $::audioWin.buttonframe -column 0 -row 4 -pady 2
+    grid $::audioWin.buttonframe.ok     -column 0 -row 0
+    grid $::audioWin.buttonframe.apply  -column 1 -row 0
+    grid $::audioWin.buttonframe.cancel -column 2 -row 0
 
     # set focus
-    $mytoplevel.settings.srd.sr_entry select from 0
-    $mytoplevel.settings.srd.sr_entry select adjust end
-    focus $mytoplevel.settings.srd.sr_entry
+    focus $::audioWin.settings.sampleRate
 
-    # for focus handling on OSX
+# for focus handling on OSX
     if {$::windowingsystem eq "aqua"} {
 
         # call apply on Return in entry boxes that are in focus & rebind Return to ok button
-        bind $mytoplevel.settings.srd.sr_entry <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
-        bind $mytoplevel.settings.srd.d_entry <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
-        bind $mytoplevel.outputs.out1f.x2 <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
+        bind $::audioWin.settings.sampleRate <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
+        bind $::audioWin.settings.delay <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
+        bind $::audioWin.outputs.numChannels <KeyPress-Return> "::dialog_audio::rebind_return $mytoplevel"
 
         # unbind Return from ok button when an entry takes focus
-        $mytoplevel.settings.srd.sr_entry config -validate focusin -vcmd "::dialog_audio::unbind_return $mytoplevel"
-        $mytoplevel.settings.srd.d_entry config -validate focusin -vcmd "::dialog_audio::unbind_return $mytoplevel"
-        $mytoplevel.outputs.out1f.x2 config -validate focusin -vcmd "::dialog_audio::unbind_return $mytoplevel"
+        $::audioWin.settings.sampleRate config -validate focusin -validatecommand "::dialog_audio::unbind_return $mytoplevel"
+        $::audioWin.settings.delay config -validate focusin -validatecommand "::dialog_audio::unbind_return $mytoplevel"
+        $::audioWin.outputs.numChannels config -validate focusin -validatecommand "::dialog_audio::unbind_return $mytoplevel"
 
         # remove cancel button from focus list since it's not activated on Return
-        $mytoplevel.buttonframe.cancel config -takefocus 0
+        $::audioWin.buttonframe.cancel config -takefocus 0
 
         # show active focus on multiple device button
-        if {[winfo exists $mytoplevel.longbutton.b]} {
-            bind $mytoplevel.longbutton.b <KeyPress-Return> "$mytoplevel.longbutton.b invoke"
-            bind $mytoplevel.longbutton.b <FocusIn> "::dialog_audio::unbind_return $mytoplevel; $mytoplevel.longbutton.b config -default active"
-            bind $mytoplevel.longbutton.b <FocusOut> "::dialog_audio::rebind_return $mytoplevel; $mytoplevel.longbutton.b config -default normal"
+        if {[winfo exists $::audioWin.longbutton.b]} {
+            bind $::audioWin.longbutton.b <KeyPress-Return> "$::audioWin.longbutton.b invoke"
+            bind $::audioWin.longbutton.b <FocusIn> "::dialog_audio::unbind_return $mytoplevel; $::audioWin.longbutton.b config -default active"
+            bind $::audioWin.longbutton.b <FocusOut> "::dialog_audio::rebind_return $mytoplevel; $::audioWin.longbutton.b config -default normal"
         }
 
         # show active focus on save settings button
-        bind $mytoplevel.saveall <KeyPress-Return> "$mytoplevel.saveall invoke"
-        bind $mytoplevel.saveall <FocusIn> "::dialog_audio::unbind_return $mytoplevel; $mytoplevel.saveall config -default active"
-        bind $mytoplevel.saveall <FocusOut> "::dialog_audio::rebind_return $mytoplevel; $mytoplevel.saveall config -default normal"
+        bind $::audioWin.saveall <KeyPress-Return> "$::audioWin.saveall invoke"
+        bind $::audioWin.saveall <FocusIn> "::dialog_audio::unbind_return $mytoplevel; $::audioWin.saveall config -default active"
+        bind $::audioWin.saveall <FocusOut> "::dialog_audio::rebind_return $mytoplevel; $::audioWin.saveall config -default normal"
 
         # show active focus on the ok button as it *is* activated on Return
-        $mytoplevel.buttonframe.ok config -default normal
-        bind $mytoplevel.buttonframe.ok <FocusIn> "$mytoplevel.buttonframe.ok config -default active"
-        bind $mytoplevel.buttonframe.ok <FocusOut> "$mytoplevel.buttonframe.ok config -default normal"
+        $::audioWin.buttonframe.ok config -default normal
+        bind $::audioWin.buttonframe.ok <FocusIn> "$::audioWin.buttonframe.ok config -default active"
+        bind $::audioWin.buttonframe.ok <FocusOut> "$::audioWin.buttonframe.ok config -default normal"
 
         # since we show the active focus, disable the highlight outline
-        if {[winfo exists $mytoplevel.longbutton.b]} {
-            $mytoplevel.longbutton.b config -highlightthickness 0
-        }
-        $mytoplevel.saveall config -highlightthickness 0
-        $mytoplevel.buttonframe.ok config -highlightthickness 0
-        $mytoplevel.buttonframe.cancel config -highlightthickness 0
+        # if {[winfo exists $mytoplevel.longbutton.b]} {
+        #     $mytoplevel.longbutton.b config -highlightthickness 0
+        # }
+        # $mytoplevel.saveall config -highlightthickness 0
+        # $mytoplevel.buttonframe.ok config -highlightthickness 0
+        # $mytoplevel.buttonframe.cancel config -highlightthickness 0
     }
 
     # set min size based on widget sizing & pos over pdwindow
@@ -417,7 +429,7 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
 # for focus handling on OSX
 proc ::dialog_audio::rebind_return {mytoplevel} {
     bind $mytoplevel <KeyPress-Return> "::dialog_audio::ok $mytoplevel"
-    focus $mytoplevel.buttonframe.ok
+    focus $::audioWin.buttonframe.ok
     return 0
 }
 

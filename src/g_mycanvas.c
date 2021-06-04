@@ -274,9 +274,9 @@ static void *my_canvas_new(t_symbol *s, int argc, t_atom *argv)
     iem_inttosymargs(&x->x_gui.x_isa, 0);
     iem_inttofstyle(&x->x_gui.x_fsf, 0);
 
-    x->x_gui.x_bcol = 0xE0E0E0;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x404040;
+    x->x_gui.x_bcol = 0x5a524c; // todo make these some variable accessable 
+    x->x_gui.x_fcol = 0xa9b665; // and settable with a tcl plugin
+    x->x_gui.x_lcol = 0xc5b18d;
 
     if(((argc >= 10)&&(argc <= 13))
        &&IS_A_FLOAT(argv,0)&&IS_A_FLOAT(argv,1)&&IS_A_FLOAT(argv,2))

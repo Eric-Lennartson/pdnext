@@ -164,7 +164,7 @@ proc ::pd_menus::build_file_menu {mymenu} {
     $mymenu entryconfigure [_ "Save As..."] -command {menu_send $::focused_window menusaveas}
     #$mymenu entryconfigure [_ "Revert*"]    -command {menu_revert $::focused_window}
     $mymenu entryconfigure [_ "Close"]      -command {::pd_bindings::window_close $::focused_window}
-    $mymenu entryconfigure [_ "Message..."] -command {menu_message_dialog}
+    # $mymenu entryconfigure [_ "Message..."] -command {menu_message_dialog}
     $mymenu entryconfigure [_ "Print..."]   -command {menu_print $::focused_window}
     # update recent files
     if {[llength $::recentfiles_list] > 0} {
@@ -568,6 +568,8 @@ proc ::pd_menus::create_preferences_menu {mymenu} {
         -command {pdsend "pd zoom-open $zoom_open"}
 	$mymenu add check -label [_ "Bezier Cables"] \
 		-variable ::curve_cords
+    $mymenu add check -label [_ "Theme"] \
+		-variable ::themeState
     $mymenu add  separator
     $mymenu add command -label [_ "Save All Preferences"] \
         -command {pdsend "pd save-preferences"}
@@ -609,7 +611,7 @@ proc ::pd_menus::build_file_menu_aqua {mymenu} {
     #$mymenu add command -label [_ "Save All"]
     #$mymenu add command -label [_ "Revert to Saved"]
     $mymenu add  separator
-    $mymenu add command -label [_ "Message..."] -accelerator "$accelerator+Shift+M"
+    # $mymenu add command -label [_ "Message..."] -accelerator "$accelerator+Shift+M"
     $mymenu add  separator
     $mymenu add command -label [_ "Print..."]   -accelerator "$accelerator+P"
 }
@@ -636,7 +638,7 @@ proc ::pd_menus::build_file_menu_x11 {mymenu} {
     $mymenu add command -label [_ "Save As..."]  -accelerator "Shift+$accelerator+S"
     #    $mymenu add command -label "Revert"
     $mymenu add  separator
-    $mymenu add command -label [_ "Message..."]  -accelerator "$accelerator+Shift+M"
+    # $mymenu add command -label [_ "Message..."]  -accelerator "$accelerator+Shift+M"
     create_preferences_menu $mymenu.preferences
     $mymenu add cascade -label [_ "Preferences"] -menu $mymenu.preferences
     $mymenu add command -label [_ "Print..."]    -accelerator "$accelerator+P"
@@ -683,7 +685,7 @@ proc ::pd_menus::build_file_menu_win32 {mymenu} {
     $mymenu add command -label [_ "Save As..."]  -accelerator "Shift+$accelerator+S"
     #    $mymenu add command -label "Revert"
     $mymenu add  separator
-    $mymenu add command -label [_ "Message..."]  -accelerator "$accelerator+Shift+M"
+    # $mymenu add command -label [_ "Message..."]  -accelerator "$accelerator+Shift+M"
     create_preferences_menu $mymenu.preferences
     $mymenu add cascade -label [_ "Preferences"] -menu $mymenu.preferences
     $mymenu add command -label [_ "Print..."]    -accelerator "$accelerator+P"

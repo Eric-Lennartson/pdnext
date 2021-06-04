@@ -118,6 +118,7 @@ proc pdtk_canvas_new {mytoplevel width height geometry editable} {
         -highlightthickness 0 -scrollregion [list 0 0 $width $height] \
         -xscrollcommand "$mytoplevel.xscroll set" \
         -yscrollcommand "$mytoplevel.yscroll set"
+
     set tmpcol [::pdtk_canvas::get_color txt_highlight $mytoplevel]
     if {$tmpcol ne ""} {
         $tkcanvas configure -selectbackground $tmpcol
@@ -137,8 +138,8 @@ proc pdtk_canvas_new {mytoplevel width height geometry editable} {
         	[::pdtk_canvas::get_color txt_highlight_front $mytoplevel]
     }
 
-    scrollbar $mytoplevel.xscroll -orient horizontal -command "$tkcanvas xview"
-    scrollbar $mytoplevel.yscroll -orient vertical -command "$tkcanvas yview"
+    ttk::scrollbar $mytoplevel.xscroll -orient horizontal -command "$tkcanvas xview"
+    ttk::scrollbar $mytoplevel.yscroll -orient vertical -command "$tkcanvas yview"
     pack $tkcanvas -side left -expand 1 -fill both
 
     # for some crazy reason, win32 mousewheel scrolling is in units of
@@ -450,7 +451,33 @@ proc ::pdtk_canvas::pdtk_canvas_reflecttitle {mytoplevel \
 #------------------------------------------------------------------------------#
 # get color value for pd
 proc ::pdtk_canvas::get_color {type {window 0}} {
-	return $::pd_colors($type)
+    if {$::themeState} {
+        return $::lightTheme($type)
+    } else {
+        return $::darkTheme($type)
+    }
+}
+
+proc ::pdtk_canvas::updateTheme {mytoplevel} {
+    set tkcanvas $mytoplevel
+    set tmpcol [::pdtk_canvas::get_color txt_highlight $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -selectbackground $tmpcol
+    }
+    set tmpcol [::pdtk_canvas::get_color canvas_fill $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -background $tmpcol
+    }
+    set tmpcol [::pdtk_canvas::get_color canvas_text_cursor $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -insertbackground $tmpcol
+    }
+    #in Tk 8.6 the selectforeground is set by the os theme?
+    set tmpcol [::pdtk_canvas::get_color txt_highlight_front $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -selectforeground \
+        	[::pdtk_canvas::get_color txt_highlight_front $mytoplevel]
+    }
 }
 
 proc ::pdtk_canvas::pdtk_connect {x1 y1 x2 y2 width tags wind col} {
@@ -484,7 +511,7 @@ proc ::pdtk_canvas::pdtk_connect {x1 y1 x2 y2 width tags wind col} {
 	} else {
 		# have to set smooth and splinesteps in case it changes
 		${wind}.c create line $x1 $y1 $x2 $y2 -width $width -tags $tags \
-			-smooth 1 -splinesteps 36  -fill [get_color $col $wind]
+			-smooth 1 -fill [get_color $col $wind]
 	}
 }
 

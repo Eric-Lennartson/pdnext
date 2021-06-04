@@ -1,4 +1,7 @@
-
+# TODO
+# This whole scrollbox thing is kinda ugly and unstable
+# figure out a way to consolidate it, or make it less janky
+# it is working, but I'm worried that it will break in the future
 package provide dialog_path 0.1
 
 package require scrollboxwindow
@@ -44,99 +47,137 @@ proc ::dialog_path::pdtk_path_dialog {mytoplevel extrapath verbose} {
 proc ::dialog_path::create_dialog {mytoplevel} {
     global docspath
     global installpath
+    # scroll box is defined in scrollbox.tcl and scrollboxwindow.tcl
     ::scrollboxwindow::make $mytoplevel $::sys_searchpath \
         dialog_path::add dialog_path::edit dialog_path::commit \
-        [_ "Pd search path for objects, help, fonts, and other files"] \
+        [_ "Search Paths"] \
         450 300 1
     wm withdraw $mytoplevel
+    wm resizable $mytoplevel 0 0
     ::pd_bindings::dialog_bindings $mytoplevel "path"
-    set readonly_color [lindex [$mytoplevel configure -background] end]
+    set readonly_color [lindex [$mytoplevel configure -background] end] ;# Change this color?
 
-    # path options
-    frame $mytoplevel.extraframe
-    pack $mytoplevel.extraframe -side top -anchor s -fill x
-    checkbutton $mytoplevel.extraframe.extra -text [_ "Use standard paths"] \
-        -variable use_standard_paths_button -anchor w
-    checkbutton $mytoplevel.extraframe.verbose -text [_ "Verbose"] \
-        -variable verbose_button -anchor w
-    pack $mytoplevel.extraframe.extra -side left -expand 1
-    pack $mytoplevel.extraframe.verbose -side right -expand 1
+# Widgets (Some widgets are defined in scrollboxwindow and scrollbox)
+# Path options
+    ttk::frame $mytoplevel.w.pathOptions 
+    ttk::checkbutton $mytoplevel.w.pathOptions.extra -text "Standard Paths" \
+        -variable use_standard_paths_button 
+    ttk::checkbutton $mytoplevel.w.pathOptions.verbose -text "Verbose" \
+        -variable verbose_button 
 
+# Docs Directory
     # add docsdir path widgets if pd_docsdir is loaded
+    # The only time this doesn't exist is when starting pd
+    # for the first time ever.
     if {[namespace exists ::pd_docsdir]} {
         set docspath $::pd_docsdir::docspath
-        labelframe $mytoplevel.docspath -text [_ "Pd Documents Directory"] \
-            -borderwidth 1 -padx 5 -pady 5
-        pack $mytoplevel.docspath -side top -anchor s -fill x -padx {2m 4m} -pady 2m
-
-        frame $mytoplevel.docspath.path
-        pack $mytoplevel.docspath.path -fill x
-        entry $mytoplevel.docspath.path.entry -textvariable docspath \
-            -takefocus 0 -state readonly -readonlybackground $readonly_color
-        button $mytoplevel.docspath.path.browse -text [_ "Browse"] \
-            -command "::dialog_path::browse_docspath $mytoplevel"
-        pack $mytoplevel.docspath.path.browse -side right -fill x -ipadx 8
-        pack $mytoplevel.docspath.path.entry -side right -expand 1 -fill x
-
-        frame $mytoplevel.docspath.buttons
-        pack $mytoplevel.docspath.buttons -fill x
-        button $mytoplevel.docspath.buttons.reset -text [_ "Reset"] \
-            -command "::dialog_path::reset_docspath $mytoplevel"
-        button $mytoplevel.docspath.buttons.disable -text [_ "Disable"] \
-            -command "::dialog_path::disable_docspath $mytoplevel"
-        pack $mytoplevel.docspath.buttons.reset -side left -ipadx 8
-        pack $mytoplevel.docspath.buttons.disable -side left -ipadx 8
-
+        ttk::labelframe $mytoplevel.w.docspath -text " Documents Directory " \
+            -padding 5
+        ttk::frame $mytoplevel.w.docspath.path 
+        ttk::entry $mytoplevel.w.docspath.path.entry -textvariable docspath -width 38 \
+            -takefocus 0 -state readonly 
+        ttk::button $mytoplevel.w.docspath.path.browse -text [_ "Browse"] \
+            -command "::dialog_path::browse_docspath $mytoplevel" \
+            
+        ttk::frame $mytoplevel.w.docspath.buttons 
+        ttk::button $mytoplevel.w.docspath.buttons.reset -text [_ "Reset"] \
+            -command "::dialog_path::reset_docspath $mytoplevel" \
+            
+        ttk::button $mytoplevel.w.docspath.buttons.disable -text [_ "Disable"] \
+            -command "::dialog_path::disable_docspath $mytoplevel" \
+            
         # scroll to right for long paths
-        $mytoplevel.docspath.path.entry xview moveto 1
+        $mytoplevel.w.docspath.path.entry xview moveto 1
     }
 
-    # add deken path widgets if deken is loaded
+# Deken
+    # deken comes with pd defacto now
     if {[namespace exists ::deken]} {
-        labelframe $mytoplevel.installpath -text [_ "Externals Install Directory"] \
-            -borderwidth 1 -padx 5 -pady 5
-        pack $mytoplevel.installpath -fill x -anchor s -padx {2m 4m} -pady 2m
+        ttk::labelframe $mytoplevel.w.installpath -text " Externals Install Directory " \
+            -padding 5
+        ttk::frame $mytoplevel.w.installpath.path 
+        ttk::entry $mytoplevel.w.installpath.path.entry -textvariable installpath -width 38 \
+            -takefocus 0 -state readonly
+        ttk::button $mytoplevel.w.installpath.path.browse -text [_ "Browse"] \
+            -command "::dialog_path::browse_installpath $mytoplevel" \
+            
 
-        frame $mytoplevel.installpath.path
-        pack $mytoplevel.installpath.path -fill x
-        entry $mytoplevel.installpath.path.entry -textvariable installpath \
-            -takefocus 0 -state readonly -readonlybackground $readonly_color
-        button $mytoplevel.installpath.path.browse -text [_ "Browse"] \
-            -command "::dialog_path::browse_installpath $mytoplevel"
-        pack $mytoplevel.installpath.path.browse -side right -fill x -ipadx 8
-        pack $mytoplevel.installpath.path.entry -side right -expand 1 -fill x
-
-        frame $mytoplevel.installpath.buttons
-        pack $mytoplevel.installpath.buttons -fill x
-        button $mytoplevel.installpath.buttons.reset -text [_ "Reset"] \
-            -command "::dialog_path::reset_installpath $mytoplevel"
-        button $mytoplevel.installpath.buttons.clear -text [_ "Clear"] \
-            -command "::dialog_path::clear_installpath $mytoplevel"
-        pack $mytoplevel.installpath.buttons.reset -side left -ipadx 8
-        pack $mytoplevel.installpath.buttons.clear -side left -ipadx 8
-
+        ttk::frame $mytoplevel.w.installpath.buttons 
+        ttk::button $mytoplevel.w.installpath.buttons.reset -text [_ "Reset"] \
+            -command "::dialog_path::reset_installpath $mytoplevel" \
+            
+        ttk::button $mytoplevel.w.installpath.buttons.clear -text [_ "Clear"] \
+            -command "::dialog_path::clear_installpath $mytoplevel" \
+            
         # scroll to right for long paths
-        $mytoplevel.installpath.path.entry xview moveto 1
+        $mytoplevel.w.installpath.path.entry xview moveto 1
     }
 
-    # focus handling on OSX
+# Layout
+    # listbox widgets (defined in scrollbox.tcl)
+    grid $mytoplevel.w -column 0 -row 0 -stick nwes
+    grid $mytoplevel.w.listbox -column 0 -row 0 -sticky nwes
+    grid $mytoplevel.w.listbox.box -column 0 -row 0 -sticky nwes
+    grid $mytoplevel.w.listbox.scrollbar -column 1 -row 0 -sticky ns
+
+    grid $mytoplevel.w.actions -column 0 -row 1 -sticky w -pady 4
+    grid $mytoplevel.w.actions.add_path -column 0 -row 0
+    grid $mytoplevel.w.actions.edit_path -column 1 -row 0
+    grid $mytoplevel.w.actions.delete_path -column 2 -row 0
+
+    # Path Options
+    grid $mytoplevel.w.pathOptions -column 0 -row 2 -sticky w -pady 4
+    grid $mytoplevel.w.pathOptions.extra -column 0 -row 0
+    grid $mytoplevel.w.pathOptions.verbose -column 1 -row 0
+
+    # Docs Directory
+    if {[namespace exists ::pd_docsdir]} {
+        grid $mytoplevel.w.docspath -column 0 -row 3 -sticky nwes -pady 4
+        grid $mytoplevel.w.docspath.path -column 0 -row 0
+        grid $mytoplevel.w.docspath.path.entry -column 0 -row 0
+        grid $mytoplevel.w.docspath.path.browse -column 1 -row 0
+
+        grid $mytoplevel.w.docspath.buttons -column 0 -row 1 -sticky w
+        grid $mytoplevel.w.docspath.buttons.reset -column 0 -row 0
+        grid $mytoplevel.w.docspath.buttons.disable -column 1 -row 0
+    }
+
+    # Deken 
+    if {[namespace exists ::deken]} {
+        grid $mytoplevel.w.installpath -column 0 -row 4 -sticky nwes -pady 4
+        grid $mytoplevel.w.installpath.path -column 0 -row 0
+        grid $mytoplevel.w.installpath.path.entry -column 0 -row 0
+        grid $mytoplevel.w.installpath.path.browse -column 1 -row 0
+
+        grid $mytoplevel.w.installpath.buttons -column 0 -row 1 -sticky w
+        grid $mytoplevel.w.installpath.buttons.reset -column 0 -row 0
+        grid $mytoplevel.w.installpath.buttons.clear -column 1 -row 0
+    }
+
+    # Buttons (these are defined in scrollboxwindow.tcl)
+    grid $mytoplevel.w.buttonframe -column 0 -row 5
+    grid $mytoplevel.w.buttonframe.ok -column 0 -row 0
+    grid $mytoplevel.w.buttonframe.apply -column 1 -row 0
+    grid $mytoplevel.w.buttonframe.cancel -column 2 -row 0
+
+# focus handling on OSX
     if {$::windowingsystem eq "aqua"} {
 
         # unbind ok button when in listbox
-        bind $mytoplevel.listbox.box <FocusIn> "::dialog_path::unbind_return $mytoplevel"
-        bind $mytoplevel.listbox.box <FocusOut> "::dialog_path::rebind_return $mytoplevel"
+        bind $mytoplevel.w.listbox.box <FocusIn> "::dialog_path::unbind_return $mytoplevel"
+        bind $mytoplevel.w.listbox.box <FocusOut> "::dialog_path::rebind_return $mytoplevel"
 
         # remove cancel button from focus list since it's not activated on Return
-        $mytoplevel.nb.buttonframe.cancel config -takefocus 0
+        $mytoplevel.w.buttonframe.cancel config -takefocus 0
 
         # show active focus on the ok button as it *is* activated on Return
-        $mytoplevel.nb.buttonframe.ok config -default normal
-        bind $mytoplevel.nb.buttonframe.ok <FocusIn> "$mytoplevel.nb.buttonframe.ok config -default active"
-        bind $mytoplevel.nb.buttonframe.ok <FocusOut> "$mytoplevel.nb.buttonframe.ok config -default normal"
+        $mytoplevel.w.buttonframe.ok config -default normal
+        bind $mytoplevel.w.buttonframe.ok <FocusIn> "$mytoplevel.w.buttonframe.ok config -default active"
+        bind $mytoplevel.w.buttonframe.ok <FocusOut> "$mytoplevel.w.buttonframe.ok config -default normal"
 
         # since we show the active focus, disable the highlight outline
-        $mytoplevel.nb.buttonframe.ok config -highlightthickness 0
-        $mytoplevel.nb.buttonframe.cancel config -highlightthickness 0
+        # $mytoplevel.w.buttonframe.ok config -highlightthickness 0
+        # $mytoplevel.w.buttonframe.cancel config -highlightthickness 0
     }
 
     # re-adjust height based on optional sections
@@ -157,7 +198,7 @@ proc ::dialog_path::browse_docspath {mytoplevel} {
     if {$newpath ne ""} {
         set docspath $newpath
         set installpath [::pd_docsdir::get_externals_path "$docspath"]
-        $mytoplevel.docspath.path.entry xview moveto 1
+        $mytoplevel.w.docspath.path.entry xview moveto 1
         return 1
     }
     return 0
@@ -176,7 +217,7 @@ proc ::dialog_path::reset_docspath {mytoplevel} {
     global installpath
     set docspath [::pd_docsdir::get_default_path]
     set installpath [::pd_docsdir::get_externals_path "$docspath"]
-    $mytoplevel.docspath.path.entry xview moveto 1
+    $mytoplevel.w.docspath.path.entry xview moveto 1
     return 1
 }
 
@@ -192,7 +233,7 @@ proc ::dialog_path::browse_installpath {mytoplevel} {
                                     -title [_ "Install externals to directory:"]]
     if {$newpath ne ""} {
         set installpath $newpath
-        $mytoplevel.installpath.path.entry xview moveto 1
+        $mytoplevel.w.installpath.path.entry xview moveto 1
         return 1
     }
     return 0
@@ -202,7 +243,7 @@ proc ::dialog_path::browse_installpath {mytoplevel} {
 proc ::dialog_path::reset_installpath {mytoplevel} {
     global installpath
     set installpath [::deken::find_installpath true]
-    $mytoplevel.installpath.path.entry xview moveto 1
+    $mytoplevel.w.installpath.path.entry xview moveto 1
 }
 
 # clear the deken installpath
@@ -215,7 +256,7 @@ proc ::dialog_path::clear_installpath {mytoplevel} {
 proc ::dialog_path::rebind_return {mytoplevel} {
     bind $mytoplevel <KeyPress-Escape> "::dialog_path::cancel $mytoplevel"
     bind $mytoplevel <KeyPress-Return> "::dialog_path::ok $mytoplevel"
-    focus $mytoplevel.nb.buttonframe.ok
+    focus $mytoplevel.w.buttonframe.ok
     return 0
 }
 

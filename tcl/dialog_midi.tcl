@@ -5,10 +5,6 @@ namespace eval ::dialog_midi:: {
     namespace export pdtk_alsa_midi_dialog
 }
 
-# TODO this panel really needs some reworking, it works but the code is
-# very unreadable
-
-
 ####################### midi dialog ##################
 
 proc ::dialog_midi::apply {mytoplevel} {
@@ -76,13 +72,13 @@ proc midi_popup {name buttonname varname devlist} {
     tk_popup $name.popup $x $y 0
 }
 
-# start a dialog window to select midi devices.  "longform" asks us to make
-# controls for opening several devices; if not, we get an extra button to
-# turn longform on and restart the dialog.
-proc ::dialog_midi::pdtk_midi_dialog {id \
+# start a dialog window to select midi devices.
+# UNUSED is where "longform" used to be
+# I think we should just show all the buttons at once
+proc ::dialog_midi::pdtk_midi_dialog {mytoplevel \
       indev1 indev2 indev3 indev4 indev5 indev6 indev7 indev8 indev9 \
       outdev1 outdev2 outdev3 outdev4 outdev5 outdev6 outdev7 outdev8 outdev9 \
-      longform} {
+      UNUSED} {
     global midi_indev1 midi_indev2 midi_indev3 midi_indev4 midi_indev5 \
          midi_indev6 midi_indev7 midi_indev8 midi_indev9
     global midi_outdev1 midi_outdev2 midi_outdev3 midi_outdev4 midi_outdev5 \
@@ -111,307 +107,225 @@ proc ::dialog_midi::pdtk_midi_dialog {id \
     set midi_alsain [llength $midi_indevlist]
     set midi_alsaout [llength $midi_outdevlist]
 
-    toplevel $id -class DialogWindow
-    wm withdraw $id
-    wm title $id [_ "MIDI Settings"]
-    wm group $id .
-    wm resizable $id 0 0
-    wm transient $id
-    wm minsize $id 240 260
-    $id configure -menu $::dialog_menubar
-    $id configure -padx 10 -pady 5
-    ::pd_bindings::dialog_bindings $id "midi"
+    toplevel $mytoplevel
+    wm withdraw $mytoplevel
+    wm title $mytoplevel "MIDI Settings"
+    wm group $mytoplevel .
+    wm resizable $mytoplevel 0 0
+    wm transient $mytoplevel
+    $mytoplevel configure -menu $::dialog_menubar
+    ::pd_bindings::dialog_bindings $mytoplevel "midi"
+
+# Widgets
+    # ins and outs probably could've been put into a for loop
+    # but I think it would be less readable
+    ttk::frame $mytoplevel.w -padding 5
+    set ::midiWin $mytoplevel.w
 
     # input devices
-    labelframe $id.inputs -text [_ "Input Devices"] -padx 5 -pady 5 -borderwidth 1
-    pack $id.inputs -side top -fill x -pady 5
+    ttk::labelframe $::midiWin.inputs -text " Input Devices " -padding 5
 
     # input device 1
-    frame $id.inputs.in1f
-    pack $id.inputs.in1f -side top -fill x
-    label $id.inputs.in1f.l1 -text "1:"
-    button $id.inputs.in1f.x1 -text [lindex $midi_indevlist $midi_indev1] \
-        -command [list midi_popup $id $id.inputs.in1f.x1 midi_indev1 $midi_indevlist]
-    pack $id.inputs.in1f.l1 -side left
-    pack $id.inputs.in1f.x1 -side left -fill x -expand 1
-
+    ttk::label $::midiWin.inputs.in1Label -text "1:"
+    ttk::button $::midiWin.inputs.in1Select -text [lindex $midi_indevlist $midi_indev1] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in1Select midi_indev1 $midi_indevlist] \
+        -width 20
+    
     # input device 2
-    if {$longform && [llength $midi_indevlist] > 2} {
-        frame $id.inputs.in2f
-        pack $id.inputs.in2f -side top -fill x
-        label $id.inputs.in2f.l1 -text "2:"
-        button $id.inputs.in2f.x1 -text [lindex $midi_indevlist $midi_indev2] \
-            -command [list midi_popup $id $id.inputs.in2f.x1 midi_indev2 \
-                $midi_indevlist]
-        pack $id.inputs.in2f.l1 -side left
-        pack $id.inputs.in2f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in2Label -text "2:"
+    ttk::button $::midiWin.inputs.in2Select -text [lindex $midi_indevlist $midi_indev2] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in2Select midi_indev2 \
+            $midi_indevlist] -width 20
 
     # input device 3
-    if {$longform && [llength $midi_indevlist] > 3} {
-        frame $id.inputs.in3f
-        pack $id.inputs.in3f -side top -fill x
-        label $id.inputs.in3f.l1 -text "3:"
-        button $id.inputs.in3f.x1 -text [lindex $midi_indevlist $midi_indev3] \
-            -command [list midi_popup $id $id.inputs.in3f.x1 midi_indev3 \
-                $midi_indevlist]
-        pack $id.inputs.in3f.l1 -side left
-        pack $id.inputs.in3f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in3Label -text "3:"
+    ttk::button $::midiWin.inputs.in3Select -text [lindex $midi_indevlist $midi_indev3] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in3Select midi_indev3 \
+            $midi_indevlist] -width 20
 
     # input device 4
-    if {$longform && [llength $midi_indevlist] > 4} {
-        frame $id.inputs.in4f
-        pack $id.inputs.in4f -side top -fill x
-        label $id.inputs.in4f.l1 -text "4:"
-        button $id.inputs.in4f.x1 -text [lindex $midi_indevlist $midi_indev4] \
-            -command [list midi_popup $id $id.inputs.in4f.x1 midi_indev4 \
-                $midi_indevlist]
-        pack $id.inputs.in4f.l1 -side left
-        pack $id.inputs.in4f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in4Label -text "4:"
+    ttk::button $::midiWin.inputs.in4Select -text [lindex $midi_indevlist $midi_indev4] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in4Select midi_indev4 \
+            $midi_indevlist] -width 20
 
     # input device 5
-    if {$longform && [llength $midi_indevlist] > 5} {
-        frame $id.inputs.in5f
-        pack $id.inputs.in5f -side top -fill x
-        label $id.inputs.in5f.l1 -text "5:"
-        button $id.inputs.in5f.x1 -text [lindex $midi_indevlist $midi_indev5] \
-            -command [list midi_popup $id $id.inputs.in5f.x1 midi_indev5 \
-                $midi_indevlist]
-        pack $id.inputs.in5f.l1 -side left
-        pack $id.inputs.in5f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in5Label -text "5:"
+    ttk::button $::midiWin.inputs.in5Select -text [lindex $midi_indevlist $midi_indev5] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in5Select midi_indev5 \
+            $midi_indevlist] -width 20
 
     # input device 6
-    if {$longform && [llength $midi_indevlist] > 6} {
-        frame $id.inputs.in6f
-        pack $id.inputs.in6f -side top -fill x
-        label $id.inputs.in6f.l1 -text "6:"
-        button $id.inputs.in6f.x1 -text [lindex $midi_indevlist $midi_indev6] \
-            -command [list midi_popup $id $id.inputs.in6f.x1 midi_indev6 \
-                $midi_indevlist]
-        pack $id.inputs.in6f.l1 -side left
-        pack $id.inputs.in6f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in6Label -text "6:"
+    ttk::button $::midiWin.inputs.in6Select -text [lindex $midi_indevlist $midi_indev6] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in6Select midi_indev6 \
+            $midi_indevlist] -width 20
 
     # input device 7
-    if {$longform && [llength $midi_indevlist] > 7} {
-        frame $id.inputs.in7f
-        pack $id.inputs.in7f -side top -fill x
-        label $id.inputs.in7f.l1 -text "7:"
-        button $id.inputs.in7f.x1 -text [lindex $midi_indevlist $midi_indev7] \
-            -command [list midi_popup $id $id.inputs.in7f.x1 midi_indev7 \
-                $midi_indevlist]
-        pack $id.inputs.in7f.l1 -side left
-        pack $id.inputs.in7f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in7Label -text "7:" 
+    ttk::button $::midiWin.inputs.in7Select -text [lindex $midi_indevlist $midi_indev7] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in7Select midi_indev7 \
+            $midi_indevlist]  -width 20
 
     # input device 8
-    if {$longform && [llength $midi_indevlist] > 8} {
-        frame $id.inputs.in8f
-        pack $id.inputs.in8f -side top -fill x
-        label $id.inputs.in8f.l1 -text "8:"
-        button $id.inputs.in8f.x1 -text [lindex $midi_indevlist $midi_indev8] \
-            -command [list midi_popup $id $id.inputs.in8f.x1 midi_indev8 \
-                $midi_indevlist]
-        pack $id.inputs.in8f.l1 -side left
-        pack $id.inputs.in8f.x1 -side left -fill x -expand 1
-    }
-
-    # input device 9
-    if {$longform && [llength $midi_indevlist] > 9} {
-        frame $id.inputs.in9f
-        pack $id.inputs.in9f -side top -fill x
-        label $id.inputs.in9f.l1 -text "9:"
-        button $id.inputs.in9f.x1 -text [lindex $midi_indevlist $midi_indev9] \
-            -command [list midi_popup $id $id.inputs.in9f.x1 midi_indev9 \
-                $midi_indevlist]
-        pack $id.inputs.in9f.l1 -side left
-        pack $id.inputs.in9f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.inputs.in8Label -text "8:" 
+    ttk::button $::midiWin.inputs.in8Select -text [lindex $midi_indevlist $midi_indev8] \
+        -command [list midi_popup $mytoplevel $::midiWin.inputs.in8Select midi_indev8 \
+            $midi_indevlist]  -width 20
 
     # output devices
-    labelframe $id.outputs -text [_ "Output Devices"] -padx 5 -pady 5 -borderwidth 1
-    pack $id.outputs -side top -fill x -pady 5
-
+    ttk::labelframe $::midiWin.outputs -text " Output Devices " -padding 5
+    
     # output device 1
-    frame $id.outputs.out1f
-    pack $id.outputs.out1f -side top -fill x
-    label $id.outputs.out1f.l1 -text "1:"
-    button $id.outputs.out1f.x1 -text [lindex $midi_outdevlist $midi_outdev1] \
-        -command [list midi_popup $id $id.outputs.out1f.x1 midi_outdev1 \
-            $midi_outdevlist]
-    pack $id.outputs.out1f.l1 -side left
-    pack $id.outputs.out1f.x1 -side left -fill x -expand 1
+    ttk::label $::midiWin.outputs.out1Label -text "1:" 
+    ttk::button $::midiWin.outputs.out1Select -text [lindex $midi_outdevlist $midi_outdev1] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out1Select midi_outdev1 \
+            $midi_outdevlist]  -width 20
 
     # output device 2
-    if {$longform && [llength $midi_outdevlist] > 2} {
-        frame $id.outputs.out2f
-        pack $id.outputs.out2f -side top -fill x
-        label $id.outputs.out2f.l1 -text "2:"
-        button $id.outputs.out2f.x1 -text [lindex $midi_outdevlist $midi_outdev2] \
-            -command \
-            [list midi_popup $id $id.outputs.out2f.x1 midi_outdev2 $midi_outdevlist]
-        pack $id.outputs.out2f.l1 -side left
-        pack $id.outputs.out2f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out2Label -text "2:" 
+    ttk::button $::midiWin.outputs.out2Select -text [lindex $midi_outdevlist $midi_outdev2] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out2Select midi_outdev2 $midi_outdevlist] \
+         -width 20
 
     # output device 3
-    if {$longform && [llength $midi_outdevlist] > 3} {
-        frame $id.outputs.out3f
-        pack $id.outputs.out3f -side top -fill x
-        label $id.outputs.out3f.l1 -text "3:"
-        button $id.outputs.out3f.x1 -text [lindex $midi_outdevlist $midi_outdev3] \
-            -command \
-            [list midi_popup $id $id.outputs.out3f.x1 midi_outdev3 $midi_outdevlist]
-        pack $id.outputs.out3f.l1 -side left
-        pack $id.outputs.out3f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out3Label -text "3:" 
+    ttk::button $::midiWin.outputs.out3Select -text [lindex $midi_outdevlist $midi_outdev3] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out3Select midi_outdev3 $midi_outdevlist] \
+         -width 20
 
     # output device 4
-    if {$longform && [llength $midi_outdevlist] > 4} {
-        frame $id.outputs.out4f
-        pack $id.outputs.out4f -side top -fill x
-        label $id.outputs.out4f.l1 -text "4:"
-        button $id.outputs.out4f.x1 -text [lindex $midi_outdevlist $midi_outdev4] \
-            -command \
-            [list midi_popup $id $id.outputs.out4f.x1 midi_outdev4 $midi_outdevlist]
-        pack $id.outputs.out4f.l1 -side left
-        pack $id.outputs.out4f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out4Label -text "4:" 
+    ttk::button $::midiWin.outputs.out4Select -text [lindex $midi_outdevlist $midi_outdev4] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out4Select midi_outdev4 $midi_outdevlist] \
+         -width 20
 
     # output device 5
-    if {$longform && [llength $midi_outdevlist] > 5} {
-        frame $id.outputs.out5f
-        pack $id.outputs.out5f -side top -fill x
-        label $id.outputs.out5f.l1 -text "5:"
-        button $id.outputs.out5f.x1 -text [lindex $midi_outdevlist $midi_outdev5] \
-            -command \
-            [list midi_popup $id $id.outputs.out5f.x1 midi_outdev5 $midi_outdevlist]
-        pack $id.outputs.out5f.l1 -side left
-        pack $id.outputs.out5f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out5Label -text "5:" 
+    ttk::button $::midiWin.outputs.out5Select -text [lindex $midi_outdevlist $midi_outdev5] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out5Select midi_outdev5 $midi_outdevlist] \
+         -width 20
 
     # output device 6
-    if {$longform && [llength $midi_outdevlist] > 6} {
-        frame $id.outputs.out6f
-        pack $id.outputs.out6f -side top -fill x
-        label $id.outputs.out6f.l1 -text "6:"
-        button $id.outputs.out6f.x1 -text [lindex $midi_outdevlist $midi_outdev6] \
-            -command \
-            [list midi_popup $id $id.outputs.out6f.x1 midi_outdev6 $midi_outdevlist]
-        pack $id.outputs.out6f.l1 -side left
-        pack $id.outputs.out6f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out6Label -text "6:" 
+    ttk::button $::midiWin.outputs.out6Select -text [lindex $midi_outdevlist $midi_outdev6] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out6Select midi_outdev6 $midi_outdevlist] \
+         -width 20
 
     # output device 7
-    if {$longform && [llength $midi_outdevlist] > 7} {
-        frame $id.outputs.out7f
-        pack $id.outputs.out7f -side top -fill x
-        label $id.outputs.out7f.l1 -text "7:"
-        button $id.outputs.out7f.x1 -text [lindex $midi_outdevlist $midi_outdev7] \
-            -command \
-            [list midi_popup $id $id.outputs.out7f.x1 midi_outdev7 $midi_outdevlist]
-        pack $id.outputs.out7f.l1 -side left
-        pack $id.outputs.out7f.x1 -side left -fill x -expand 1
-    }
+    ttk::label $::midiWin.outputs.out7Label -text "7:" 
+    ttk::button $::midiWin.outputs.out7Select -text [lindex $midi_outdevlist $midi_outdev7] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out7Select midi_outdev7 $midi_outdevlist] \
+         -width 20
 
     # output device 8
-    if {$longform && [llength $midi_outdevlist] > 8} {
-        frame $id.outputs.out8f
-        pack $id.outputs.out8f -side top -fill x
-        label $id.outputs.out8f.l1 -text "8:"
-        button $id.outputs.out8f.x1 -text [lindex $midi_outdevlist $midi_outdev8] \
-            -command \
-            [list midi_popup $id $id.outputs.out8f.x1 midi_outdev8 $midi_outdevlist]
-        pack $id.outputs.out8f.l1 -side left
-        pack $id.outputs.out8f.x1 -side left -fill x -expand 1
-    }
-
-    # output device 9
-    if {$longform && [llength $midi_outdevlist] > 9} {
-        frame $id.outputs.out9f
-        pack $id.outputs.out9f -side top -fill x
-        label $id.outputs.out9f.l1 -text "9:"
-        button $id.outputs.out9f.x1 -text [lindex $midi_outdevlist $midi_outdev9] \
-            -command \
-            [list midi_popup $id $id.outputs.out9f.x1 midi_outdev9 $midi_outdevlist]
-        pack $id.outputs.out9f.l1 -side left
-        pack $id.outputs.out9f.x1 -side left -fill x -expand 1
-    }
-
-    # if not the "long form" make a button to
-    # restart with longform set.
-    if {$longform == 0} {
-        frame $id.longbutton
-        pack $id.longbutton -side top -fill x
-        button $id.longbutton.b -text [_ "Use Multiple Devices"] \
-            -command  {pdsend "pd midi-properties 1"}
-        pack $id.longbutton.b -expand 1 -ipadx 10 -pady 5
-    }
-
+    ttk::label $::midiWin.outputs.out8Label -text "8:" 
+    ttk::button $::midiWin.outputs.out8Select -text [lindex $midi_outdevlist $midi_outdev8] \
+        -command [list midi_popup $mytoplevel $::midiWin.outputs.out8Select midi_outdev8 $midi_outdevlist] \
+         -width 20
+        
     # save all settings button
-    button $id.saveall -text [_ "Save All Settings"] \
-        -command "::dialog_midi::apply $id; pdsend \"pd save-preferences\""
-    pack $id.saveall -side top -expand 1 -ipadx 10 -pady 5
-
+    ttk::button $::midiWin.saveall -text "Save All Settings"  -width -1\
+        -command "::dialog_midi::apply $mytoplevel; pdsend \"pd save-preferences\"" 
     # buttons
-    frame $id.buttonframe
-    pack $id.buttonframe -side top -after $id.saveall -pady 2m
-    button $id.buttonframe.cancel -text [_ "Cancel"] \
-        -command "::dialog_midi::cancel $id"
-    pack $id.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
-    if {$::windowingsystem ne "aqua"} {
-        button $id.buttonframe.apply -text [_ "Apply"] \
-            -command "::dialog_midi::apply $id"
-        pack $id.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
-    }
-    button $id.buttonframe.ok -text [_ "OK"] \
-        -command "::dialog_midi::ok $id" -default active
-    pack $id.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
+    ttk::frame $::midiWin.buttonframe 
+    ttk::button $::midiWin.buttonframe.cancel -text "Cancel" \
+        -command "::dialog_midi::cancel $mytoplevel"
+    ttk::button $::midiWin.buttonframe.apply -text "Apply" \
+        -command "::dialog_midi::apply $mytoplevel"
+    ttk::button $::midiWin.buttonframe.ok -text "OK" \
+        -command "::dialog_midi::ok $mytoplevel" -default active
+
+# Layout 
+    grid $::midiWin -column 0 -row 0 -sticky nwes
+    grid $::midiWin.inputs -column 0 -row 0 -sticky nwes -pady 2
+
+    grid $::midiWin.inputs.in1Label -column 0 -row 0
+    grid $::midiWin.inputs.in1Select -column 1 -row 0
+    grid $::midiWin.inputs.in2Label -column 0 -row 1
+    grid $::midiWin.inputs.in2Select -column 1 -row 1
+    grid $::midiWin.inputs.in3Label -column 0 -row 2
+    grid $::midiWin.inputs.in3Select -column 1 -row 2
+    grid $::midiWin.inputs.in4Label -column 0 -row 3
+    grid $::midiWin.inputs.in4Select -column 1 -row 3
+
+    grid $::midiWin.inputs.in5Label -column 2 -row 0 -padx 2
+    grid $::midiWin.inputs.in5Select -column 3 -row 0 -pady 1
+    grid $::midiWin.inputs.in6Label -column 2 -row 1 -padx 2
+    grid $::midiWin.inputs.in6Select -column 3 -row 1 -pady 1
+    grid $::midiWin.inputs.in7Label -column 2 -row 2 -padx 2
+    grid $::midiWin.inputs.in7Select -column 3 -row 2 -pady 1
+    grid $::midiWin.inputs.in8Label -column 2 -row 3 -padx 2
+    grid $::midiWin.inputs.in8Select -column 3 -row 3 -pady 1
+
+    grid $::midiWin.outputs -column 0 -row 1 -sticky nwes -pady 2
+ 
+    grid $::midiWin.outputs.out1Label -column 0 -row 0
+    grid $::midiWin.outputs.out1Select -column 1 -row 0
+    grid $::midiWin.outputs.out2Label -column 0 -row 1
+    grid $::midiWin.outputs.out2Select -column 1 -row 1
+    grid $::midiWin.outputs.out3Label -column 0 -row 2
+    grid $::midiWin.outputs.out3Select -column 1 -row 2
+    grid $::midiWin.outputs.out4Label -column 0 -row 3
+    grid $::midiWin.outputs.out4Select -column 1 -row 3
+
+    grid $::midiWin.outputs.out5Label -column 2 -row 0 -padx 2
+    grid $::midiWin.outputs.out5Select -column 3 -row 0 -pady 1
+    grid $::midiWin.outputs.out6Label -column 2 -row 1 -padx 2
+    grid $::midiWin.outputs.out6Select -column 3 -row 1 -pady 1
+    grid $::midiWin.outputs.out7Label -column 2 -row 2 -padx 2
+    grid $::midiWin.outputs.out7Select -column 3 -row 2 -pady 1
+    grid $::midiWin.outputs.out8Label -column 2 -row 3 -padx 2
+    grid $::midiWin.outputs.out8Select -column 3 -row 3 -pady 1
+
+    grid $::midiWin.saveall -column 0 -row 2 -pady 2
+    grid $::midiWin.buttonframe -column 0 -row 3 -pady 2
+    grid $::midiWin.buttonframe.cancel -column 0 -row 0
+    grid $::midiWin.buttonframe.apply -column 1 -row 0 -padx 2
+    grid $::midiWin.buttonframe.ok -column 2 -row 0
 
     # set focus
-    focus $id.buttonframe.ok
+    focus $::midiWin.buttonframe.ok
 
     # for focus handling on OSX
     if {$::windowingsystem eq "aqua"} {
 
         # remove cancel button from focus list since it's not activated on Return
-        $id.buttonframe.cancel config -takefocus 0
+        $::midiWin.buttonframe.cancel config -takefocus 0
 
         # show active focus on multiple device button
-        if {[winfo exists $id.longbutton.b]} {
-            bind $id.longbutton.b <KeyPress-Return> "$id.longbutton.b invoke"
-            bind $id.longbutton.b <FocusIn> "::dialog_midi::unbind_return $id; $id.longbutton.b config -default active"
-            bind $id.longbutton.b <FocusOut> "::dialog_midi::rebind_return $id; $id.longbutton.b config -default normal"
+        if {[winfo exists $::midiWin.longbutton.b]} {
+            bind $::midiWin.longbutton.b <KeyPress-Return> "$::midiWin.longbutton.b invoke"
+            bind $::midiWin.longbutton.b <FocusIn> "::dialog_midi::unbind_return $mytoplevel; $::midiWin.longbutton.b config -default active"
+            bind $::midiWin.longbutton.b <FocusOut> "::dialog_midi::rebind_return $mytoplevel; $::midiWin.longbutton.b config -default normal"
         }
 
         # show active focus on save settings button
-        bind $id.saveall <KeyPress-Return> "$id.saveall invoke"
-        bind $id.saveall <FocusIn> "::dialog_midi::unbind_return $id; $id.saveall config -default active"
-        bind $id.saveall <FocusOut> "::dialog_midi::rebind_return $id; $id.saveall config -default normal"
+        bind $::midiWin.saveall <KeyPress-Return> "$::midiWin.saveall invoke"
+        bind $::midiWin.saveall <FocusIn> "::dialog_midi::unbind_return $mytoplevel; $::midiWin.saveall config -default active"
+        bind $::midiWin.saveall <FocusOut> "::dialog_midi::rebind_return $mytoplevel; $::midiWin.saveall config -default normal"
 
         # show active focus on the ok button as it *is* activated on Return
-        $id.buttonframe.ok config -default normal
-        bind $id.buttonframe.ok <FocusIn> "$id.buttonframe.ok config -default active"
-        bind $id.buttonframe.ok <FocusOut> "$id.buttonframe.ok config -default normal"
+        $::midiWin.buttonframe.ok config -default normal
+        bind $::midiWin.buttonframe.ok <FocusIn> "$::midiWin.buttonframe.ok config -default active"
+        bind $::midiWin.buttonframe.ok <FocusOut> "$::midiWin.buttonframe.ok config -default normal"
 
         # since we show the active focus, disable the highlight outline
-        if {[winfo exists $id.longbutton.b]} {
-            $id.longbutton.b config -highlightthickness 0
-        }
-        $id.saveall config -highlightthickness 0
-        $id.buttonframe.ok config -highlightthickness 0
-        $id.buttonframe.cancel config -highlightthickness 0
+        # if {[winfo exists $::midiWin.longbutton.b]} {
+        #     $::midiWin.longbutton.b config -highlightthickness 0
+        # }
+        # $::midiWin.saveall config -highlightthickness 0
+        # $::midiWin.buttonframe.ok config -highlightthickness 0
+        # $::midiWin.buttonframe.cancel config -highlightthickness 0
     }
 
     # set min size based on widget sizing & pos over pdwindow
-    wm minsize $id [winfo reqwidth $id] [winfo reqheight $id]
-    position_over_window $id .pdwindow
-    raise $id
+    wm minsize $mytoplevel [winfo reqwidth $mytoplevel] [winfo reqheight $mytoplevel]
+    position_over_window $mytoplevel .pdwindow
+    raise $mytoplevel
 }
 
+# Leaving this alone for now, but if someone asks I'll probably change it
 proc ::dialog_midi::pdtk_alsa_midi_dialog {id indev1 indev2 indev3 indev4 \
         outdev1 outdev2 outdev3 outdev4 longform alsa} {
 
@@ -443,49 +357,49 @@ proc ::dialog_midi::pdtk_alsa_midi_dialog {id indev1 indev2 indev3 indev4 \
     set midi_alsain [expr [llength $midi_indevlist] - 1]
     set midi_alsaout [expr [llength $midi_outdevlist] - 1]
 
-    toplevel $id -class DialogWindow
-    wm withdraw $id
-    wm title $id [_ "ALSA MIDI Settings"]
-    wm resizable $id 0 0
-    wm transient $id
-    $id configure -padx 10 -pady 5
-    if {$::windowingsystem eq "aqua"} {$id configure -menu .menubar}
-    ::pd_bindings::dialog_bindings $id "midi"
+    toplevel $mytoplevel -class DialogWindow
+    wm withdraw $mytoplevel
+    wm title $mytoplevel [_ "ALSA MIDI Settings"]
+    wm resizable $mytoplevel 0 0
+    wm transient $mytoplevel
+    $mytoplevel configure -padx 10 -pady 5
+    if {$::windowingsystem eq "aqua"} {$mytoplevel configure -menu .menubar}
+    ::pd_bindings::dialog_bindings $mytoplevel "midi"
 
-    frame $id.in1f
-    pack $id.in1f -side top
+    frame $mytoplevel.in1f
+    pack $mytoplevel.in1f -side top
 
     if {$alsa} {
-        label $id.in1f.l1 -text [_ "In Ports:"]
-        entry $id.in1f.x1 -textvariable midi_alsain -width 4
-        pack $id.in1f.l1 $id.in1f.x1 -side left
-        label $id.in1f.l2 -text [_ "Out Ports:"]
-        entry $id.in1f.x2 -textvariable midi_alsaout -width 4
-        pack $id.in1f.l2 $id.in1f.x2 -side left
+        label $mytoplevel.in1f.l1 -text [_ "In Ports:"]
+        entry $mytoplevel.in1f.x1 -textvariable midi_alsain -width 4
+        pack $mytoplevel.in1f.l1 $mytoplevel.in1f.x1 -side left
+        label $mytoplevel.in1f.l2 -text [_ "Out Ports:"]
+        entry $mytoplevel.in1f.x2 -textvariable midi_alsaout -width 4
+        pack $mytoplevel.in1f.l2 $mytoplevel.in1f.x2 -side left
     }
 
     # save all settings button
-    button $id.saveall -text [_ "Save All Settings"] \
-        -command "::dialog_midi::apply $id; pdsend \"pd save-preferences\""
-    pack $id.saveall -side top -expand 1 -ipadx 10 -pady 5
+    button $mytoplevel.saveall -text [_ "Save All Settings"] \
+        -command "::dialog_midi::apply $mytoplevel; pdsend \"pd save-preferences\""
+    pack $mytoplevel.saveall -side top -expand 1 -ipadx 10 -pady 5
 
     # buttons
-    frame $id.buttonframe
-    pack $id.buttonframe -side top -after $id.saveall -pady 2m
-    button $id.buttonframe.cancel -text [_ "Cancel"]\
-        -command "::dialog_midi::cancel $id"
-    button $id.buttonframe.apply -text [_ "Apply"]\
-        -command "::dialog_midi::apply $id"
-    button $id.buttonframe.ok -text [_ "OK"]\
-        -command "::dialog_midi::ok $id" -default active
-    pack $id.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
-    pack $id.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
-    pack $id.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
+    frame $mytoplevel.buttonframe
+    pack $mytoplevel.buttonframe -side top -after $mytoplevel.saveall -pady 2m
+    button $mytoplevel.buttonframe.cancel -text [_ "Cancel"]\
+        -command "::dialog_midi::cancel $mytoplevel"
+    button $mytoplevel.buttonframe.apply -text [_ "Apply"]\
+        -command "::dialog_midi::apply $mytoplevel"
+    button $mytoplevel.buttonframe.ok -text [_ "OK"]\
+        -command "::dialog_midi::ok $mytoplevel" -default active
+    pack $mytoplevel.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
+    pack $mytoplevel.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
+    pack $mytoplevel.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
 
     # set min size based on widget sizing & pos over pdwindow
-    wm minsize $id [winfo reqwidth $id] [winfo reqheight $id]
-    position_over_window $id .pdwindow
-    raise "$id"
+    wm minsize $mytoplevel [winfo reqwidth $mytoplevel] [winfo reqheight $mytoplevel]
+    position_over_window $mytoplevel .pdwindow
+    raise "$mytoplevel"
 }
 
 # for focus handling on OSX

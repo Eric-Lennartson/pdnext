@@ -54,7 +54,7 @@ void vradio_draw_new(t_vradio *x, t_glist *glist)
 
     for(i = 0; i < n; i++)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -tags %lxBASE%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #a89984 -tags %lxBASE%d\n",
                  canvas, xx11, yy11, xx12, yy12, IEMGUI_ZOOM(x),
                  x->x_gui.x_bcol, x, i);
         sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #%06x -outline #%06x -tags %lxBUT%d\n",
@@ -67,14 +67,14 @@ void vradio_draw_new(t_vradio *x, t_glist *glist)
         yy22 += dy;
         x->x_drawn = x->x_on;
     }
-    if(!x->x_gui.x_fsf.x_snd_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]\n",
+    if(!x->x_gui.x_fsf.x_snd_able) // inlet
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]\n",
              canvas,
              xx11, yy11 + IEMGUI_ZOOM(x) - ioh,
              xx11 + iow, yy11,
              x, 0);
-    if(!x->x_gui.x_fsf.x_rcv_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+    if(!x->x_gui.x_fsf.x_rcv_able) // outlet
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xx11, yy11b,
              xx11 + iow, yy11b - IEMGUI_ZOOM(x) + ioh,
@@ -574,16 +574,16 @@ static void vradio_single_change(t_vradio *x)
 static void *vradio_donew(t_symbol *s, int argc, t_atom *argv, int old)
 {
     t_vradio *x = (t_vradio *)pd_new(old ? vradio_old_class : vradio_class);
-    int a = IEM_GUI_DEFAULTSIZE, on = 0, f = 0;
-    int ldx = 0, ldy = -8, chg = 1, num = 8;
-    int fs = 10;
+    int a = IEM_GUI_RADIOSIZE, on = 0, f = 0;
+    int ldx = 0, ldy = -8, chg = 1, num = 4;
+    int fs = 12;
     int ftbreak = IEM_BNG_DEFAULTBREAKFLASHTIME, fthold = IEM_BNG_DEFAULTHOLDFLASHTIME;
     char str[144];
     float fval = 0;
 
-    x->x_gui.x_bcol = 0xFCFCFC;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x00;
+    x->x_gui.x_bcol = 0x5a524c; // These should be globals in the header file?
+    x->x_gui.x_fcol = 0xa9b665; // this would help with tcl access?
+    x->x_gui.x_lcol = 0xc5b18d;
 
     if((argc == 15)&&IS_A_FLOAT(argv,0)&&IS_A_FLOAT(argv,1)&&IS_A_FLOAT(argv,2)
        &&IS_A_FLOAT(argv,3)

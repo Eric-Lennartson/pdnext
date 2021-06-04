@@ -23,14 +23,14 @@ namespace eval ::pdwindow:: {
 
 proc ::pdwindow::set_layout {} {
     variable maxloglevel
-    .pdwindow.text.internal tag configure log0 -foreground \
+    $::win.text.internal tag configure log0 -foreground \
     	[::pdtk_canvas::get_color pdwindow_fatal_text .pdwindow] -background \
     	[::pdtk_canvas::get_color pdwindow_fatal_highlight .pdwindow]
-    .pdwindow.text.internal tag configure log1 -foreground \
+    $::win.text.internal tag configure log1 -foreground \
     	[::pdtk_canvas::get_color pdwindow_error_text .pdwindow]
-    .pdwindow.text.internal tag configure log2 -foreground \
+    $::win.text.internal tag configure log2 -foreground \
     	[::pdtk_canvas::get_color pdwindow_post_text .pdwindow]
-    .pdwindow.text.internal tag configure log3 -foreground \
+    $::win.text.internal tag configure log3 -foreground \
     	[::pdtk_canvas::get_color pdwindow_debug_text .pdwindow]
 
     # 0-20(4-24) is a rough useful range of 'verbose' levels for impl debugging
@@ -38,7 +38,7 @@ proc ::pdwindow::set_layout {} {
     set end 25
     for {set i $start} {$i < $end} {incr i} {
         set B [expr int(($i - $start) * (40 / ($end - $start))) + 50]
-        .pdwindow.text.internal tag configure log${i} -foreground grey${B}
+        $::win.text.internal tag configure log${i} -foreground grey${B}
     }
 }
 
@@ -46,14 +46,14 @@ proc ::pdwindow::set_layout {} {
 # grab focus on part of the Pd window when Pd is busy
 proc ::pdwindow::busygrab {} {
     # set the mouse cursor to look busy and grab focus so it stays that way
-    .pdwindow.text configure -cursor watch
-    grab set .pdwindow.text
+    $::win.text configure -cursor watch
+    grab set $::win.text
 }
 
 # release focus on part of the Pd window when Pd is finished
 proc ::pdwindow::busyrelease {} {
-    .pdwindow.text configure -cursor xterm
-    grab release .pdwindow.text
+    $::win.text configure -cursor xterm
+    grab release $::win.text
 }
 
 # ------------------------------------------------------------------------------
@@ -67,14 +67,14 @@ proc ::pdwindow::buffer_message {object_id level message} {
 proc ::pdwindow::insert_log_line {object_id level message} {
     set message [subst -nocommands -novariables $message]
     if {$object_id eq ""} {
-        .pdwindow.text.internal insert end $message log$level
+        $::win.text.internal insert end $message log$level
     } else {
-        .pdwindow.text.internal insert end $message [list log$level obj$object_id]
-        .pdwindow.text.internal tag bind obj$object_id <$::modifier-ButtonRelease-1> \
+        $::win.text.internal insert end $message [list log$level obj$object_id]
+        $::win.text.internal tag bind obj$object_id <$::modifier-ButtonRelease-1> \
             "::pdwindow::select_by_id $object_id; break"
-        .pdwindow.text.internal tag bind obj$object_id <Key-Return> \
+        $::win.text.internal tag bind obj$object_id <Key-Return> \
             "::pdwindow::select_by_id $object_id; break"
-        .pdwindow.text.internal tag bind obj$object_id <Key-KP_Enter> \
+        $::win.text.internal tag bind obj$object_id <Key-KP_Enter> \
             "::pdwindow::select_by_id $object_id; break"
     }
 }
@@ -83,7 +83,7 @@ proc ::pdwindow::insert_log_line {object_id level message} {
 proc ::pdwindow::filter_buffer_to_text {args} {
     variable logbuffer
     variable maxloglevel
-    .pdwindow.text.internal delete 0.0 end
+    $::win.text.internal delete 0.0 end
     set i 0
     foreach {object_id level message} $logbuffer {
         if { $level <= $::loglevel || $maxloglevel == $::loglevel} {
@@ -93,7 +93,7 @@ proc ::pdwindow::filter_buffer_to_text {args} {
         if { [expr $i % 10000] == 0} {update idletasks}
         incr i
     }
-    .pdwindow.text.internal yview end
+    $::win.text.internal yview end
     ::pdwindow::verbose 10 "the Pd window filtered $i lines\n"
 }
 
@@ -113,14 +113,14 @@ proc ::pdwindow::logpost {object_id level message} {
     variable lastlevel $level
 
     buffer_message $object_id $level $message
-    if {[llength [info commands .pdwindow.text.internal]] &&
+    if {[llength [info commands .pdwindow.w.text.internal]] &&
         ($level <= $::loglevel || $maxloglevel == $::loglevel)} {
         # cancel any pending move of the scrollbar, and schedule it
         # after writing a line. This way the scrollbar is only moved once
         # when the inserting has finished, greatly speeding things up
-        after cancel .pdwindow.text.internal yview end
+        after cancel $::win.text.internal yview end
         insert_log_line $object_id $level $message
-        after idle .pdwindow.text.internal yview end
+        after idle $::win.text.internal yview end
     }
     # -stderr only sets $::stderr if 'pd-gui' is started before 'pd'
     if {$::stderr} {puts stderr $message}
@@ -129,7 +129,7 @@ proc ::pdwindow::logpost {object_id level message} {
 # shortcuts for posting to the Pd window
 proc ::pdwindow::fatal {message} {logpost {} 0 $message}
 proc ::pdwindow::error {message} {logpost {} 1 $message}
-proc ::pdwindow::post {message} {logpost {} 2 $message}
+proc ::pdwindow::post  {message} {logpost {} 2 $message}
 proc ::pdwindow::debug {message} {logpost {} 3 $message}
 # for backwards compatibility
 proc ::pdwindow::bug {message} {logpost {} 1 \
@@ -154,7 +154,7 @@ proc ::pdwindow::verbose {level message} {
 # clear the log and the buffer
 proc ::pdwindow::clear_console {} {
     variable logbuffer {}
-    .pdwindow.text.internal delete 0.0 end
+    $::win.text.internal delete 0.0 end
 }
 
 # save the contents of the pdwindow::logbuffer to a file
@@ -172,8 +172,15 @@ proc ::pdwindow::save_logbuffer_to_file {} {
     close $f
 }
 # this has 'args' to satisfy trace, but its not used
-proc ::pdwindow::loglevel_updated {args} {
-    ::pdwindow::filter_buffer_to_text $args
+proc ::pdwindow::loglevel_updated {level UNUSED} {
+    switch $level {
+        0 { set ::loglevel 0 }
+        1 { set ::loglevel 1 }
+        2 { set ::loglevel 2 }
+        3 { set ::loglevel 3 }
+        4 { set ::loglevel 4 }
+    } 
+    ::pdwindow::filter_buffer_to_text $level
     ::pd_guiprefs::write_loglevel
 }
 
@@ -189,11 +196,13 @@ proc ::pdwindow::pdtk_pd_dsp {value} {
     }
 }
 
-proc ::pdwindow::pdtk_pd_dio {red} {
-    if {$red == 1} {
-        .pdwindow.header.ioframe.dio configure -foreground red
+proc ::pdwindow::pdtk_pd_dio {error} {
+    ttk::style configure good.TLabel -background "#1c1c1c" -foreground "#1c1c1c"
+    ttk::style congifure bad.TLabel -background "#1c1c1c" -foreground "#ea6962"
+    if {$error == 1} {
+        $::win.header.dio -style bad.TLabel
     } else {
-        .pdwindow.header.ioframe.dio configure -foreground lightgray
+        $::win.header.dio -style good.TLabel
     }
 }
 
@@ -208,20 +217,20 @@ proc ::pdwindow::pdtk_pd_audio {state} {
         # fallback in case the $state values change in the future
         set labeltext [concat Audio $state]
     }
-    .pdwindow.header.ioframe.iostate configure -text $labeltext
+    # $::win.header.ioframe.iostate configure -text $labeltext
 }
 
 #--bindings specific to the Pd window------------------------------------------#
 
 proc ::pdwindow::pdwindow_bindings {} {
     # these bindings are for the whole Pd window, minus the Tcl entry
-    foreach window {.pdwindow.text .pdwindow.header} {
-        bind $window <$::modifier-Key-x> "tk_textCut .pdwindow.text"
-        bind $window <$::modifier-Key-c> "tk_textCopy .pdwindow.text"
-        bind $window <$::modifier-Key-v> "tk_textPaste .pdwindow.text"
+    foreach window {$::win.text $::win.header} {
+        bind $window <$::modifier-Key-x> "tk_textCut $::win.text"
+        bind $window <$::modifier-Key-c> "tk_textCopy $::win.text"
+        bind $window <$::modifier-Key-v> "tk_textPaste $::win.text"
     }
     # Select All doesn't seem to work unless its applied to the whole window
-    bind .pdwindow <$::modifier-Key-a> ".pdwindow.text tag add sel 1.0 end"
+    bind .pdwindow <$::modifier-Key-a> "$::win.text tag add sel 1.0 end"
     # the "; break" part stops executing another binds, like from the Text class
 
     # these don't do anything in the Pd window, so alert the user, then break
@@ -250,8 +259,7 @@ proc ::pdwindow::eval_tclentry {} {
     if {$tclentry eq ""} {return} ;# no need to do anything if empty
     if {[catch {uplevel #0 $tclentry} errorname]} {
         global errorInfo
-        switch -regexp -- $errorname {
-            "missing close-brace" {
+        switch -regexp -- $errorname { "missing close-brace" {
                 ::pdwindow::error [concat [_ "(Tcl) MISSING CLOSE-BRACE '\}': "] $errorInfo]\n
             } "missing close-bracket" {
                 ::pdwindow::error [concat [_ "(Tcl) MISSING CLOSE-BRACKET '\]': "] $errorInfo]\n
@@ -275,17 +283,17 @@ proc ::pdwindow::get_history {direction} {
     if {$history_position > [llength $tclentry_history]} {
         set history_position [llength $tclentry_history]
     }
-    .pdwindow.tcl.entry delete 0 end
-    .pdwindow.tcl.entry insert 0 \
+    $::win.tcl.entry delete 0 end
+    $::win.tcl.entry insert 0 \
         [lindex $tclentry_history end-[expr $history_position - 1]]
 }
 
 proc ::pdwindow::validate_tcl {} {
     variable tclentry
     if {[info complete $tclentry]} {
-        .pdwindow.tcl.entry configure -background "white"
+        $::win.tcl.entry configure -background "white"
     } else {
-        .pdwindow.tcl.entry configure -background "#FFF0F0"
+        $::win.tcl.entry configure -background "#FFF0F0"
     }
 }
 
@@ -293,20 +301,20 @@ proc ::pdwindow::validate_tcl {} {
 
 proc ::pdwindow::create_tcl_entry {} {
 # Tcl entry box frame
-    label .pdwindow.tcl.label -text [_ "Tcl:"] -anchor e
-    pack .pdwindow.tcl.label -side left
-    entry .pdwindow.tcl.entry -width 200 \
+    label $::win.tcl.label -text [_ "Tcl:"] -anchor e
+    pack $::win.tcl.label -side left
+    entry $::win.tcl.entry -width 200 \
        -exportselection 1 -insertwidth 2 -insertbackground blue \
        -textvariable ::pdwindow::tclentry -font TkTextFont
-    pack .pdwindow.tcl.entry -side left -fill x
+    pack $::win.tcl.entry -side left -fill x
 # bindings for the Tcl entry widget
-    bind .pdwindow.tcl.entry <$::modifier-Key-a> "%W selection range 0 end; break"
-    bind .pdwindow.tcl.entry <Return> "::pdwindow::eval_tclentry"
-    bind .pdwindow.tcl.entry <Up>     "::pdwindow::get_history 1"
-    bind .pdwindow.tcl.entry <Down>   "::pdwindow::get_history -1"
-    bind .pdwindow.tcl.entry <KeyRelease> +"::pdwindow::validate_tcl"
+    bind $::win.tcl.entry <$::modifier-Key-a> "%W selection range 0 end; break"
+    bind $::win.tcl.entry <Return> "::pdwindow::eval_tclentry"
+    bind $::win.tcl.entry <Up>     "::pdwindow::get_history 1"
+    bind $::win.tcl.entry <Down>   "::pdwindow::get_history -1"
+    bind $::win.tcl.entry <KeyRelease> +"::pdwindow::validate_tcl"
 
-    bind .pdwindow.text <Key-Tab> "focus .pdwindow.tcl.entry; break"
+    bind $::win.text <Key-Tab> "focus $::win.tcl.entry; break"
 }
 
 proc ::pdwindow::set_findinstance_cursor {widget key state} {
@@ -326,103 +334,104 @@ proc ::pdwindow::create_window {} {
     variable logmenuitems
     set ::loaded(.pdwindow) 0
 
-    # colorize by class before creating anything
-    option add *PdWindow*Entry.highlightBackground "grey" startupFile
-    option add *PdWindow*Frame.background "grey" startupFile
-    option add *PdWindow*Label.background "grey" startupFile
-    option add *PdWindow*Checkbutton.background "grey" startupFile
-    option add *PdWindow*Menubutton.background "grey" startupFile
-    option add *PdWindow*Text.background "white" startupFile
-    option add *PdWindow*Entry.background "white" startupFile
-
     toplevel .pdwindow -class PdWindow
-    wm title .pdwindow [_ "Pd"]
-    set ::windowname(.pdwindow) [_ "Pd"]
+    wm title .pdwindow "Pure Data"
+    set ::windowname(.pdwindow) "Pd"
     if {$::windowingsystem eq "x11"} {
         wm minsize .pdwindow 400 75
     } else {
-        wm minsize .pdwindow 400 51
+        wm minsize .pdwindow 250 51 ;# 51 b/c of header size
+        wm maxsize .pdwindow 600 451 ;# 4:3 ratio
     }
-    wm geometry .pdwindow =500x400+20+50
+    # I'm just using the size that the grid manager
+    # wants, but if I wanted to change that in the future
+    # and start with a different size, use this line
+    # wm geometry .pdwindow <dimensions and offset here>
+    
 
-    frame .pdwindow.header -borderwidth 1 -relief flat -background lightgray
-    pack .pdwindow.header -side top -fill x -ipady 5
-
-    frame .pdwindow.header.pad1
-    pack .pdwindow.header.pad1 -side left -padx 12
-
-    checkbutton .pdwindow.header.dsp -text [_ "DSP"] -variable ::dsp \
-        -takefocus 1 -background lightgray \
-        -borderwidth 0  -command {pdsend "pd dsp $::dsp"}
-    pack .pdwindow.header.dsp -side right -fill y -anchor e -padx 5 -pady 0
-
-# frame for DIO error and audio in/out labels
-    frame .pdwindow.header.ioframe -background lightgray
-    pack .pdwindow.header.ioframe -side right -padx 30
-
-# I/O state label (shows I/O on/off/in-only/out-only)
-    label .pdwindow.header.ioframe.iostate \
-        -text [_ "Audio off"] -borderwidth 1 \
-        -background lightgray -foreground black \
-        -takefocus 0 \
-        -font {$::font_family -14}
+# Widgets
+    ttk::frame .pdwindow.w
+    set ::win .pdwindow.w 
+    ttk::frame $::win.header -padding 5 -style header.TFrame
+    # TODO make this a button, for now this is a checkbox
+    ttk::checkbutton $::win.header.dsp -text [_ "DSP"] -variable ::dsp \
+        -takefocus 1 -command {pdsend "pd dsp $::dsp"}
 
 # DIO error label
-    label .pdwindow.header.ioframe.dio \
-        -text [_ "Audio I/O error"] -borderwidth 1 \
-        -background lightgray -foreground lightgray \
+    ttk::label $::win.header.dio \
+        -text "Audio I/O error" \
         -takefocus 0 \
-        -font {$::font_family -14}
+        -font {$::font_family -11}
 
-    pack .pdwindow.header.ioframe.iostate .pdwindow.header.ioframe.dio \
-        -side top
-
-    label .pdwindow.header.loglabel -text [_ "Log:"] -anchor e \
-        -background lightgray
-    pack .pdwindow.header.loglabel -side left
+    ttk::frame $::win.header.pad -width 210 -height 43
+    ttk::label $::win.header.loglabel -text [_ "Log:"]
 
     set loglevels {0 1 2 3 4}
-    lappend logmenuitems "0 [_ fatal]"
-    lappend logmenuitems "1 [_ error]"
-    lappend logmenuitems "2 [_ normal]"
-    lappend logmenuitems "3 [_ debug]"
-    lappend logmenuitems "4 [_ all]"
-    set logmenu \
-        [eval tk_optionMenu .pdwindow.header.logmenu ::loglevel $loglevels]
-    .pdwindow.header.logmenu configure -background lightgray
-    foreach i $loglevels {
-        $logmenu entryconfigure $i -label [lindex $logmenuitems $i]
+    set logmenuitems [list  "0 fatal" "1 error" "2 normal" "3 debug" "4 all"]
+    ttk::menubutton $::win.header.logmenu -menu $::win.header.logmenu.items \
+        -textvariable ::loglevel -width 2
+
+    menu $::win.header.logmenu.items
+    foreach i $logmenuitems { 
+        $::win.header.logmenu.items add command -label $i
     }
-    trace add variable ::loglevel write ::pdwindow::loglevel_updated
+    foreach i $logmenuitems { 
+        $::win.header.logmenu.items entryconfigure $i -command "::pdwindow::loglevel_updated $i" 
+    }
 
     # TODO figure out how to make the menu traversable with the keyboard
-    #.pdwindow.header.logmenu configure -takefocus 1
-    pack .pdwindow.header.logmenu -side left
-    frame .pdwindow.tcl -borderwidth 0
-    pack .pdwindow.tcl -side bottom -fill x
+    #$::win.header.logmenu configure -takefocus 1
+    ttk::frame $::win.tcl -borderwidth 0
+
+    ttk::frame $::win.console 
+
     # TODO this should use the pd_font_$size created in pd-gui.tcl
-    text .pdwindow.text -relief raised -bd 2 -font {$::font_family 10} \
-        -highlightthickness 0 -borderwidth 1 -relief flat \
-        -yscrollcommand ".pdwindow.scroll set" -width 60 \
+    tk::text $::win.text -bd 0 -font {$::font_family 10} \
+        -highlightthickness 0 -borderwidth 0 -relief flat \
+        -yscrollcommand "$::win.scroll set" -width 60 \
         -undo false -autoseparators false -maxundo 1 -takefocus 0
-    scrollbar .pdwindow.scroll -command ".pdwindow.text.internal yview"
-    pack .pdwindow.scroll -side right -fill y
-    pack .pdwindow.text -side right -fill both -expand 1
+    ttk::scrollbar $::win.scroll -command "$::win.text.internal yview"
+
+# Layout
+    grid $::win -column 0 -row 0 -sticky nwes
+    grid $::win.header -column 0 -row 0 -sticky nwes -columnspan 2
+    grid $::win.header.dsp      -column 0 -row 0
+    grid $::win.header.dio      -column 1 -row 0 -padx 10
+    grid $::win.header.pad      -column 2 -row 0
+    grid $::win.header.loglabel -column 3 -row 0
+    grid $::win.header.logmenu  -column 4 -row 0
+
+    grid $::win.text   -column 0 -row 1 -sticky nwes
+    grid $::win.scroll -column 1 -row 1 -sticky ns
+
+# Resize
+    grid columnconfigure .pdwindow 0 -weight 1
+    grid rowconfigure .pdwindow 0 -weight 1
+    grid columnconfigure $::win 0 -weight 1
+    grid rowconfigure $::win 0 -weight 0
+    grid rowconfigure $::win 1 -weight 1
+
+    grid columnconfigure $::win.header 0 -weight 0
+    grid columnconfigure $::win.header 1 -weight 0
+    grid columnconfigure $::win.header 2 -weight 1
+    grid columnconfigure $::win.header 3 -weight 0
+    grid columnconfigure $::win.header 4 -weight 0
+
     raise .pdwindow
-    focus .pdwindow.text
-    # run bindings last so that .pdwindow.tcl.entry exists
+    focus $::win.text
+    # run bindings last so that $::win.tcl.entry exists
     pdwindow_bindings
     # set cursor to show when clicking in 'findinstance' mode
     bind .pdwindow <KeyPress> "+::pdwindow::set_findinstance_cursor %W %K %s"
     bind .pdwindow <KeyRelease> "+::pdwindow::set_findinstance_cursor %W %K %s"
 
     # hack to make a good read-only text widget from http://wiki.tcl.tk/1152
-    rename ::.pdwindow.text ::.pdwindow.text.internal
-    proc ::.pdwindow.text {args} {
+    rename ::$::win.text ::$::win.text.internal
+    proc ::.pdwindow.w.text {args} {
         switch -exact -- [lindex $args 0] {
             "insert" {}
             "delete" {}
-            "default" { return [eval ::.pdwindow.text.internal $args] }
+            "default" { return [eval ::$::win.text.internal $args] }
         }
     }
 
@@ -440,7 +449,7 @@ proc ::pdwindow::create_window_finalize {} {
 
     # this ought to be called after all elements of the window (including the
     # menubar!) have been created!
-    if {![winfo viewable .pdwindow.text]} { tkwait visibility .pdwindow.text }
+    if {![winfo viewable $::win.text]} { tkwait visibility $::win.text }
     set fontsize [::pd_guiprefs::read menu-fontsize]
     if {$fontsize != ""} {
         ::dialog_font::apply .pdwindow $fontsize
@@ -452,8 +461,8 @@ proc ::pdwindow::configure_window_offset {{winid .pdwindow}} {
     if {$::windowingsystem eq "x11"} {
         if {[winfo viewable $winid]} {
             # wait for possible race-conditions at startup...
-            if {[winfo viewable .pdwindow] && ![winfo viewable .pdwindow.header.pad1]} {
-                tkwait visibility .pdwindow.header.pad1
+            # I've removed pad1, not sure what it ever did anyways
+            if {[winfo viewable .pdwindow] } {
             }
 
             regexp -- {([0-9]+)x([0-9]+)\+(-?[0-9]+)\+(-?[0-9]+)} [wm geometry $winid] -> \
@@ -477,10 +486,31 @@ proc ::pdwindow::configure_menubar {} {
     .pdwindow configure -menu .menubar
 }
 
+# we can only get theme and colors from plugin after it loads
 proc ::pdwindow::set_colors {} {
 	# set some layout variables
-    # have to do this here to get colors from plugins in (after they load)
     ::pdwindow::set_layout
-    .pdwindow.text configure -background \
-    	[::pdtk_canvas::get_color pdwindow_fill .pdwindow]
+
+    # these are here because they are different from the default theme
+    ttk::style configure s.TCheckbutton -background "#1c1c1c" -foreground "#ddc7a1"
+    ttk::style map s.TCheckbutton -background [list active "#292828"]
+    ttk::style configure s.TFrame -background "#1c1c1c"
+    ttk::style configure s.TLabel -background "#1c1c1c" -foreground "#ddc7a1"
+    ttk::style configure dio.TLabel -background "#1c1c1c" -foreground "#1c1c1c"
+    ttk::style configure s.TMenubutton -foreground "#ddc7a1"
+    ttk::style map s.TMenubutton -foreground [list hover "#292828"] 
+
+    $::win.header configure -style s.TFrame
+    $::win.header.pad configure -style s.TFrame
+
+    $::win.header.loglabel configure -style s.TLabel
+    $::win.header.dio configure -style dio.TLabel
+
+    $::win.header.logmenu configure -style s.TMenubutton
+
+    $::win.header.dsp configure -style s.TCheckbutton
+
+    $::win.text configure -background [::pdtk_canvas::get_color pdwindow_fill .pdwindow]
+    # make the insert blend in with the background
+    $::win.text configure -insertbackground [::pdtk_canvas::get_color pdwindow_fill .pdwindow]
 }

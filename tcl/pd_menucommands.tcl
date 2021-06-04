@@ -97,9 +97,9 @@ proc ::pd_menucommands::menu_send {window message} {
         pdsend "$mytoplevel $message"
     } elseif {$mytoplevel eq ".pdwindow"} {
         if {$message eq "copy"} {
-            tk_textCopy .pdwindow.text
+            tk_textCopy .pdwindow.w.text
         } elseif {$message eq "selectall"} {
-            .pdwindow.text tag add sel 1.0 end
+            .pdwindow.w.text tag add sel 1.0 end
         } elseif {$message eq "menusaveas"} {
             ::pdwindow::save_logbuffer_to_file
         }
@@ -118,7 +118,7 @@ proc ::pd_menucommands::menu_send_float {window message float} {
 # open the dialog panels
 
 proc ::pd_menucommands::menu_message_dialog {} {
-    ::dialog_message::open_message_dialog $::focused_window
+    # ::dialog_message::open_message_dialog $::focused_window
 }
 
 proc ::pd_menucommands::menu_find_dialog {} {
@@ -130,7 +130,7 @@ proc ::pd_menucommands::menu_font_dialog {} {
         raise .font
         focus .font
     } elseif {$::focused_window eq ".pdwindow"} {
-        pdtk_canvas_dofont .pdwindow [lindex [.pdwindow.text cget -font] 1]
+        pdtk_canvas_dofont .pdwindow [lindex [.pdwindow.w.text cget -font] 1]
     } else {
         pdsend "$::focused_window menufont"
     }

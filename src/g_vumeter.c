@@ -98,25 +98,32 @@ static void vu_draw_update(t_gobj *client, t_glist *glist)
 
 static void vu_draw_new(t_vu *x, t_glist *glist)
 {
-    int xpos = text_xpix(&x->x_gui.x_obj, glist);
-    int ypos = text_ypix(&x->x_gui.x_obj, glist);
-    int hmargin = HMARGIN * IEMGUI_ZOOM(x), vmargin = VMARGIN * IEMGUI_ZOOM(x);
-    int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
-    int w4 = x->x_gui.x_w/4, mid = xpos + x->x_gui.x_w/2,
-        quad1 = xpos + w4 + IEMGUI_ZOOM(x);
-    int quad3 = xpos + x->x_gui.x_w - w4,
-        end = xpos + x->x_gui.x_w + 4*IEMGUI_ZOOM(x);
-    int k1 = (x->x_led_size+1)*IEMGUI_ZOOM(x), k2 = IEM_VU_STEPS+1, k3 = k1/2;
-    int led_col, yyy, i, k4 = ypos - k3;
-    int ledw = x->x_led_size * IEMGUI_ZOOM(x);
-    int fs = x->x_gui.x_fontsize * IEMGUI_ZOOM(x);
+    int xpos    = text_xpix(&x->x_gui.x_obj, glist);
+    int ypos    = text_ypix(&x->x_gui.x_obj, glist);
+    int hmargin = HMARGIN * IEMGUI_ZOOM(x);
+    int vmargin = VMARGIN * IEMGUI_ZOOM(x);
+    int iow     = IOWIDTH * IEMGUI_ZOOM(x);
+    int ioh     = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
+    int w4      = x->x_gui.x_w/10;
+    int mid     = xpos + x->x_gui.x_w/2;
+    int quad1   = xpos + w4 + IEMGUI_ZOOM(x);
+    int quad3   = xpos + x->x_gui.x_w - w4;
+    int end     = xpos + x->x_gui.x_w + 4*IEMGUI_ZOOM(x);
+    int k1      = (x->x_led_size+1)*IEMGUI_ZOOM(x);
+    int k2      = IEM_VU_STEPS+1;
+    int k3      = k1/2;
+    int k4      = ypos - k3;
+    int ledw    = x->x_led_size * IEMGUI_ZOOM(x);
+    int fs      = x->x_gui.x_fontsize * IEMGUI_ZOOM(x);
+    int led_col, yyy;
     t_canvas *canvas = glist_getcanvas(glist);
 
-    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -tags %lxBASE\n",
+    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxBASE\n",
              canvas, xpos - hmargin, ypos - vmargin,
              xpos+x->x_gui.x_w + hmargin,
-             ypos+x->x_gui.x_h + vmargin, IEMGUI_ZOOM(x), x->x_gui.x_bcol, x);
-    for(i = 1; i <= IEM_VU_STEPS; i++)
+             ypos+x->x_gui.x_h + vmargin, IEMGUI_ZOOM(x), 
+             x->x_gui.x_bcol, x->x_gui.x_bcol, x);
+    for(int i = 1; i <= IEM_VU_STEPS; i++)
     {
         led_col = iemgui_vu_col[i];
         yyy = k4 + k1*(k2-i);
@@ -132,7 +139,7 @@ static void vu_draw_new(t_vu *x, t_glist *glist)
     }
     if(x->x_scale)
     {
-        i = IEM_VU_STEPS + 1;
+        int i = IEM_VU_STEPS + 1;
         yyy = k4 + k1 * (k2 - i);
         sys_vgui(".x%lx.c create text %d %d -text {%s} -anchor w \
                  -font {{%s} -%d %s} -fill #%06x -tags %lxSCALE%d\n",
@@ -140,21 +147,26 @@ static void vu_draw_new(t_vu *x, t_glist *glist)
                  x->x_gui.x_font, fs,
                  sys_fontweight, x->x_gui.x_lcol, x, i);
     }
+    // this is so stupid
+    // it is hiding the leds, by covering them with another rect
+    // that changes size with the leds
     sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #%06x -outline #%06x -tags %lxRCOVER\n",
-             canvas, quad1 - IEMGUI_ZOOM(x), ypos - IEMGUI_ZOOM(x), quad3 + IEMGUI_ZOOM(x),
-             ypos - IEMGUI_ZOOM(x) + k1*IEM_VU_STEPS, x->x_gui.x_bcol, x->x_gui.x_bcol, x);
+             canvas, 
+             quad1 - IEMGUI_ZOOM(x)-1, ypos - IEMGUI_ZOOM(x)-1, 
+             quad3 + IEMGUI_ZOOM(x)+1, ypos - IEMGUI_ZOOM(x) + k1*IEM_VU_STEPS+1, 
+             x->x_gui.x_bcol, x->x_gui.x_bcol, x);
     sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #%06x -tags %lxPLED\n",
              canvas, mid, ypos + PEAKHEIGHT * IEMGUI_ZOOM(x),
              mid, ypos + PEAKHEIGHT * IEMGUI_ZOOM(x),
              (x->x_led_size+1)*IEMGUI_ZOOM(x), x->x_gui.x_bcol, x);
     if(!x->x_gui.x_fsf.x_snd_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]\n",
              canvas,
              xpos - hmargin, ypos + x->x_gui.x_h + vmargin + IEMGUI_ZOOM(x) - ioh,
              xpos - hmargin + iow, ypos + x->x_gui.x_h + vmargin,
              x, 0);
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]x\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]x\n",
              canvas,
              xpos + x->x_gui.x_w + hmargin - iow, ypos + x->x_gui.x_h + vmargin + IEMGUI_ZOOM(x) - ioh,
              xpos + x->x_gui.x_w + hmargin, ypos + x->x_gui.x_h + vmargin,
@@ -162,12 +174,12 @@ static void vu_draw_new(t_vu *x, t_glist *glist)
     }
     if(!x->x_gui.x_fsf.x_rcv_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xpos - hmargin, ypos - vmargin,
              xpos - hmargin + iow, ypos - vmargin - IEMGUI_ZOOM(x) + ioh,
              x, 0);
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xpos + x->x_gui.x_w + hmargin - iow, ypos - vmargin,
              xpos + x->x_gui.x_w + hmargin, ypos - vmargin - IEMGUI_ZOOM(x) + ioh,
@@ -321,12 +333,12 @@ static void vu_draw_io(t_vu* x, t_glist* glist, int old_snd_rcv_flags)
 
     if((old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && !x->x_gui.x_fsf.x_snd_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxOUT%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxOUT%d\n",
              canvas,
              xpos - hmargin, ypos + x->x_gui.x_h + vmargin + IEMGUI_ZOOM(x) - ioh,
              xpos - hmargin + iow, ypos + x->x_gui.x_h + vmargin,
              x, 0);
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxOUT%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxOUT%d\n",
              canvas,
              xpos + x->x_gui.x_w + hmargin - iow, ypos + x->x_gui.x_h + vmargin + IEMGUI_ZOOM(x) - ioh,
              xpos + x->x_gui.x_w + hmargin, ypos + x->x_gui.x_h + vmargin,
@@ -341,12 +353,12 @@ static void vu_draw_io(t_vu* x, t_glist* glist, int old_snd_rcv_flags)
     }
     if((old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && !x->x_gui.x_fsf.x_rcv_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxIN%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxIN%d\n",
              canvas,
              xpos - hmargin, ypos - vmargin,
              xpos - hmargin + iow, ypos - vmargin - IEMGUI_ZOOM(x) + ioh,
              x, 0);
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxIN%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxIN%d\n",
              canvas,
              xpos + x->x_gui.x_w + hmargin - iow, ypos - vmargin,
              xpos + x->x_gui.x_w + hmargin, ypos - vmargin - IEMGUI_ZOOM(x) + ioh,
@@ -385,7 +397,7 @@ static void vu_draw_select(t_vu* x,t_glist* glist)
     }
     else
     {
-        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, IEM_GUI_COLOR_NORMAL);
+        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, x->x_gui.x_bcol);
         for(i = 1; i <= IEM_VU_STEPS; i++)
         {
             if(((i+2) & 3) && (x->x_scale))
@@ -653,7 +665,7 @@ static void vu_bang(t_vu *x)
 static void *vu_new(t_symbol *s, int argc, t_atom *argv)
 {
     t_vu *x = (t_vu *)pd_new(vu_class);
-    int w = IEM_GUI_DEFAULTSIZE, h = IEM_VU_STEPS*IEM_VU_DEFAULTSIZE;
+    int w = 18, h = IEM_VU_STEPS*IEM_VU_DEFAULTSIZE;
     int ldx = -1, ldy = -8, f = 0, fs = 10, scale  =1;
     int ftbreak = IEM_BNG_DEFAULTBREAKFLASHTIME, fthold = IEM_BNG_DEFAULTHOLDFLASHTIME;
     char str[144];
@@ -661,9 +673,9 @@ static void *vu_new(t_symbol *s, int argc, t_atom *argv)
     iem_inttosymargs(&x->x_gui.x_isa, 0);
     iem_inttofstyle(&x->x_gui.x_fsf, 0);
 
-    x->x_gui.x_bcol = 0x404040;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x00;
+    x->x_gui.x_bcol = 0x5a524c; // todo make these some variable accessable 
+    x->x_gui.x_lcol = 0xc5b18d; // and settable with a tcl plugin
+    x->x_gui.x_fcol = 0x00; // no foreground for vumeter
 
     if((argc >= 11)&&IS_A_FLOAT(argv,0)&&IS_A_FLOAT(argv,1)
        &&(IS_A_SYMBOL(argv,2)||IS_A_FLOAT(argv,2))

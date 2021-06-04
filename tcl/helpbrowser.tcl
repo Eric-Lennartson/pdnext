@@ -20,7 +20,7 @@ proc ::helpbrowser::open_helpbrowser {} {
         wm deiconify .helpbrowser
         raise .helpbrowser
     } else {
-        toplevel .helpbrowser -class HelpBrowser
+        toplevel .helpbrowser
         wm group .helpbrowser .
         wm transient .helpbrowser
         wm title .helpbrowser [_ "Help Browser"]
@@ -79,25 +79,20 @@ proc ::helpbrowser::make_rootlistbox {{select true}} {
     variable libdirlist
     variable helplist
 
+# Theme and Style
+    ttk::setTheme radiance
+
+
+
     # exportselection 0 looks good, but selection gets easily out-of-sync
-    set current_listbox [listbox "[set b .helpbrowser.frame.root0]" \
-    	-yscrollcommand "$b-scroll set" -highlightthickness 5 \
-    	-selectborderwidth 0 -height 20 -width 24 -exportselection 0 -bd 0]
-    set tmpcol [::pdtk_canvas::get_color helpbrowser_fill .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -background $tmpcol
-		$current_listbox configure -highlightbackground $tmpcol
-		$current_listbox configure -highlightcolor $tmpcol
-	}
-	set tmpcol [::pdtk_canvas::get_color helpbrowser_text .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -foreground $tmpcol
-	}
-	set tmpcol [::pdtk_canvas::get_color helpbrowser_highlight .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -selectbackground $tmpcol
-	}
-    pack $current_listbox [scrollbar "$b-scroll" -command [list $current_listbox yview]] \
+    set current_listbox [listbox "[set b .helpbrowser.frame.root0]" -yscrollcommand "$b-scroll set" \
+                             -highlightbackground "#32302f" -highlightthickness 3 \
+                             -highlightcolor "#7daea3" -selectborderwidth 0 \
+                             -background "#32302f" -foreground "#c5b18d" \
+                             -selectbackground "#7c6f64" -selectforeground "#7daea3" \
+                             -height 20 -width 24 -exportselection 0 -bd 0]
+
+    pack $current_listbox [ttk::scrollbar "$b-scroll" -command [list $current_listbox yview]] \
         -side left -fill both -expand 1
     # first show the directories (for easier navigation)
     foreach item [lsort  $libdirlist] {
@@ -226,24 +221,13 @@ proc ::helpbrowser::make_liblistbox {dir {select true}} {
 
     check_destroy 1
     # exportselection 0 looks good, but selection gets easily out-of-sync
-    set current_listbox [listbox "[set b .helpbrowser.frame.root1]" \
-    	-yscrollcommand "$b-scroll set" -highlightthickness 5 \
-    	-selectborderwidth 0 -height 20 -width 24 -exportselection 0 -bd 0]
-    set tmpcol [::pdtk_canvas::get_color helpbrowser_fill .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -background $tmpcol
-		$current_listbox configure -highlightbackground $tmpcol
-		$current_listbox configure -highlightcolor $tmpcol
-	}
-	set tmpcol [::pdtk_canvas::get_color helpbrowser_text .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -foreground $tmpcol
-	}
-    set tmpcol [::pdtk_canvas::get_color helpbrowser_highlight .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -selectbackground $tmpcol
-	}
-    pack $current_listbox [scrollbar "$b-scroll" -command [list $current_listbox yview]] \
+    set current_listbox [listbox "[set b .helpbrowser.frame.root1]" -yscrollcommand "$b-scroll set" \
+                             -highlightbackground "#32302f" -highlightthickness 3 \
+                             -highlightcolor "#7daea3" -selectborderwidth 0 \
+                             -background "#32302f" -foreground "#c5b18d" \
+                             -selectbackground "#7c6f64" -selectforeground "#7daea3" \
+                             -height 20 -width 24 -exportselection 0 -bd 0]
+    pack $current_listbox [ttk::scrollbar "$b-scroll" -command [list $current_listbox yview]] \
         -side left -fill both -expand 1
     foreach item [lsort -dictionary [glob -directory $dir -nocomplain -types {d} -- *]] {
         if {[glob -directory $item -nocomplain -types {f} -- $doctypes] ne "" ||
@@ -294,23 +278,14 @@ proc ::helpbrowser::make_doclistbox {dir count {select true}} {
     check_destroy $count
     # exportselection 0 looks good, but selection gets easily out-of-sync
     set current_listbox [listbox "[set b .helpbrowser.frame.root$count]" \
-        -yscrollcommand "$b-scroll set" -highlightthickness 5 \
-        -selectborderwidth 0 -height 20 -width 24 -exportselection 0 -bd 0]
-    set tmpcol [::pdtk_canvas::get_color helpbrowser_fill .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -background $tmpcol
-		$current_listbox configure -highlightbackground $tmpcol
-		$current_listbox configure -highlightcolor $tmpcol
-	}
-	set tmpcol [::pdtk_canvas::get_color helpbrowser_text .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -foreground $tmpcol
-	}
-    set tmpcol [::pdtk_canvas::get_color helpbrowser_highlight .helpbrowser]
-    if {$tmpcol ne ""} {
-		$current_listbox configure -selectbackground $tmpcol
-	}
-    pack $current_listbox [scrollbar "$b-scroll" -command "$current_listbox yview"] \
+                             -yscrollcommand "$b-scroll set" \
+                             -highlightbackground "#32302f" -highlightthickness 3 \
+                             -highlightcolor "#7daea3" -selectborderwidth 0 \
+                             -background "#32302f" -foreground "#c5b18d" \
+                             -selectbackground "#7c6f64" -selectforeground "#7daea3" \
+                             -height 20 -width 24 -exportselection 0 -bd 0]
+                             
+    pack $current_listbox [ttk::scrollbar "$b-scroll" -command "$current_listbox yview"] \
         -side left -fill both -expand 1
 
     foreach item [lsort -dictionary [glob -directory $dir -nocomplain -types {d} -- *]] {

@@ -58,11 +58,12 @@ void hradio_draw_new(t_hradio *x, t_glist *glist)
     int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
     t_canvas *canvas = glist_getcanvas(glist);
 
-    for(i = 0; i < n; i++)
+    for(i = 0; i < n; i++) // creating each of the squares surrounding the hradio
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -tags %lxBASE%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #a89984 -tags %lxBASE%d\n",
                  canvas, xx11, yy11, xx11 + dx, yy12, IEMGUI_ZOOM(x),
                  x->x_gui.x_bcol, x, i);
+        // create the selection square
         sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #%06x -outline #%06x -tags %lxBUT%d\n",
                  canvas, xx21, yy21, xx22, yy22,
                  (x->x_on == i) ? x->x_gui.x_fcol : x->x_gui.x_bcol,
@@ -72,14 +73,14 @@ void hradio_draw_new(t_hradio *x, t_glist *glist)
         xx22 += dx;
         x->x_drawn = x->x_on;
     }
-    if(!x->x_gui.x_fsf.x_snd_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]\n",
+    if(!x->x_gui.x_fsf.x_snd_able) //inlet
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]\n",
              canvas,
              xx11b, yy12 + IEMGUI_ZOOM(x) - ioh,
              xx11b + iow, yy12,
              x, 0);
-    if(!x->x_gui.x_fsf.x_rcv_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+    if(!x->x_gui.x_fsf.x_rcv_able) //outlet
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xx11b, yy11,
              xx11b + iow, yy11 - IEMGUI_ZOOM(x) + ioh,
@@ -575,17 +576,17 @@ static void hradio_single_change(t_hradio *x)
 static void *hradio_donew(t_symbol *s, int argc, t_atom *argv, int old)
 {
     t_hradio *x = (t_hradio *)pd_new(old ? hradio_old_class : hradio_class);
-    int a = IEM_GUI_DEFAULTSIZE, on = 0;
-    int ldx = 0, ldy = -8, chg = 1, num = 8;
-    int fs = 10;
+    int a = IEM_GUI_RADIOSIZE, on = 0;
+    int ldx = -1, ldy = -10, chg = 1, num = 4;
+    int fs = 12;
     t_float fval = 0;
 
     iem_inttosymargs(&x->x_gui.x_isa, 0);
     iem_inttofstyle(&x->x_gui.x_fsf, 0);
 
-    x->x_gui.x_bcol = 0xFCFCFC;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x00;
+    x->x_gui.x_bcol = 0x5a524c; // These should be globals in the header file?
+    x->x_gui.x_fcol = 0xa9b665; // this would help with tcl access?
+    x->x_gui.x_lcol = 0xc5b18d;
 
     if((argc == 15)&&IS_A_FLOAT(argv,0)&&IS_A_FLOAT(argv,1)&&IS_A_FLOAT(argv,2)
        &&IS_A_FLOAT(argv,3)

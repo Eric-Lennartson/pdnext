@@ -38,15 +38,18 @@
 #define IEM_GUI_COLNR_D_BLUE         28
 #define IEM_GUI_COLNR_D_MAGENTA      29
 
-#define IEM_GUI_COLOR_SELECTED       255
-#define IEM_GUI_COLOR_NORMAL         0
+// when updating to poll tcl, these get updated?
+#define IEM_GUI_COLOR_SELECTED       0x7daea3
+#define IEM_GUI_COLOR_NORMAL         0xa89984
+#define IEM_GUI_TGL_OFF_COLOR        0x928374
 
 #define IEM_GUI_MAX_COLOR            30
 
-#define IEM_GUI_DEFAULTSIZE 15
+#define IEM_GUI_DEFAULTSIZE 24
+#define IEM_GUI_RADIOSIZE   18
 #define IEM_GUI_MINSIZE     8
 #define IEM_GUI_MAXSIZE     1000
-#define IEM_SL_DEFAULTSIZE  128
+#define IEM_SL_DEFAULTSIZE  140
 #define IEM_SL_MINSIZE      2
 #define IEM_FONT_MINSIZE    4
 
@@ -83,7 +86,7 @@
 #define IEM_GUI_DRAW_MODE_CONFIG 5
 #define IEM_GUI_DRAW_MODE_IO     6
 
-#define IEM_GUI_IOHEIGHT 2
+#define IEM_GUI_IOHEIGHT 3
 
 #define IS_A_POINTER(atom,index) ((atom+index)->a_type == A_POINTER)
 #define IS_A_FLOAT(atom,index) ((atom+index)->a_type == A_FLOAT)
@@ -97,7 +100,7 @@
 #define IEM_GUI_OLD_SND_FLAG 1
 #define IEM_GUI_OLD_RCV_FLAG 2
 
-#define IEM_GUI_COLOR_EDITED 16711680
+#define IEM_GUI_COLOR_EDITED 0x7daea3
 #define IEMGUI_MAX_NUM_LEN 32
 
 #define IEMGUI_ZOOM(x) ((x)->x_gui.x_glist->gl_zoom)

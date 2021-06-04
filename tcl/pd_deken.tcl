@@ -531,49 +531,46 @@ proc ::deken::versioncompare {a b} {
 }
 
 proc ::deken::status {{msg ""}} {
-    #variable mytoplevelref
-    #$mytoplevelref.results insert end "$msg\n"
-    #$mytoplevelref.status.label -text "$msg"
     after cancel $::deken::statustimer
     if {"" ne $msg} {
         set ::deken::statustext "STATUS: $msg"
-        set ::deken::statustimer [after 5000 [list set ::deken::statustext ""]]
+        set ::deken::statustimer [after 3000 [list set ::deken::statustext ""]]
     } {
         set ::deken::statustext ""
     }
 }
 proc ::deken::scrollup {} {
     variable mytoplevelref
-    $mytoplevelref.results see 0.0
+    $mytoplevelref.w.resultsFrame.results see 0.0
 }
 proc ::deken::post {msg {tag ""}} {
     variable mytoplevelref
-    $mytoplevelref.results insert end "$msg\n" $tag
-    $mytoplevelref.results see end
+    $mytoplevelref.w.resultsFrame.results insert end "$msg\n" $tag
+    $mytoplevelref.w.resultsFrame.results see end
 }
 proc ::deken::clearpost {} {
     variable mytoplevelref
-    $mytoplevelref.results delete 1.0 end
+    $mytoplevelref.w.resultsFrame.results delete 1.0 end
 }
 proc ::deken::bind_posttag {tag key cmd} {
     variable mytoplevelref
-    $mytoplevelref.results tag bind $tag $key $cmd
+    $mytoplevelref.w.resultsFrame.results tag bind $tag $key $cmd
 }
 proc ::deken::highlightable_posttag {tag} {
     variable mytoplevelref
     ::deken::bind_posttag $tag <Enter> \
-        "$mytoplevelref.results tag add highlight [ $mytoplevelref.results tag ranges $tag ]"
+        "$mytoplevelref.w.resultsFrame.results tag add highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tag ]"
     ::deken::bind_posttag $tag <Leave> \
-        "$mytoplevelref.results tag remove highlight [ $mytoplevelref.results tag ranges $tag ]"
+        "$mytoplevelref.w.resultsFrame.results tag remove highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tag ]"
     # make sure that the 'highlight' tag is topmost
-    $mytoplevelref.results tag raise highlight
+    $mytoplevelref.w.resultsFrame.results tag raise highlight
 }
 proc ::deken::bind_postmenu {mytoplevel tag menus} {
     set cmd "::deken::result_contextmenu %W %x %y $menus"
     if {$::windowingsystem eq "aqua"} {
-        $mytoplevel.results tag bind $tag <2> $cmd
+        $::dekenWin.resultsFrame.results tag bind $tag <2> $cmd
     } else {
-        $mytoplevel.results tag bind $tag <3> $cmd
+        $::dekenWin.resultsFrame.results tag bind $tag <3> $cmd
     }
 }
 proc ::deken::result_contextmenu {widget theX theY args} {
@@ -609,10 +606,10 @@ proc ::deken::prompt_installdir {} {
 
 
 proc ::deken::update_searchbutton {mytoplevel} {
-    if { [$mytoplevel.searchbit.entry get] == "" } {
-        $mytoplevel.searchbit.button configure -text [_ "Show all" ]
+    if { [$::dekenWin.searchbit.entry get] == "" } {
+        $::dekenWin.searchbit.button configure -text [_ "Show all" ]
     } {
-        $mytoplevel.searchbit.button configure -text [_ "Search" ]
+        $::dekenWin.searchbit.button configure -text [_ "Search" ]
     }
 }
 
@@ -627,12 +624,12 @@ proc ::deken::open_searchui {mytoplevel} {
         raise $mytoplevel
     } else {
         ::deken::create_dialog $mytoplevel
-        $mytoplevel.results tag configure error -foreground red
-        $mytoplevel.results tag configure warn -foreground orange
-        $mytoplevel.results tag configure info -foreground grey
-        $mytoplevel.results tag configure highlight -foreground blue
-        $mytoplevel.results tag configure archmatch
-        $mytoplevel.results tag configure noarchmatch -foreground grey
+        $::dekenWin.resultsFrame.results tag configure error -foreground "#ea6962"
+        $::dekenWin.resultsFrame.results tag configure warn -foreground "#bd6f3e"
+        $::dekenWin.resultsFrame.results tag configure info -foreground "#999999"
+        $::dekenWin.resultsFrame.results tag configure highlight -foreground "#7daea3"
+        $::dekenWin.resultsFrame.results tag configure archmatch
+        $::dekenWin.resultsFrame.results tag configure noarchmatch -foreground "#999999"
     }
     ::deken::post [_ "To get a list of all available externals, try an empty search."] info
 }
@@ -641,69 +638,76 @@ proc ::deken::open_searchui {mytoplevel} {
 proc ::deken::create_dialog {mytoplevel} {
     toplevel $mytoplevel -class DialogWindow
     variable mytoplevelref $mytoplevel
-    wm title $mytoplevel [_ "Find externals"]
-    wm geometry $mytoplevel 670x550
-    wm minsize $mytoplevel 230 360
+    wm title $mytoplevel [_ "Deken - A Package Manager for Pure Data Externals"]
     wm transient $mytoplevel
-    $mytoplevel configure -padx 10 -pady 5
+    wm resizable $mytoplevel 0 0
 
     if {$::windowingsystem eq "aqua"} {
         $mytoplevel configure -menu $::dialog_menubar
     }
 
-    frame $mytoplevel.searchbit
-    pack $mytoplevel.searchbit -side top -fill x
+# Widgets
+    ttk::frame $mytoplevel.w -padding 5 
+    set ::dekenWin $mytoplevel.w
 
-    entry $mytoplevel.searchbit.entry -font 18 -relief sunken -highlightthickness 1 -highlightcolor blue
-    pack $mytoplevel.searchbit.entry -side left -padx 6 -fill x -expand true
-    bind $mytoplevel.searchbit.entry <Key-Return> "::deken::initiate_search $mytoplevel"
-    bind $mytoplevel.searchbit.entry <KeyRelease> "::deken::update_searchbutton $mytoplevel"
-    focus $mytoplevel.searchbit.entry
-    button $mytoplevel.searchbit.button -text [_ "Show all"] -default active -command "::deken::initiate_search $mytoplevel"
-    pack $mytoplevel.searchbit.button -side right -padx 6 -pady 3 -ipadx 10
+    ttk::frame $::dekenWin.searchbit 
 
-    frame $mytoplevel.warning
-    pack $mytoplevel.warning -side top -fill x
-    label $mytoplevel.warning.label -text [_ "Only install externals uploaded by people you trust."]
-    pack $mytoplevel.warning.label -side left -padx 6
+    ttk::entry $::dekenWin.searchbit.entry -width 55 
+    bind $::dekenWin.searchbit.entry <Key-Return> "::deken::initiate_search $mytoplevel"
+    bind $::dekenWin.searchbit.entry <KeyRelease> "::deken::update_searchbutton $mytoplevel"
+    focus $::dekenWin.searchbit.entry
+    ttk::button $::dekenWin.searchbit.button -width -1 -text "Show all" -default active \
+        -command "::deken::initiate_search $mytoplevel" 
+    ttk::label $::dekenWin.searchbit.warning -text "Only install externals uploaded by people you trust." \
+        
 
-    frame $mytoplevel.status
-    pack $mytoplevel.status -side bottom -fill x
-    button $mytoplevel.status.preferences -text [_ "Preferences" ] -command "::deken::preferences::show"
-    pack $mytoplevel.status.preferences -side right -padx 6 -pady 3 -ipadx 10
-    label $mytoplevel.status.label -textvariable ::deken::statustext
-    pack $mytoplevel.status.label -side left -padx 6
+    ttk::frame $::dekenWin.status 
+    ttk::button $::dekenWin.status.preferences -width -1 -text "Preferences" -command "::deken::preferences::show" \
+        
+    ttk::label $::dekenWin.status.label -textvariable ::deken::statustext 
 
-    text $mytoplevel.results -takefocus 0 -cursor hand2 -height 100 -yscrollcommand "$mytoplevel.results.ys set"
-    scrollbar $mytoplevel.results.ys -orient vertical -command "$mytoplevel.results yview"
-    pack $mytoplevel.results.ys -side right -fill y
-    pack $mytoplevel.results -side top -padx 6 -pady 3 -fill both -expand true
+    ttk::frame $::dekenWin.resultsFrame  -padding "4 0"
+    tk::text $::dekenWin.resultsFrame.results -takefocus 0 -cursor hand2 -relief flat -height 30 -yscrollcommand "$::dekenWin.resultsFrame.ys set" \
+        -background "#45403d" -foreground "#c5b18d" -selectbackground "#665c54" -selectforeground "#7daea3" \
+        -borderwidth 0 -highlightthickness 0 -insertbackground "white" -highlightcolor "#45403d" 
+    ttk::scrollbar $::dekenWin.resultsFrame.ys -orient vertical -command "$::dekenWin.resultsFrame.results yview"
+    ttk::frame $::dekenWin.progress  -padding "0 8" 
 
+# Layout
+    grid $::dekenWin -column 0 -row 0 -sticky nsew
+    grid $::dekenWin.searchbit -column 0 -row 0 -sticky nsew
+    grid $::dekenWin.searchbit.entry -column 0 -row 0
+    grid $::dekenWin.searchbit.button -column 1 -row 0
+    grid $::dekenWin.searchbit.warning -column 0 -row 1 -sticky w
 
-    frame $mytoplevel.progress
-    pack $mytoplevel.progress -side bottom -fill x
+    grid $::dekenWin.resultsFrame -column 0 -row 1 -sticky nsew
+    grid $::dekenWin.resultsFrame.results -column 0 -row 0
+    grid $::dekenWin.resultsFrame.ys -column 1 -row 0 -sticky ns
+
+    grid $::dekenWin.progress -column 0 -row 2
+
+    # creating and gridding the progress bar, there's a weird if and catch statement attached
+    # HOW TO REMOVE THIS IT IS UGLY
     if { [ catch {
-        ttk::progressbar $mytoplevel.progress.bar -orient horizontal -length 640 -maximum 100 -mode determinate -variable ::deken::progressvar } stdout ] } {
+        ttk::progressbar $::dekenWin.progress.bar -orient horizontal -length 575 -maximum 100 -mode determinate -variable ::deken::progressvar } stdout ] } {
     } {
-        pack $mytoplevel.progress.bar -side bottom
+        grid $::dekenWin.progress.bar -column 0 -row 3 -sticky w
+
         proc ::deken::progress {x} {
             set ::deken::progressvar $x
+            if {$x < 100} {
+                set term [$::dekenWin.searchbit.entry get]
+                ::deken::status [format "Installing '%s'..." $term]
+            } else {
+                ::deken::status "Done!"
+            }
         }
     }
-}
 
-proc ::deken::preferences::create_pathpad {toplevel row {padx 2} {pady 2}} {
-    set pad [::deken::utilities::newwidget ${toplevel}.pad]
-    frame $pad -relief groove -borderwidth 2 -width 2 -height 2
-    grid ${pad} -sticky ew -row ${row} -column 0 -columnspan 3 -padx ${padx}  -pady ${pady}
-}
-proc ::deken::preferences::create_packpad {toplevel {padx 2} {pady 2} } {
-    set mypad [::deken::utilities::newwidget ${toplevel}.pad]
+    grid $::dekenWin.status -column 0 -row 4 -sticky e
+    grid $::dekenWin.status.label -column 0 -row 0
+    grid $::dekenWin.status.preferences -column 1 -row 0
 
-    frame $mypad
-    pack $mypad -padx ${padx} -pady ${pady} -expand 1 -fill y
-
-    return mypad
 }
 
 proc ::deken::preferences::userpath_doit { } {
@@ -744,16 +748,18 @@ proc ::deken::preferences::create_pathentry {toplevel row var path {generic fals
         if { [file pathtype $path] != "absolute" } { return }
     }
 
-    set rdb [::deken::utilities::newwidget ${toplevel}.path]
     set chk [::deken::utilities::newwidget ${toplevel}.doit]
     set pad [::deken::utilities::newwidget ${toplevel}.pad]
+    set rdb [::deken::utilities::newwidget ${toplevel}.path]
 
-    radiobutton ${rdb} -value ${path} -text "${path}" -variable $var
-    frame ${pad}
-    button ${chk} -text "..." -command "::deken::preferences::path_doit ${rdb} ${chk} ${path}"
+    ttk::radiobutton ${rdb} -value ${path} -text "${path}" -variable $var \
+        
+    ttk::frame ${pad}  -width 10
+    ttk::button ${chk} -text "..." -width -1 \
+        -command "::deken::preferences::path_doit ${rdb} ${chk} ${path}"
 
     grid ${rdb} -sticky w    -row ${row} -column 2
-    grid ${pad} -sticky ""   -row ${row} -column 1 -padx 10
+    grid ${pad} -sticky nsew -row ${row} -column 1
     grid ${chk} -sticky nsew -row ${row} -column 0
 
 
@@ -763,13 +769,28 @@ proc ::deken::preferences::create_pathentry {toplevel row var path {generic fals
     return [list ${rdb} ${chk}]
 }
 
-proc ::deken::preferences::create {mytoplevel} {
-    # urgh...we want to know when the window gets drawn,
-    # so we can query the size of the pathentries canvas
-    # in order to get the scrolling-region right!!!
-    # this seems to be so wrong...
-    bind $mytoplevel <Map> "::deken::preferences::mapped %W"
+proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
+    if {[winfo exists $mytoplevel]} {
+        wm deiconify $mytoplevel
+        raise $mytoplevel
+    } else {
+        toplevel $mytoplevel
+        wm title $mytoplevel "Deken Preferences"
 
+        ttk::frame $mytoplevel.frame -padding 5 
+        grid $mytoplevel.frame -column 0 -row 0
+        ::deken::preferences::create $mytoplevel.frame
+    }
+}
+
+# this dialog allows us to select:
+#  - which directory to extract to
+#    - including all (writable) elements from $::sys_staticpath
+#      and option to create each of them
+#    - a directory chooser
+#  - whether to delete directories before re-extracting
+#  - whether to filter-out non-matching architectures
+proc ::deken::preferences::create {mytoplevel} {
     set ::deken::preferences::installpath $::deken::installpath
     set ::deken::preferences::hideforeignarch $::deken::hideforeignarch
     if { $::deken::userplatform == "" } {
@@ -788,48 +809,27 @@ proc ::deken::preferences::create {mytoplevel} {
     set ::deken::preferences::add_to_path $::deken::add_to_path
     set ::deken::preferences::add_to_path_temp $::deken::preferences::add_to_path
 
-    # this dialog allows us to select:
-    #  - which directory to extract to
-    #    - including all (writable) elements from $::sys_staticpath
-    #      and option to create each of them
-    #    - a directory chooser
-    #  - whether to delete directories before re-extracting
-    #  - whether to filter-out non-matching architectures
-    labelframe $mytoplevel.installdir -text [_ "Install externals to directory:" ] -padx 5 -pady 5 -borderwidth 1
-    canvas $mytoplevel.installdir.cnv \
-        -confine true
-    scrollbar $mytoplevel.installdir.scrollv \
-        -command "$mytoplevel.installdir.cnv yview"
-    scrollbar $mytoplevel.installdir.scrollh \
-        -orient horizontal \
-        -command "$mytoplevel.installdir.cnv xview"
-    $mytoplevel.installdir.cnv configure \
-        -xscrollincrement 0 \
-        -xscrollcommand " $mytoplevel.installdir.scrollh set"
-    $mytoplevel.installdir.cnv configure \
-        -yscrollincrement 0 \
-        -yscrollcommand " $mytoplevel.installdir.scrollv set" \
+# Widgets
+    ttk::labelframe $mytoplevel.installdir -text " Externals Installation Directory " \
+        -padding 5
+    tk::canvas $mytoplevel.installdir.cnv -confine true
 
-    pack $mytoplevel.installdir.cnv -side left -fill both -expand 1
-    pack $mytoplevel.installdir.scrollv -side right -fill y
-    pack $mytoplevel.installdir.scrollh -side bottom -fill x -before  $mytoplevel.installdir.cnv
-    pack $mytoplevel.installdir -fill both
-
-    set pathsframe [frame $mytoplevel.installdir.cnv.f]
+    set pathsframe [ttk::frame $mytoplevel.installdir.cnv.f ]
     set row 0
     ### dekenpath: directory-chooser
     # FIXME: should we ask user to add chosen directory to PATH?
     set pathdoit [::deken::preferences::create_pathentry ${pathsframe} ${row} ::deken::preferences::installpath "USER" true]
     incr row
     [lindex $pathdoit 0] configure \
-        -foreground blue \
         -value "USER" \
         -textvariable ::deken::preferences::userinstallpath \
-        -variable ::deken::preferences::installpath
+        -variable ::deken::preferences::installpath 
+
     [lindex $pathdoit 1] configure \
         -text "..." \
         -command "::deken::preferences::userpath_doit"
-    ::deken::preferences::create_pathpad ${pathsframe} ${row}
+    ttk::separator $pathsframe.sep1
+    grid $pathsframe.sep1 -column 0 -row $row -sticky we -pady 2 -columnspan 3
     incr row
 
     ### dekenpath: default directories
@@ -838,14 +838,16 @@ proc ::deken::preferences::create {mytoplevel} {
             ::deken::preferences::create_pathentry ${pathsframe} ${row} ::deken::preferences::installpath $p
             incr row
         }
-        ::deken::preferences::create_pathpad ${pathsframe} ${row}
+        ttk::separator $pathsframe.sep2
+        grid $pathsframe.sep2 -column 0 -row $row -sticky we -pady 2 -columnspan 3
         incr row
     }
     foreach p $::sys_staticpath {
         ::deken::preferences::create_pathentry ${pathsframe} ${row} ::deken::preferences::installpath $p
         incr row
     }
-    ::deken::preferences::create_pathpad ${pathsframe} ${row}
+    ttk::separator $pathsframe.sep3
+    grid $pathsframe.sep3 -column 0 -row $row -sticky we -pady 2 -columnspan 3
     incr row
 
     foreach p $::sys_searchpath {
@@ -853,23 +855,21 @@ proc ::deken::preferences::create {mytoplevel} {
         incr row
     }
 
-    pack $pathsframe -fill x
     $mytoplevel.installdir.cnv create window 0 0 -anchor nw -window $pathsframe
 
-    ## installation options
-    labelframe $mytoplevel.install -text [_ "Installation options:" ] -padx 5 -pady 5 -borderwidth 1
-    pack $mytoplevel.install -side top -fill x -anchor w
+    # installation options
+    ttk::labelframe $mytoplevel.install -text " Installation options " \
+        -padding 5
 
-    checkbutton $mytoplevel.install.remove -text [_ "Try to remove libraries before (re)installing them?"] \
-        -variable ::deken::preferences::remove_on_install
-    pack $mytoplevel.install.remove -anchor w
+    ttk::checkbutton $mytoplevel.install.remove -text [_ "Try to remove libraries before (re)installing them?"] \
+        -variable ::deken::preferences::remove_on_install 
+    
+    ttk::checkbutton $mytoplevel.install.readme -text [_ "Show README of newly installed libraries (if present)?"] \
+        -variable ::deken::preferences::show_readme 
+    
 
-    checkbutton $mytoplevel.install.readme -text [_ "Show README of newly installed libraries (if present)?"] \
-        -variable ::deken::preferences::show_readme
-    pack $mytoplevel.install.readme -anchor w
-
-    checkbutton $mytoplevel.install.add_to_path -text [_ "Should newly installed libraries be added to Pd's search path?"] \
-        -variable ::deken::preferences::add_to_path
+    ttk::checkbutton $mytoplevel.install.add_to_path -text [_ "Should newly installed libraries be added to Pd's search path?"] \
+        -variable ::deken::preferences::add_to_path 
     catch { $mytoplevel.install.add_to_path configure \
                 -tristatevalue 1 \
                 -onvalue 2 \
@@ -878,62 +878,68 @@ proc ::deken::preferences::create {mytoplevel} {
                                    [::deken::utilities::tristate $::deken::preferences::add_to_path_temp 1 0]]}
     } stdout
 
-    pack $mytoplevel.install.add_to_path -anchor w
-
-
-    ## platform filter settings
-    labelframe $mytoplevel.platform -text [_ "Platform settings:" ] -padx 5 -pady 5 -borderwidth 1
-    pack $mytoplevel.platform -side top -fill x -anchor w
+    # platform filter settings
+    ttk::labelframe $mytoplevel.platform -text " Platform settings " \
+        -padding 5
 
     # default architecture vs user-defined arch
-    radiobutton $mytoplevel.platform.default -value "DEFAULT" \
+    ttk::radiobutton $mytoplevel.platform.default -value "DEFAULT" \
         -text [format [_ "Default platform: %s" ] [::deken::platform2string ] ] \
         -variable ::deken::preferences::platform \
-        -command "$mytoplevel.platform.userarch.entry configure -state disabled"
-    pack $mytoplevel.platform.default -anchor w
-
-    frame $mytoplevel.platform.userarch
-    radiobutton $mytoplevel.platform.userarch.radio -value "USER" \
+        -command "$mytoplevel.platform.userarch.entry configure -state disabled" \
+        
+    ttk::frame $mytoplevel.platform.userarch 
+    ttk::radiobutton $mytoplevel.platform.userarch.radio -value "USER" \
         -text [_ "User-defined platform:" ] \
         -variable ::deken::preferences::platform \
-        -command "$mytoplevel.platform.userarch.entry configure -state normal"
-    entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform
+        -command "$mytoplevel.platform.userarch.entry configure -state normal" \
+        
+    ttk::entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform \
+        
     if { "$::deken::preferences::platform" == "DEFAULT" } {
         $mytoplevel.platform.userarch.entry configure -state disabled
     }
 
-    pack $mytoplevel.platform.userarch -anchor w
-    pack $mytoplevel.platform.userarch.radio -side left
-    pack $mytoplevel.platform.userarch.entry -side right -fill x
-
     # hide non-matching architecture?
-    ::deken::preferences::create_packpad $mytoplevel.platform 2 10
-
-    checkbutton $mytoplevel.platform.hide_foreign -text [_ "Hide foreign architectures?"] \
-        -variable ::deken::preferences::hideforeignarch
-    pack $mytoplevel.platform.hide_foreign -anchor w
-
-
-    # Use two frames for the buttons, since we want them both bottom and right
-    frame $mytoplevel.nb
-    pack $mytoplevel.nb -side bottom -fill x -pady 2m
-
+    ttk::checkbutton $mytoplevel.platform.hide_foreign -text [_ "Hide foreign architectures?"] \
+        -variable ::deken::preferences::hideforeignarch 
+    
     # buttons
-    frame $mytoplevel.nb.buttonframe
-    pack $mytoplevel.nb.buttonframe -side right -fill x -padx 2m
+    ttk::frame $mytoplevel.buttonframe 
+    ttk::button $mytoplevel.buttonframe.cancel -text [_ "Cancel"] \
+        -command "::deken::preferences::cancel $mytoplevel" \
+        
+    ttk::button $mytoplevel.buttonframe.apply -text [_ "Apply"] \
+        -command "::deken::preferences::apply $mytoplevel" \
+        
+    ttk::button $mytoplevel.buttonframe.ok -text [_ "OK"] \
+        -command "::deken::preferences::ok $mytoplevel" \
+        
 
-    button $mytoplevel.nb.buttonframe.cancel -text [_ "Cancel"] \
-        -command "::deken::preferences::cancel $mytoplevel"
-    pack $mytoplevel.nb.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
-    if {$::windowingsystem ne "aqua"} {
-        button $mytoplevel.nb.buttonframe.apply -text [_ "Apply"] \
-            -command "::deken::preferences::apply $mytoplevel"
-        pack $mytoplevel.nb.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
-    }
-    button $mytoplevel.nb.buttonframe.ok -text [_ "OK"] \
-        -command "::deken::preferences::ok $mytoplevel"
-    pack $mytoplevel.nb.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
+# Layout
+    #Install Directories
+    grid $mytoplevel.installdir  -column 0 -row 0 -sticky nwes -pady 2
+    grid $mytoplevel.installdir.cnv -column 0 -row 0
+    grid $pathsframe -column 0 -row 0 ;# Pathsframe is for the canvas
+    # Installation Options
+    grid $mytoplevel.install -column 0 -row 1 -sticky nwes -pady 2
+    grid $mytoplevel.install.remove -column 0 -row 0 -sticky w
+    grid $mytoplevel.install.readme -column 0 -row 1  -sticky w
+    grid $mytoplevel.install.add_to_path -column 0 -row 2  -sticky w
+    # Platform Settings
+    grid $mytoplevel.platform -column 0 -row 2 -sticky nwes -pady 2
+    grid $mytoplevel.platform.default -column 0 -row 0  -sticky w
 
+    grid $mytoplevel.platform.userarch -column 0 -row 1  -sticky w
+    grid $mytoplevel.platform.userarch.radio -column 0 -row 0  -sticky w
+    grid $mytoplevel.platform.userarch.entry -column 1 -row 0  -sticky w
+
+    grid $mytoplevel.platform.hide_foreign -column 0 -row 2  -sticky w
+    # Buttons
+    grid $mytoplevel.buttonframe -column 0 -row 3 -pady 2
+    grid $mytoplevel.buttonframe.ok -column 0 -row 0
+    grid $mytoplevel.buttonframe.apply -column 1 -row 0
+    grid $mytoplevel.buttonframe.cancel -column 2 -row 0
 }
 
 proc ::deken::preferences::mapped {mytoplevel} {
@@ -945,21 +951,6 @@ proc ::deken::preferences::mapped {mytoplevel} {
             $cnv configure -scrollregion $bbox
         }
     } stdout
-}
-
-proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
-    if {[winfo exists $mytoplevel]} {
-        wm deiconify $mytoplevel
-        raise $mytoplevel
-    } else {
-        toplevel $mytoplevel -class DialogWindow
-        wm title $mytoplevel [format [_ "Deken %s Preferences"] $::deken::version]
-
-        frame $mytoplevel.frame
-        pack $mytoplevel.frame -side top -padx 6 -pady 3 -fill both -expand true
-
-        ::deken::preferences::create $mytoplevel.frame
-    }
 }
 
 proc ::deken::preferences::apply {mytoplevel} {
@@ -992,7 +983,7 @@ proc ::deken::preferences::ok {mytoplevel} {
 
 
 proc ::deken::initiate_search {mytoplevel} {
-    set searchterm [$mytoplevel.searchbit.entry get]
+    set searchterm [$::dekenWin.searchbit.entry get]
     # let the user know what we're doing
     ::deken::clearpost
     ::pdwindow::debug "\[deken\]: "
@@ -1046,7 +1037,7 @@ proc ::deken::show_result {mytoplevel counter result showmatches} {
         set comment [string map {"\n" "\n\t"} $comment]
         ::deken::post "$title\n\t$comment\n" [list $tag $matchtag]
         ::deken::highlightable_posttag $tag
-        ::deken::bind_posttag $tag <Enter> "+::deken::status {$status}"
+        #::deken::bind_posttag $tag <Enter> "+::deken::status {$status}"
         ::deken::bind_posttag $tag <1> "$cmd"
         if { "" ne $contextmenus } {
             ::deken::bind_postmenu $mytoplevel $tag $contextmenus

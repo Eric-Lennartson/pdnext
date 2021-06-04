@@ -36,9 +36,9 @@ void toggle_draw_update(t_toggle *x, t_glist *glist)
         t_canvas *canvas = glist_getcanvas(glist);
 
         sys_vgui(".x%lx.c itemconfigure %lxX1 -fill #%06x\n", canvas, x,
-                 (x->x_on != 0.0) ? x->x_gui.x_fcol : x->x_gui.x_bcol);
+                 (x->x_on != 0.0) ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR);
         sys_vgui(".x%lx.c itemconfigure %lxX2 -fill #%06x\n", canvas, x,
-                 (x->x_on != 0.0) ? x->x_gui.x_fcol : x->x_gui.x_bcol);
+                 (x->x_on != 0.0) ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR);
     }
 }
 
@@ -48,36 +48,46 @@ void toggle_draw_new(t_toggle *x, t_glist *glist)
     int ypos = text_ypix(&x->x_gui.x_obj, glist);
     int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
     int crossw = 1, w = x->x_gui.x_w / IEMGUI_ZOOM(x);
+    int inset = 1;
     t_canvas *canvas = glist_getcanvas(glist);
     if(w >= 30)
         crossw = 2;
     if(w >= 60)
         crossw = 3;
     crossw *= IEMGUI_ZOOM(x);
+    crossw += 2;
 
-    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -tags %lxBASE\n",
+    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxBASE\n",
              canvas, xpos, ypos,
              xpos + x->x_gui.x_w, ypos + x->x_gui.x_h,
              IEMGUI_ZOOM(x),
-             x->x_gui.x_bcol, x);
+             x->x_gui.x_bcol, x->x_gui.x_bcol, x);
     sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #%06x -tags %lxX1\n",
              canvas,
-             xpos + crossw + IEMGUI_ZOOM(x), ypos + crossw + IEMGUI_ZOOM(x),
-             xpos + x->x_gui.x_w - crossw - IEMGUI_ZOOM(x), ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x),
-             crossw, (x->x_on != 0.0) ? x->x_gui.x_fcol : x->x_gui.x_bcol, x);
+             xpos + crossw + IEMGUI_ZOOM(x) + inset, 
+             ypos + crossw + IEMGUI_ZOOM(x) + inset,
+             xpos + x->x_gui.x_w - crossw - IEMGUI_ZOOM(x) - inset + 1, 
+             ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x) - inset + 1,
+             crossw, 
+             (x->x_on != 0.0) ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR, 
+             x);
     sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #%06x -tags %lxX2\n",
              canvas,
-             xpos + crossw + IEMGUI_ZOOM(x), ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x),
-             xpos + x->x_gui.x_w - crossw - IEMGUI_ZOOM(x), ypos + crossw + IEMGUI_ZOOM(x),
-             crossw, (x->x_on != 0.0) ? x->x_gui.x_fcol : x->x_gui.x_bcol, x);
+             xpos + crossw + IEMGUI_ZOOM(x) + inset, 
+             ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x) - inset + 1,
+             xpos + x->x_gui.x_w - crossw - IEMGUI_ZOOM(x) - inset + 1, 
+             ypos + crossw + IEMGUI_ZOOM(x) + inset,
+             crossw, 
+             (x->x_on != 0.0) ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR, 
+             x);
     if(!x->x_gui.x_fsf.x_snd_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]\n",
              canvas,
              xpos, ypos + x->x_gui.x_h + IEMGUI_ZOOM(x) - ioh,
              xpos + iow, ypos + x->x_gui.x_h,
              x, 0);
     if(!x->x_gui.x_fsf.x_rcv_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xpos, ypos,
              xpos + iow, ypos - IEMGUI_ZOOM(x) + ioh,
@@ -103,6 +113,8 @@ void toggle_draw_move(t_toggle *x, t_glist *glist)
     if(w >= 60)
         crossw = 3;
     crossw *= IEMGUI_ZOOM(x);
+    crossw += 2;
+    int inset = 1;
 
     sys_vgui(".x%lx.c coords %lxBASE %d %d %d %d\n",
              canvas, x, xpos, ypos,
@@ -110,13 +122,17 @@ void toggle_draw_move(t_toggle *x, t_glist *glist)
     sys_vgui(".x%lx.c itemconfigure %lxX1 -width %d\n", canvas, x, crossw);
     sys_vgui(".x%lx.c coords %lxX1 %d %d %d %d\n",
              canvas, x,
-             xpos + crossw + IEMGUI_ZOOM(x), ypos + crossw + IEMGUI_ZOOM(x),
-             xpos + x->x_gui.x_w - crossw, ypos + x->x_gui.x_h - crossw);
+             xpos + crossw + IEMGUI_ZOOM(x) + inset, 
+             ypos + crossw + IEMGUI_ZOOM(x) + inset,
+             xpos + x->x_gui.x_w - crossw - inset - 1, 
+             ypos + x->x_gui.x_h - crossw - inset - 1);
     sys_vgui(".x%lx.c itemconfigure %lxX2 -width %d\n", canvas, x, crossw);
     sys_vgui(".x%lx.c coords %lxX2 %d %d %d %d\n",
              canvas, x,
-             xpos + crossw + IEMGUI_ZOOM(x), ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x),
-             xpos + x->x_gui.x_w - crossw, ypos + crossw);
+             xpos + crossw + IEMGUI_ZOOM(x) + inset, 
+             ypos + x->x_gui.x_h - crossw - IEMGUI_ZOOM(x) - inset,
+             xpos + x->x_gui.x_w - crossw - inset - 1, 
+             ypos + crossw + inset + 1);
     if(!x->x_gui.x_fsf.x_snd_able)
         sys_vgui(".x%lx.c coords %lxOUT%d %d %d %d %d\n",
              canvas, x, 0,
@@ -205,7 +221,7 @@ void toggle_draw_select(t_toggle* x, t_glist* glist)
     }
     else
     {
-        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, IEM_GUI_COLOR_NORMAL);
+        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, x->x_gui.x_bcol);
         sys_vgui(".x%lx.c itemconfigure %lxLABEL -fill #%06x\n", canvas, x, x->x_gui.x_lcol);
     }
 }
@@ -406,17 +422,17 @@ static void *toggle_new(t_symbol *s, int argc, t_atom *argv)
 {
     t_toggle *x = (t_toggle *)pd_new(toggle_class);
     int a = IEM_GUI_DEFAULTSIZE, f = 0;
-    int ldx = 17, ldy = 7;
-    int fs = 10;
+    int ldx = 30, ldy = 11;
+    int fs = 12;
     t_float on = 0.0, nonzero = 1.0;
     char str[144];
 
     iem_inttosymargs(&x->x_gui.x_isa, 0);
     iem_inttofstyle(&x->x_gui.x_fsf, 0);
 
-    x->x_gui.x_bcol = 0xFCFCFC;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x00;
+    x->x_gui.x_bcol = 0x5a524c; // todo make these some variable accessable 
+    x->x_gui.x_fcol = 0xa9b665; // and settable with a tcl plugin
+    x->x_gui.x_lcol = 0xc5b18d;
 
     if(((argc == 13)||(argc == 14))&&IS_A_FLOAT(argv,0)
        &&IS_A_FLOAT(argv,1)

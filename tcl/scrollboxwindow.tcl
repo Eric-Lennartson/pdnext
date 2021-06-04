@@ -8,6 +8,9 @@
 ## with cancel, apply, and OK buttons
 ## which contains a scrollbox widget populated with the given data
 
+# TODO
+# bug when clicking on scrollbar, fix it?
+
 package provide scrollboxwindow 0.1
 
 package require scrollbox
@@ -16,7 +19,7 @@ namespace eval scrollboxwindow {
 }
 
 proc ::scrollboxwindow::get_listdata {mytoplevel} {
-    return [$mytoplevel.listbox.box get 0 end]
+    return [$mytoplevel.w.listbox.box get 0 end]
 }
 
 proc ::scrollboxwindow::do_apply {mytoplevel commit_method listdata} {
@@ -65,32 +68,27 @@ proc ::scrollboxwindow::make {mytoplevel listdata add_method edit_method commit_
     wm transient $mytoplevel .pdwindow
     wm protocol $mytoplevel WM_DELETE_WINDOW "::scrollboxwindow::cancel $mytoplevel"
 
-    # Enforce a minimum size for the window
-    wm minsize $mytoplevel $width $height
+    # # Enforce a minimum size for the window
+    # wm minsize $mytoplevel $width $height
 
-    # Set the current dimensions of the window
-    wm geometry $mytoplevel "${width}x${height}"
+    # # Set the current dimensions of the window
+    # wm geometry $mytoplevel "${width}x${height}"
 
     # Add the scrollbox widget
     ::scrollbox::make $mytoplevel $listdata $add_method $edit_method
 
-    # Use two frames for the buttons, since we want them both bottom and right
-    frame $mytoplevel.nb
-    pack $mytoplevel.nb -side bottom -fill x -pady 2m
-
     # buttons
-    frame $mytoplevel.nb.buttonframe
-    pack $mytoplevel.nb.buttonframe -side right -fill x -padx 2m
+    # $mytoplevel.w is defined in scrollbox.tcl
+    ttk::frame $mytoplevel.w.buttonframe 
 
-    button $mytoplevel.nb.buttonframe.cancel -text [_ "Cancel"] \
-        -command "::scrollboxwindow::cancel $mytoplevel"
-    pack $mytoplevel.nb.buttonframe.cancel -side left -expand 1 -fill x -padx 15 -ipadx 10
-    if {$::windowingsystem ne "aqua"} {
-        button $mytoplevel.nb.buttonframe.apply -text [_ "Apply"] \
-            -command "::scrollboxwindow::apply $mytoplevel $commit_method"
-        pack $mytoplevel.nb.buttonframe.apply -side left -expand 1 -fill x -padx 15 -ipadx 10
-    }
-    button $mytoplevel.nb.buttonframe.ok -text [_ "OK"] \
-        -command "::scrollboxwindow::ok $mytoplevel $commit_method"
-    pack $mytoplevel.nb.buttonframe.ok -side left -expand 1 -fill x -padx 15 -ipadx 10
+    ttk::button $mytoplevel.w.buttonframe.cancel -text "Cancel" \
+        -command "::scrollboxwindow::cancel $mytoplevel" \
+        
+    ttk::button $mytoplevel.w.buttonframe.apply -text "Apply" \
+        -command "::scrollboxwindow::apply $mytoplevel $commit_method" \
+        
+    ttk::button $mytoplevel.w.buttonframe.ok -text "OK" \
+        -command "::scrollboxwindow::ok $mytoplevel $commit_method" \
+        
+
 }

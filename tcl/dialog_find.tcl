@@ -33,8 +33,8 @@ proc ::dialog_find::get_history {direction} {
     if {$history_position > [llength $find_history]} {
         set history_position [llength $find_history]
     }
-    .find.entry delete 0 end
-    .find.entry insert 0 [lindex $find_history end-[expr $history_position - 1]]
+    .find.win.entry delete 0 end
+    .find.win.entry insert 0 [lindex $find_history end-[expr $history_position - 1]]
 }
 
 # mytoplevel isn't used here, but is kept for compatibility with other dialog ok procs
@@ -48,7 +48,7 @@ proc ::dialog_find::ok {mytoplevel} {
     variable is_searching
     variable is_searching_id
 
-    set findstring [.find.entry get]
+    set findstring [.find.win.entry get]
     if {$findstring eq ""} {
         if {$::windowingsystem eq "aqua"} {bell}
         return
@@ -69,12 +69,12 @@ proc ::dialog_find::ok {mytoplevel} {
             }
             .pdwindow.text see [lindex $matches 0]
             lappend find_history $findstring
-            .find.searchin configure -text \
+            .find.win.searchin configure -text \
                 [format [_ "Found '%1\$s' in %2\$s"] \
                 [get_search_string] [lookup_windowname $find_in_window] ]
         } else {
             if {$::windowingsystem eq "aqua"} {bell}
-            .find.searchin configure -text \
+            .find.win.searchin configure -text \
                 [format [_ "Couldn't find '%1\$s' in %2\$s"] \
                 [get_search_string] [lookup_windowname $find_in_window] ]
         }
@@ -125,8 +125,8 @@ proc ::dialog_find::focus_find {} {
     if {[winfo exists $find_in_window] eq 0} {
         set_window_to_search .pdwindow
     }
-    focus .find.entry
-    .find.entry selection range 0 end
+    focus .find.win.entry
+    .find.win.entry selection range 0 end
 }
 
 # set which window to run the search in, does not update if search is in progress
@@ -146,7 +146,7 @@ proc ::dialog_find::set_window_to_search {mytoplevel} {
         if {$find_in_window eq ".find"} {
             set find_in_window [winfo toplevel [lindex [wm stackorder .] end-1]]
         }
-        .find.searchin configure -text \
+        .find.win.searchin configure -text \
             [format [_ "Search in %s for:"] [lookup_windowname $find_in_window] ]
     }
     update_bindings
@@ -176,7 +176,7 @@ proc ::dialog_find::pdtk_showfindresult {mytoplevel success which total} {
             $which $total [get_search_string] [lookup_windowname $mytoplevel] ]
     }
     ::pdwindow::debug "$infostring\n"
-    .find.searchin configure -text "$infostring"
+    .find.win.searchin configure -text "$infostring"
 }
 
 # the find panel is opened from the menu and key bindings
@@ -193,50 +193,60 @@ proc ::dialog_find::open_find_dialog {mytoplevel} {
 }
 
 proc ::dialog_find::create_dialog {mytoplevel} {
-    toplevel .find -class DialogWindow
-    wm title .find [_ "Find"]
-    wm geometry .find =475x125+150+150
+    toplevel .find
+    wm title .find "Find"
     wm group .find .
     wm resizable .find 0 0
     wm transient .find
     .find configure -menu $::dialog_menubar
-    .find configure -padx 10 -pady 5
+    
     ::pd_bindings::dialog_bindings .find "find"
 
-    label .find.searchin -text \
+# Widgets
+    ttk::frame .find.win -padding 5 
+    ttk::label .find.win.searchin  -text \
             [format [_ "Search in %s for:"] [_ "Pd window"] ]
-    pack .find.searchin -side top -fill x -pady 1
+    
 
-    entry .find.entry -width 54 -font 18 -relief sunken \
-        -highlightthickness 1 -highlightcolor blue
-    pack .find.entry -side top -padx 10
+    ttk::entry .find.win.entry -width 30 -font 18 
+    
+    bind .find.win.entry <Up> "::dialog_find::get_history 1"
+    bind .find.win.entry <Down> "::dialog_find::get_history -1"
 
-    bind .find.entry <Up> "::dialog_find::get_history 1"
-    bind .find.entry <Down> "::dialog_find::get_history -1"
+    ttk::frame .find.win.frame 
+    ttk::checkbutton .find.win.frame.wholeword -variable ::dialog_find::wholeword_button \
+        -text [_ "Match whole word only"]
+                                               
+    ttk::frame .find.win.frame.pad -width 48 
 
-    checkbutton .find.wholeword -variable ::dialog_find::wholeword_button \
-        -text [_ "Match whole word only"] -anchor w
-    pack .find.wholeword -side left -padx 10 -pady 3
-
-    frame .find.buttonframe -background yellow
-    pack .find.buttonframe -side right -pady 3
+    # todo make it work for the other OS's
     if {$::windowingsystem eq "win32"} {
         button .find.cancel -text [_ "Cancel"] -default normal \
             -command "::dialog_find::cancel $mytoplevel"
         pack .find.cancel -side right -padx 6 -pady 3 -ipadx 10
     }
-    button .find.button -text [_ "Find"] -default active \
-        -command "::dialog_find::ok $mytoplevel"
-    pack .find.button -side right -padx 6 -pady 3 -ipadx 15
+    ttk::button .find.win.frame.button -text [_ "Find"] -default active \
+        -command "::dialog_find::ok $mytoplevel" 
     if {$::windowingsystem eq "x11"} {
         button .find.close -text [_ "Close"] -default normal \
             -command "::dialog_find::cancel $mytoplevel"
         pack .find.close -side right -padx 6 -pady 3 -ipadx 10
     }
+
+# Layout
+    grid .find.win -column 0 -row 0
+    grid .find.win.searchin -column 0 -row 0 -pady 2
+    grid .find.win.entry    -column 0 -row 1 -pady 2
+
+    grid .find.win.frame -column 0 -row 2 -sticky nwes
+    grid .find.win.frame.wholeword -column 0 -row 0
+    grid .find.win.frame.pad       -column 1 -row 0 -pady 2
+    grid .find.win.frame.button    -column 2 -row 0
+
     # on Mac OS X, the buttons shouldn't get Tab/keyboard focus
     if {$::windowingsystem eq "aqua"} {
-        .find.wholeword configure -takefocus 0
-        .find.button configure -takefocus 0
+        .find.win.frame.wholeword configure -takefocus 0
+        .find.win.frame.button configure -takefocus 0
     }
     ::dialog_find::set_window_to_search $mytoplevel
 }
@@ -270,9 +280,9 @@ proc ::dialog_find::update_bindings {} {
 # returns the current search string, shortens & appends "..." if too long
 proc ::dialog_find::get_search_string {} {
     if {[winfo exists .find] eq 0} {return ""}
-    if {[string length [.find.entry get]] > 20} {
-        return [format "%s..." [string range [.find.entry get] 0 20]]
+    if {[string length [.find.win.entry get]] > 20} {
+        return [format "%s..." [string range [.find.win.entry get] 0 20]]
     } else {
-        return [.find.entry get]
+        return [.find.win.entry get]
     }
 }

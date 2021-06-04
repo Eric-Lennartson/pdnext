@@ -17,24 +17,25 @@ proc ::dialog_startup::chooseCommand { prompt initialValue } {
     global cmd
     set cmd $initialValue
 
-    toplevel .inputbox -class DialogWindow
+    toplevel .inputbox
     wm title .inputbox $prompt
     wm group .inputbox .
-    wm minsize .inputbox 450 30
     wm resizable .inputbox 0 0
-    wm geom .inputbox "450x30"
 
-    button .inputbox.button -text [_ "OK"] -command { destroy .inputbox } \
-        -width [::msgcat::mcmax [_ "OK"]]
+    ttk::frame .inputbox.f -padding 5 
+    ttk::entry .inputbox.f.entry -width 40 -textvariable cmd 
+    bind .inputbox.f.entry <KeyPress-Return> { destroy .inputbox }
+    bind .inputbox.f.entry <KeyPress-Escape> { destroy .inputbox }
 
-    entry .inputbox.entry -width 50 -textvariable cmd
-    pack .inputbox.button -side right
-    bind .inputbox.entry <KeyPress-Return> { destroy .inputbox }
-    bind .inputbox.entry <KeyPress-Escape> { destroy .inputbox }
-    pack .inputbox.entry -side right -expand 1 -fill x -padx 2m
+    ttk::button .inputbox.f.button -width -1 -text [_ "OK"] -command { destroy .inputbox } \
+        -width [::msgcat::mcmax [_ "OK"]] 
+
+    grid .inputbox.f -column 0 -row 0
+    grid .inputbox.f.entry  -column 0 -row 0
+    grid .inputbox.f.button -column 1 -row 0
 
     raise .inputbox
-    focus .inputbox.entry
+    focus .inputbox.f.entry
     wm transient .inputbox
     grab .inputbox
     tkwait window .inputbox
@@ -81,51 +82,77 @@ proc ::dialog_startup::pdtk_startup_dialog {mytoplevel defeatrt flags} {
 proc ::dialog_startup::create_dialog {mytoplevel} {
     ::scrollboxwindow::make $mytoplevel $::startup_libraries \
         dialog_startup::add dialog_startup::edit dialog_startup::commit \
-        [_ "Pd libraries to load on startup"] \
+        [_ "Startup Libraries"] \
         450 300 0
     wm withdraw $mytoplevel
     ::pd_bindings::dialog_bindings $mytoplevel "startup"
 
-    frame $mytoplevel.flags
-    pack $mytoplevel.flags -side top -anchor s -fill x -padx 2m
-    label $mytoplevel.flags.entryname -text [_ "Startup flags:"]
-    entry $mytoplevel.flags.entry -textvariable ::startup_flags
-    pack $mytoplevel.flags.entry -side right -expand 1 -fill x
-    pack $mytoplevel.flags.entryname -side right
+    ttk::frame $mytoplevel.w.flags 
+    ttk::label $mytoplevel.w.flags.entryname -text "Startup flags:" 
+    ttk::entry $mytoplevel.w.flags.entry -textvariable ::startup_flags -width 40 
 
     if {$::windowingsystem ne "win32"} {
-        frame $mytoplevel.defeatrtframe
-        pack $mytoplevel.defeatrtframe -side top -anchor s -fill x -padx 2m -pady 5
-        checkbutton $mytoplevel.defeatrtframe.defeatrt -anchor w \
+        ttk::frame $mytoplevel.w.defeatrtframe  
+        
+        ttk::checkbutton $mytoplevel.w.defeatrtframe.defeatrt \
             -text [_ "Defeat real-time scheduling"] \
             -variable ::dialog_startup::defeatrt_button
-        pack $mytoplevel.defeatrtframe.defeatrt
+    }
+    ttk::separator $mytoplevel.w.sep
+
+# Layout
+    # listbox widgets (defined in scrollbox.tcl)
+    grid $mytoplevel.w -column 0 -row 0
+    grid $mytoplevel.w -column 0 -row 0 -stick nwes
+    grid $mytoplevel.w.listbox -column 0 -row 0 -sticky nwes
+    grid $mytoplevel.w.listbox.box -column 0 -row 0 -sticky nwes
+    grid $mytoplevel.w.listbox.scrollbar -column 1 -row 0 -sticky ns
+
+    grid $mytoplevel.w.actions -column 0 -row 1 -sticky w -pady 4
+    grid $mytoplevel.w.actions.add_path -column 0 -row 0
+    grid $mytoplevel.w.actions.edit_path -column 1 -row 0
+    grid $mytoplevel.w.actions.delete_path -column 2 -row 0
+
+    grid $mytoplevel.w.flags -column 0 -row 2 -sticky w -pady 2
+    grid $mytoplevel.w.flags.entryname -column 0 -row 0
+    grid $mytoplevel.w.flags.entry     -column 1 -row 0
+    if {$::windowingsystem ne "win32"} {
+        grid $mytoplevel.w.defeatrtframe -column 0 -row 3 -sticky w -pady 2
+        grid $mytoplevel.w.defeatrtframe.defeatrt -column 0 -row 0
     }
 
-    # focus handling on OSX
+    grid $mytoplevel.w.sep -column 0 -row 5 -pady 2 -sticky we
+
+    # Buttons (these are defined in scrollboxwindow.tcl)
+    grid $mytoplevel.w.buttonframe -column 0 -row 6 -pady 2
+    grid $mytoplevel.w.buttonframe.ok -column 0 -row 0
+    grid $mytoplevel.w.buttonframe.apply -column 1 -row 0
+    grid $mytoplevel.w.buttonframe.cancel -column 2 -row 0
+
+# focus handling on OSX
     if {$::windowingsystem eq "aqua"} {
 
         # unbind ok button when in listbox
-        bind $mytoplevel.listbox.box <FocusIn> "::dialog_startup::unbind_return $mytoplevel"
-        bind $mytoplevel.listbox.box <FocusOut> "::dialog_startup::rebind_return $mytoplevel"
+        bind $mytoplevel.w.listbox.box <FocusIn> "::dialog_startup::unbind_return $mytoplevel"
+        bind $mytoplevel.w.listbox.box <FocusOut> "::dialog_startup::rebind_return $mytoplevel"
 
         # call apply on Return in entry boxes that are in focus & rebind Return to ok button
-        bind $mytoplevel.flags.entry <KeyPress-Return> "::dialog_startup::rebind_return $mytoplevel"
+        bind $mytoplevel.w.flags.entry <KeyPress-Return> "::dialog_startup::rebind_return $mytoplevel"
 
         # unbind Return from ok button when an entry takes focus
-        $mytoplevel.flags.entry config -validate focusin -vcmd "::dialog_startup::unbind_return $mytoplevel"
+        $mytoplevel.w.flags.entry config -validate focusin -validatecommand "::dialog_startup::unbind_return $mytoplevel"
 
         # remove cancel button from focus list since it's not activated on Return
-        $mytoplevel.nb.buttonframe.cancel config -takefocus 0
+        $mytoplevel.w.buttonframe.cancel config -takefocus 0
 
         # show active focus on the ok button as it *is* activated on Return
-        $mytoplevel.nb.buttonframe.ok config -default normal
-        bind $mytoplevel.nb.buttonframe.ok <FocusIn> "$mytoplevel.nb.buttonframe.ok config -default active"
-        bind $mytoplevel.nb.buttonframe.ok <FocusOut> "$mytoplevel.nb.buttonframe.ok config -default normal"
+        $mytoplevel.w.buttonframe.ok config -default normal
+        bind $mytoplevel.w.buttonframe.ok <FocusIn> "$mytoplevel.w.buttonframe.ok config -default active"
+        bind $mytoplevel.w.buttonframe.ok <FocusOut> "$mytoplevel.w.buttonframe.ok config -default normal"
 
         # since we show the active focus, disable the highlight outline
-        $mytoplevel.nb.buttonframe.ok config -highlightthickness 0
-        $mytoplevel.nb.buttonframe.cancel config -highlightthickness 0
+        # $mytoplevel.nb.buttonframe.ok config -highlightthickness 0
+        # $mytoplevel.nb.buttonframe.cancel config -highlightthickness 0
     }
 
     # set min size based on widget sizing
@@ -140,7 +167,7 @@ proc ::dialog_startup::create_dialog {mytoplevel} {
 proc ::dialog_startup::rebind_return {mytoplevel} {
     bind $mytoplevel <KeyPress-Escape> "::dialog_startup::cancel $mytoplevel"
     bind $mytoplevel <KeyPress-Return> "::dialog_startup::ok $mytoplevel"
-    focus $mytoplevel.nb.buttonframe.ok
+    focus $mytoplevel.w.buttonframe.ok
     return 0
 }
 

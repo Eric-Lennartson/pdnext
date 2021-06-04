@@ -5,6 +5,8 @@
 /* g_7_guis.c written by Thomas Musil (c) IEM KUG Graz Austria 2000-2001 */
 /* thanks to Miller Puckette, Guenther Geiger and Krzystof Czaja */
 
+// todo add the thumb color as an option for tcl dialog
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -34,15 +36,36 @@ static t_class *vslider_class;
 static void vslider_draw_update(t_gobj *client, t_glist *glist)
 {
     t_vslider *x = (t_vslider *)client;
+
+    int xpos = text_xpix(&x->x_gui.x_obj, glist);
+    int ypos = text_ypix(&x->x_gui.x_obj, glist);
+    int ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
+    int bmargin = BMARGIN * IEMGUI_ZOOM(x);
+
+    // canvas coords are 0,0 for the top left.
+    // which means rmin is at the TOP
+    // and rmax is at the BOTTOM
+
     if (glist_isvisible(glist))
     {
-        int r = text_ypix(&x->x_gui.x_obj, glist) + x->x_gui.x_h -
-            ((x->x_val + 50)/100);
-        int xpos = text_xpix(&x->x_gui.x_obj, glist);
+        int r = ypos + x->x_gui.x_h - ((x->x_val + 50)/100);
+        int rmin = ypos + ioh; // current gui ypos + iolet height
+        int rmax = ypos + x->x_gui.x_h - ioh + 1; // current gui ypos + gui height - iolet height
+        r = (r >= rmax) ? rmax :
+            (r <= rmin) ? rmin : r;
 
-        sys_vgui(".x%lx.c coords %lxKNOB %d %d %d %d\n",
-                 glist_getcanvas(glist), x, xpos + IEMGUI_ZOOM(x), r,
-                 xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), r);
+        sys_vgui(".x%lx.c coords %lxTRACK %d %d %d %d\n",
+            glist_getcanvas(glist), x,
+            xpos + IEMGUI_ZOOM(x)+1, 
+            r,
+            xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+            rmax);
+        sys_vgui(".x%lx.c coords %lxTHUMB %d %d %d %d\n",
+            glist_getcanvas(glist), x, 
+            xpos + IEMGUI_ZOOM(x), 
+            r,
+            xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+            r);
     }
 }
 
@@ -50,32 +73,48 @@ static void vslider_draw_new(t_vslider *x, t_glist *glist)
 {
     int xpos = text_xpix(&x->x_gui.x_obj, glist);
     int ypos = text_ypix(&x->x_gui.x_obj, glist);
-    int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
-    int tmargin = TMARGIN * IEMGUI_ZOOM(x), bmargin = BMARGIN * IEMGUI_ZOOM(x);
-    int r = ypos + x->x_gui.x_h - ((x->x_val + 50)/100);
+    int iow = IOWIDTH * IEMGUI_ZOOM(x);
+    int ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
+    int tmargin = TMARGIN * IEMGUI_ZOOM(x);
+    int bmargin = BMARGIN * IEMGUI_ZOOM(x);
+    int rmin = ypos + x->x_gui.x_h - ((x->x_val + 50)/100) - bmargin + 1;
     t_canvas *canvas = glist_getcanvas(glist);
 
-    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -tags %lxBASE\n",
+    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxBASE\n",
              canvas, xpos, ypos - tmargin,
              xpos + x->x_gui.x_w, ypos + x->x_gui.x_h + bmargin,
              IEMGUI_ZOOM(x),
-             x->x_gui.x_bcol, x);
+             x->x_gui.x_bcol, x->x_gui.x_bcol, x);
     if(!x->x_gui.x_fsf.x_snd_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxOUT%d outlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxOUT%d outlet]\n",
              canvas,
              xpos, ypos + x->x_gui.x_h + bmargin + IEMGUI_ZOOM(x) - ioh,
              xpos + iow, ypos + x->x_gui.x_h + bmargin,
              x, 0);
     if(!x->x_gui.x_fsf.x_rcv_able)
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags [list %lxIN%d inlet]\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags [list %lxIN%d inlet]\n",
              canvas,
              xpos, ypos - tmargin,
              xpos + iow, ypos - tmargin - IEMGUI_ZOOM(x) + ioh,
              x, 0);
-    sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #%06x -tags %lxKNOB\n",
-             canvas, xpos + IEMGUI_ZOOM(x), r,
-             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), r,
-             1 + 2 * IEMGUI_ZOOM(x), x->x_gui.x_fcol, x);
+    // track
+    sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxTRACK\n",
+             canvas, 
+             xpos + IEMGUI_ZOOM(x)+1, // don't touch edge
+             rmin,
+             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+             rmin,
+             2 * IEMGUI_ZOOM(x), 
+             x->x_gui.x_fcol, x->x_gui.x_fcol, x);
+    // thumb
+    sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #222222 -tags %lxTHUMB\n",
+             canvas, 
+             xpos + IEMGUI_ZOOM(x), 
+             rmin,
+             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+             rmin,
+             1 + 2 * IEMGUI_ZOOM(x), 
+             x); // todo create a variable for the thumb fill color
     sys_vgui(".x%lx.c create text %d %d -text {%s} -anchor w \
              -font {{%s} -%d %s} -fill #%06x -tags [list %lxLABEL label text]\n",
              canvas, xpos + x->x_gui.x_ldx * IEMGUI_ZOOM(x),
@@ -92,6 +131,10 @@ static void vslider_draw_move(t_vslider *x, t_glist *glist)
     int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = IEM_GUI_IOHEIGHT * IEMGUI_ZOOM(x);
     int tmargin = TMARGIN * IEMGUI_ZOOM(x), bmargin = BMARGIN * IEMGUI_ZOOM(x);
     int r = ypos + x->x_gui.x_h - ((x->x_val+ 50)/100);
+    int rmin = ypos + ioh; // current gui ypos + iolet height
+    int rmax = ypos + x->x_gui.x_h - ioh + 1; // current gui ypos + gui height - iolet height
+    r = (r >= rmax) ? rmax :
+        (r <= rmin) ? rmin : r;
     t_canvas *canvas = glist_getcanvas(glist);
 
     sys_vgui(".x%lx.c coords %lxBASE %d %d %d %d\n",
@@ -108,9 +151,18 @@ static void vslider_draw_move(t_vslider *x, t_glist *glist)
              canvas, x, 0,
              xpos, ypos - tmargin,
              xpos + iow, ypos - tmargin - IEMGUI_ZOOM(x) + ioh);
-    sys_vgui(".x%lx.c coords %lxKNOB %d %d %d %d\n",
-             canvas, x, xpos + IEMGUI_ZOOM(x), r,
-             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), r);
+    sys_vgui(".x%lx.c coords %lxTRACK %d %d %d %d\n",
+             canvas, x, 
+             xpos + IEMGUI_ZOOM(x)+1, 
+             r,
+             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+             rmax);
+    sys_vgui(".x%lx.c coords %lxTHUMB %d %d %d %d\n",
+             canvas, x, 
+             xpos + IEMGUI_ZOOM(x), 
+             r,
+             xpos + x->x_gui.x_w - IEMGUI_ZOOM(x), 
+             r);
     sys_vgui(".x%lx.c coords %lxLABEL %d %d\n",
              canvas, x, xpos+x->x_gui.x_ldx * IEMGUI_ZOOM(x),
              ypos+x->x_gui.x_ldy * IEMGUI_ZOOM(x));
@@ -121,7 +173,8 @@ static void vslider_draw_erase(t_vslider* x, t_glist* glist)
     t_canvas *canvas = glist_getcanvas(glist);
 
     sys_vgui(".x%lx.c delete %lxBASE\n", canvas, x);
-    sys_vgui(".x%lx.c delete %lxKNOB\n", canvas, x);
+    sys_vgui(".x%lx.c delete %lxTHUMB\n", canvas, x);
+    sys_vgui(".x%lx.c delete %lxTRACK\n", canvas, x);
     sys_vgui(".x%lx.c delete %lxLABEL\n", canvas, x);
     if(!x->x_gui.x_fsf.x_snd_able)
         sys_vgui(".x%lx.c delete %lxOUT%d\n", canvas, x, 0);
@@ -137,10 +190,12 @@ static void vslider_draw_config(t_vslider* x, t_glist* glist)
              canvas, x, x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
              (x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_lcol),
              (strcmp(x->x_gui.x_lab->s_name, "empty") ? x->x_gui.x_lab->s_name : ""));
-    sys_vgui(".x%lx.c itemconfigure %lxKNOB -fill #%06x\n", canvas,
-             x, x->x_gui.x_fcol);
     sys_vgui(".x%lx.c itemconfigure %lxBASE -fill #%06x\n", canvas,
              x, x->x_gui.x_bcol);
+    sys_vgui(".x%lx.c itemconfigure %lxTRACK -fill #%06x\n", canvas,
+             x, x->x_gui.x_fcol);
+    sys_vgui(".x%lx.c itemconfigure %lxTHUMB -fill #222222\n", 
+            canvas, x);
 }
 
 static void vslider_draw_io(t_vslider* x, t_glist* glist, int old_snd_rcv_flags)
@@ -153,27 +208,27 @@ static void vslider_draw_io(t_vslider* x, t_glist* glist, int old_snd_rcv_flags)
 
     if((old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && !x->x_gui.x_fsf.x_snd_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxOUT%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxOUT%d\n",
              canvas,
              xpos, ypos + x->x_gui.x_h + bmargin + IEMGUI_ZOOM(x) - ioh,
              xpos + iow, ypos + x->x_gui.x_h + bmargin,
              x, 0);
         /* keep these above outlet */
-        sys_vgui(".x%lx.c raise %lxKNOB %lxOUT%d\n", canvas, x, x, 0);
-        sys_vgui(".x%lx.c raise %lxLABEL %lxKNOB\n", canvas, x, x);
+        sys_vgui(".x%lx.c raise %lxTHUMB %lxOUT%d\n", canvas, x, x, 0);
+        sys_vgui(".x%lx.c raise %lxLABEL %lxTHUMB\n", canvas, x, x);
     }
     if(!(old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && x->x_gui.x_fsf.x_snd_able)
         sys_vgui(".x%lx.c delete %lxOUT%d\n", canvas, x, 0);
     if((old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && !x->x_gui.x_fsf.x_rcv_able)
     {
-        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxIN%d\n",
+        sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill #a89984 -outline #a89984 -tags %lxIN%d\n",
              canvas,
              xpos, ypos - tmargin,
              xpos + iow, ypos - tmargin - IEMGUI_ZOOM(x) + ioh,
              x, 0);
         /* keep these above inlet */
-        sys_vgui(".x%lx.c raise %lxKNOB %lxIN%d\n", canvas, x, x, 0);
-        sys_vgui(".x%lx.c raise %lxLABEL %lxKNOB\n", canvas, x, x);
+        sys_vgui(".x%lx.c raise %lxTHUMB %lxIN%d\n", canvas, x, x, 0);
+        sys_vgui(".x%lx.c raise %lxLABEL %lxTHUMB\n", canvas, x, x);
     }
     if(!(old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && x->x_gui.x_fsf.x_rcv_able)
         sys_vgui(".x%lx.c delete %lxIN%d\n", canvas, x, 0);
@@ -190,7 +245,7 @@ static void vslider_draw_select(t_vslider *x, t_glist *glist)
     }
     else
     {
-        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, IEM_GUI_COLOR_NORMAL);
+        sys_vgui(".x%lx.c itemconfigure %lxBASE -outline #%06x\n", canvas, x, x->x_gui.x_bcol);
         sys_vgui(".x%lx.c itemconfigure %lxLABEL -fill #%06x\n", canvas, x, x->x_gui.x_lcol);
     }
 }
@@ -548,9 +603,9 @@ static void vslider_loadbang(t_vslider *x, t_floatarg action)
 static void *vslider_new(t_symbol *s, int argc, t_atom *argv)
 {
     t_vslider *x = (t_vslider *)pd_new(vslider_class);
-    int w = IEM_GUI_DEFAULTSIZE, h = IEM_SL_DEFAULTSIZE;
+    int w = 22, h = IEM_SL_DEFAULTSIZE;
     int lilo = 0, f = 0, ldx = 0, ldy = -9;
-    int fs = 10, steady = 1;
+    int fs = 12, steady = 1;
     double min = 0.0, max = (double)(IEM_SL_DEFAULTSIZE-1);
     char str[144];
     float v = 0;
@@ -558,9 +613,9 @@ static void *vslider_new(t_symbol *s, int argc, t_atom *argv)
     iem_inttosymargs(&x->x_gui.x_isa, 0);
     iem_inttofstyle(&x->x_gui.x_fsf, 0);
 
-    x->x_gui.x_bcol = 0xFCFCFC;
-    x->x_gui.x_fcol = 0x00;
-    x->x_gui.x_lcol = 0x00;
+    x->x_gui.x_bcol = 0x5a524c; // todo make these some variable accessable 
+    x->x_gui.x_fcol = 0xa9b665; // and settable with a tcl plugin
+    x->x_gui.x_lcol = 0xc5b18d;
 
     if(((argc == 17)||(argc == 18))&&IS_A_FLOAT(argv,0)&&IS_A_FLOAT(argv,1)
        &&IS_A_FLOAT(argv,2)&&IS_A_FLOAT(argv,3)

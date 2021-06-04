@@ -95,7 +95,7 @@ proc ::pd_bindings::global_bindings {} {
     bind_capslock all $::modifier-Shift-Key J {menu_send %W hslider}
     bind_capslock all $::modifier-Shift-Key I {menu_send %W hradio}
     bind_capslock all $::modifier-Shift-Key L {menu_clear_console}
-    bind_capslock all $::modifier-Shift-Key M {menu_message_dialog}
+    # bind_capslock all $::modifier-Shift-Key M {menu_message_dialog}
     bind_capslock all $::modifier-Shift-Key N {menu_send %W numbox}
     bind_capslock all $::modifier-Shift-Key Q {pdsend "pd quit"}
     bind_capslock all $::modifier-Shift-Key R {menu_send %W tidy}
