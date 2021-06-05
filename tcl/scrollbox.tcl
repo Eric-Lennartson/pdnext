@@ -140,9 +140,24 @@ proc ::scrollbox::make { mytoplevel listdata add_method edit_method } {
     # todo, set these colors somewhere else, a tcl plugin maybe?
     tk::listbox $mytoplevel.w.listbox.box -relief flat -highlightthickness 0 \
         -selectmode browse -activestyle dotbox -width 48 \
-        -yscrollcommand [list "$mytoplevel.w.listbox.scrollbar" set] \
-        -background "#45403d" -foreground "#ddc7a1" \
-        -selectbackground "#665c54" -selectforeground "#7daea3"
+        -yscrollcommand [list "$mytoplevel.w.listbox.scrollbar" set]
+
+    set col [::pdtk_canvas::get_color scrollbox_fill $mytoplevel]
+    if {$col ne ""} {
+        $mytoplevel.w.listbox.box configure  -background $col
+    }   
+    set col [::pdtk_canvas::get_color text $mytoplevel]
+    if {$col ne ""} {
+        $mytoplevel.w.listbox.box configure -foreground $col
+    } 
+    set col [::pdtk_canvas::get_color selected $mytoplevel]
+    if {$col ne ""} {
+        $mytoplevel.w.listbox.box configure -selectforeground $col
+    } 
+    set col [::pdtk_canvas::get_color txt_highlight $mytoplevel]
+    if {$col ne ""} {
+        $mytoplevel.w.listbox.box configure -selectbackground $col
+    }  
 
     # Create a scrollbar and keep it in sync with the current
     # listbox view

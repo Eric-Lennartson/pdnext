@@ -402,7 +402,7 @@ proc ::pdwindow::create_window {} {
     grid $::win.header.logmenu  -column 4 -row 0
 
     grid $::win.text   -column 0 -row 1 -sticky nwes
-    grid $::win.scroll -column 1 -row 1 -sticky ns
+    grid $::win.scroll -column 1 -row 1 -sticky ns -padx 1 -pady 1
 
 # Resize
     grid columnconfigure .pdwindow 0 -weight 1

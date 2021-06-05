@@ -627,7 +627,10 @@ proc ::deken::open_searchui {mytoplevel} {
         $::dekenWin.resultsFrame.results tag configure error -foreground "#ea6962"
         $::dekenWin.resultsFrame.results tag configure warn -foreground "#bd6f3e"
         $::dekenWin.resultsFrame.results tag configure info -foreground "#999999"
-        $::dekenWin.resultsFrame.results tag configure highlight -foreground "#7daea3"
+        set col [::pdtk_canvas::get_color selected $mytoplevel]
+        if {$col ne ""} {
+            $::dekenWin.resultsFrame.results tag configure highlight -foreground $col
+        }
         $::dekenWin.resultsFrame.results tag configure archmatch
         $::dekenWin.resultsFrame.results tag configure noarchmatch -foreground "#999999"
     }
@@ -667,9 +670,32 @@ proc ::deken::create_dialog {mytoplevel} {
     ttk::label $::dekenWin.status.label -textvariable ::deken::statustext 
 
     ttk::frame $::dekenWin.resultsFrame  -padding "4 0"
-    tk::text $::dekenWin.resultsFrame.results -takefocus 0 -cursor hand2 -relief flat -height 30 -yscrollcommand "$::dekenWin.resultsFrame.ys set" \
-        -background "#45403d" -foreground "#c5b18d" -selectbackground "#665c54" -selectforeground "#7daea3" \
-        -borderwidth 0 -highlightthickness 0 -insertbackground "white" -highlightcolor "#45403d" 
+    tk::text $::dekenWin.resultsFrame.results -takefocus 0 -cursor hand2 -relief flat \
+        -height 30 -yscrollcommand "$::dekenWin.resultsFrame.ys set" \
+        -borderwidth 0 -highlightthickness 0
+    
+    set col [::pdtk_canvas::get_color scrollbox_fill $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -background $col \
+            -highlightcolor $col
+    }
+    set col [::pdtk_canvas::get_color text $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -foreground $col
+    }
+    set col [::pdtk_canvas::get_color selected $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -selectforeground $col
+    }
+    set col [::pdtk_canvas::get_color cursor $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -insertbackground $col
+    }
+    set col [::pdtk_canvas::get_color helpbrowser_highlight $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -selectbackground $col
+    }
+    
     ttk::scrollbar $::dekenWin.resultsFrame.ys -orient vertical -command "$::dekenWin.resultsFrame.results yview"
     ttk::frame $::dekenWin.progress  -padding "0 8" 
 

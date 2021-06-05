@@ -1361,6 +1361,8 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     }
 }
 
+// check this func to maybe get the highlight to happen when editing things?
+// I don't want it now, but I may in the future
 void text_drawborder(t_text *x, t_glist *glist,
     const char *tag, int width2, int height2, int firsttime)
 {
