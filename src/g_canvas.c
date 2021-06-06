@@ -602,8 +602,13 @@ static void canvas_bind(t_canvas *x)
 
 static void canvas_unbind(t_canvas *x)
 {
+    char buf[MAXPDSTRING];
+    snprintf(buf, MAXPDSTRING, ".x%lx.c", (long unsigned int)x);
+    t_symbol s;
+    s.s_name = buf;
+
     if (strcmp(x->gl_name->s_name, "Pd"))
-        pd_unbind(&x->gl_pd, canvas_makebindsym(x->gl_name));
+        pd_unbind(&x->gl_pd, canvas_makebindsym(&s));
 }
 
 void canvas_reflecttitle(t_canvas *x)
