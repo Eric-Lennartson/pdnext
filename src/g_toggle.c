@@ -171,12 +171,12 @@ void toggle_draw_config(t_toggle* x, t_glist* glist)
              canvas, x, x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
              (x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_lcol),
              (strcmp(x->x_gui.x_lab->s_name, "empty") ? x->x_gui.x_lab->s_name : ""));
-    sys_vgui(".x%lx.c itemconfigure %lxBASE -fill #%06x\n", canvas, x,
-             x->x_gui.x_bcol);
+    sys_vgui(".x%lx.c itemconfigure %lxBASE -fill #%06x -fill #%06x\n", canvas, x,
+             x->x_gui.x_bcol, x->x_gui.x_bcol);
     sys_vgui(".x%lx.c itemconfigure %lxX1 -fill #%06x\n", canvas, x,
-             x->x_on ? x->x_gui.x_fcol : x->x_gui.x_bcol);
+             x->x_on ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR);
     sys_vgui(".x%lx.c itemconfigure %lxX2 -fill #%06x\n", canvas, x,
-             x->x_on ? x->x_gui.x_fcol : x->x_gui.x_bcol);
+             x->x_on ? x->x_gui.x_fcol : IEM_GUI_TGL_OFF_COLOR);
 }
 
 void toggle_draw_io(t_toggle* x, t_glist* glist, int old_snd_rcv_flags)

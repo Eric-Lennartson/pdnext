@@ -188,8 +188,9 @@ static void hslider_draw_config(t_hslider* x, t_glist* glist)
              canvas, x, x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
              (x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_lcol),
              (strcmp(x->x_gui.x_lab->s_name, "empty") ? x->x_gui.x_lab->s_name : ""));
+    sys_vgui(".x%lx.c itemconfigure %lxTRACK -fill #%06x -outline #%06x\n", canvas, x, x->x_gui.x_fcol, x->x_gui.x_fcol);        
     sys_vgui(".x%lx.c itemconfigure %lxTHUMB -fill #222222\n", canvas, x);
-    sys_vgui(".x%lx.c itemconfigure %lxBASE -fill #%06x\n", canvas, x, x->x_gui.x_bcol);
+    sys_vgui(".x%lx.c itemconfigure %lxBASE  -fill #%06x -outline #%06x\n", canvas, x, x->x_gui.x_bcol, x->x_gui.x_bcol);
 }
 
 static void hslider_draw_io(t_hslider* x, t_glist* glist, int old_snd_rcv_flags)
