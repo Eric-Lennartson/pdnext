@@ -333,6 +333,8 @@ t_canvas *canvas_new(void *dummy, t_symbol *sel, int argc, t_atom *argv)
     int vis = 0, width = GLIST_DEFCANVASWIDTH, height = GLIST_DEFCANVASHEIGHT;
     int xloc = 0, yloc = GLIST_DEFCANVASYLOC;
     int font = (owner ? owner->gl_font : sys_defaultfont);
+
+
     glist_init(x);
     x->gl_obj.te_type = T_OBJECT;
     if (!owner)
@@ -576,6 +578,9 @@ t_symbol *canvas_makebindsym(t_symbol *s)
     char buf[MAXPDSTRING];
     snprintf(buf, MAXPDSTRING-1, "pd-%s", s->s_name);
     buf[MAXPDSTRING-1] = 0;
+
+    // post(buf);
+
     return (gensym(buf));
 }
 
@@ -584,8 +589,15 @@ t_symbol *canvas_makebindsym(t_symbol *s)
     abstractions.  (Claude Heiland et al. Aug 9 2013) */
 static void canvas_bind(t_canvas *x)
 {
+    // this doesn't seem to break anything, but be warned
+    // check here if canvases are doing weird things
+    char buf[MAXPDSTRING];
+    snprintf(buf, MAXPDSTRING, ".x%lx.c", (long unsigned int)x);
+    t_symbol s;
+    s.s_name = buf;
+
     if (strcmp(x->gl_name->s_name, "Pd"))
-        pd_bind(&x->gl_pd, canvas_makebindsym(x->gl_name));
+        pd_bind(&x->gl_pd, canvas_makebindsym(&s));
 }
 
 static void canvas_unbind(t_canvas *x)
@@ -667,10 +679,11 @@ void canvas_drawredrect(t_canvas *x, int doit)
     called from the GUI after the fact to "notify" us that we're mapped. */
 void canvas_map(t_canvas *x, t_floatarg f)
 {
-    int flag = (f != 0);
+    int flag = (f != 0); // ???
     t_gobj *y;
     if (flag)
-    {
+    { // if true and it's not already visible
+      // make everything visible
         if (!glist_isvisible(x))
         {
             t_selection *sel;
@@ -691,7 +704,7 @@ void canvas_map(t_canvas *x, t_floatarg f)
         }
     }
     else
-    {
+    { // otherwise, clear out the whole canvas
         if (glist_isvisible(x))
         {
             if (!x->gl_havewindow)
@@ -2094,3 +2107,6 @@ void glob_open(t_pd *ignore, t_symbol *name, t_symbol *dir, t_floatarg f)
     }
     glob_evalfile(ignore, name, dir);
 }
+
+
+
