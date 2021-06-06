@@ -492,13 +492,24 @@ proc ::pdwindow::set_colors {} {
     ::pdwindow::set_layout
 
     # these are here because they are different from the default theme
-    ttk::style configure s.TCheckbutton -background "#1c1c1c" -foreground "#ddc7a1"
-    ttk::style map s.TCheckbutton -background [list active "#292828"]
-    ttk::style configure s.TFrame -background "#1c1c1c"
-    ttk::style configure s.TLabel -background "#1c1c1c" -foreground "#ddc7a1"
-    ttk::style configure dio.TLabel -background "#1c1c1c" -foreground "#1c1c1c"
-    ttk::style configure s.TMenubutton -foreground "#ddc7a1"
-    ttk::style map s.TMenubutton -foreground [list hover "#292828"] 
+    # 0 is dark theme, 1 is light theme
+    if {$::themeState == 0} {
+        ttk::style configure s.TCheckbutton -background "#1c1c1c" -foreground "#ddc7a1"
+        ttk::style map s.TCheckbutton      -background [list active "#292828"]
+        ttk::style configure s.TFrame      -background "#1c1c1c"
+        ttk::style configure s.TLabel      -background "#1c1c1c" -foreground "#ddc7a1"
+        ttk::style configure dio.TLabel    -background "#1c1c1c" -foreground "#1c1c1c"
+        ttk::style configure s.TMenubutton -background "#1c1c1c" -foreground "#ddc7a1"
+        ttk::style map s.TMenubutton -foreground [list hover "#292828"] 
+    } else {
+        ttk::style configure s.TCheckbutton -background "#2b2b2b" -foreground "#EEECE3"
+        ttk::style map s.TCheckbutton      -background [list active "#444444"]
+        ttk::style configure s.TFrame      -background "#2b2b2b"
+        ttk::style configure s.TLabel      -background "#2b2b2b" -foreground "#EEECE3"
+        ttk::style configure dio.TLabel    -background "#2b2b2b" -foreground "#2b2b2b"
+        ttk::style configure s.TMenubutton -background "#2b2b2b" -foreground "#292828"
+        ttk::style map s.TMenubutton -foreground [list hover "#EEECE3"] 
+    }
 
     $::win.header configure -style s.TFrame
     $::win.header.pad configure -style s.TFrame
