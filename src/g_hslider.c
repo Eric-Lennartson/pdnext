@@ -41,6 +41,9 @@ static void hslider_draw_update(t_gobj *client, t_glist *glist)
         int ypos = text_ypix(&x->x_gui.x_obj, glist);
         int r = xpos + ((x->x_val + 50)/100);
         int rmin = xpos + iow;
+        if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+        rmin = xpos;
+        }
         int rmax = xpos + x->x_gui.x_w - RMARGIN*IEMGUI_ZOOM(x)+5;
         r = (r <= rmin) ? rmin :
             (r >= rmax) ? rmax : r;
@@ -69,6 +72,12 @@ static void hslider_draw_new(t_hslider *x, t_glist *glist)
     int lmargin = LMARGIN * IEMGUI_ZOOM(x);
     int rmargin = RMARGIN * IEMGUI_ZOOM(x);
     int r = xpos + (x->x_val + 50)/100;
+
+    int rmin = r + iow;
+    if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+        rmin = r;
+    }
+
     t_canvas *canvas = glist_getcanvas(glist);
 
     sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxBASE\n",
@@ -94,18 +103,18 @@ static void hslider_draw_new(t_hslider *x, t_glist *glist)
     // track
     sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxTRACK\n",
              canvas, 
-             r + iow, // don't touch iolets
+             rmin, // don't touch iolets
              ypos + IEMGUI_ZOOM(x) + 1, // don't touch edge
-             r + iow,
+             rmin,
              ypos + x->x_gui.x_h - IEMGUI_ZOOM(x), 
              2 * IEMGUI_ZOOM(x), 
              x->x_gui.x_fcol, x->x_gui.x_fcol, x);
     // thumb
     sys_vgui(".x%lx.c create line %d %d %d %d -width %d -fill #222222 -tags %lxTHUMB\n",
              canvas, 
-             r + iow, // don't touch iolets
+             rmin, // don't touch iolets
              ypos + IEMGUI_ZOOM(x), // don't touch edge
-             r + iow, 
+             rmin, 
              ypos + x->x_gui.x_h - IEMGUI_ZOOM(x),
              1 + 2 * IEMGUI_ZOOM(x), 
              x); // todo add in thumb color for tcl
@@ -128,6 +137,9 @@ static void hslider_draw_move(t_hslider *x, t_glist *glist)
     int rmargin = RMARGIN * IEMGUI_ZOOM(x);
     int r = xpos + (x->x_val + 50)/100;
     int rmin = xpos + iow;
+    if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+        rmin = xpos;
+    }
     int rmax = xpos + x->x_gui.x_w - RMARGIN*IEMGUI_ZOOM(x)+5;
     r = (r <= rmin) ? rmin :
         (r >= rmax) ? rmax : r;
