@@ -51,6 +51,10 @@ static void vslider_draw_update(t_gobj *client, t_glist *glist)
         int r = ypos + x->x_gui.x_h - ((x->x_val + 50)/100);
         int rmin = ypos + ioh; // current gui ypos + iolet height
         int rmax = ypos + x->x_gui.x_h - ioh + 1; // current gui ypos + gui height - iolet height
+        if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+            rmin = ypos - 1; // rmin is at the TOP of the vsl
+            rmax = ypos + x->x_gui.x_h + 1; // rmax is at the BOTTOM of the vsl
+        }
         r = (r >= rmax) ? rmax :
             (r <= rmin) ? rmin : r;
 
@@ -78,6 +82,9 @@ static void vslider_draw_new(t_vslider *x, t_glist *glist)
     int tmargin = TMARGIN * IEMGUI_ZOOM(x);
     int bmargin = BMARGIN * IEMGUI_ZOOM(x);
     int rmin = ypos + x->x_gui.x_h - ((x->x_val + 50)/100) - bmargin + 1;
+    if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+        rmin = ypos + x->x_gui.x_h - ((x->x_val + 50)/100) + 1;
+    }
     t_canvas *canvas = glist_getcanvas(glist);
 
     sys_vgui(".x%lx.c create rectangle %d %d %d %d -width %d -fill #%06x -outline #%06x -tags %lxBASE\n",
@@ -133,6 +140,10 @@ static void vslider_draw_move(t_vslider *x, t_glist *glist)
     int r = ypos + x->x_gui.x_h - ((x->x_val+ 50)/100);
     int rmin = ypos + ioh; // current gui ypos + iolet height
     int rmax = ypos + x->x_gui.x_h - ioh + 1; // current gui ypos + gui height - iolet height
+    if( x->x_gui.x_fsf.x_snd_able && x->x_gui.x_fsf.x_rcv_able ) {
+        rmin = ypos - 1; // rmin is at the TOP of the vsl
+        rmax = ypos + x->x_gui.x_h + 1; // rmax is at the BOTTOM of the vsl
+    }
     r = (r >= rmax) ? rmax :
         (r <= rmin) ? rmin : r;
     t_canvas *canvas = glist_getcanvas(glist);
