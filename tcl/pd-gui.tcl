@@ -370,12 +370,12 @@ proc init_for_platform {} {
             set ::windowframey 0
             # mouse cursors for all the different modes
             set ::cursor_runmode_nothing "arrow"
-            set ::cursor_runmode_clickme "center_ptr"
+            set ::cursor_runmode_clickme "hand2"
             set ::cursor_runmode_thicken "sb_v_double_arrow"
             set ::cursor_runmode_addpoint "plus"
-            set ::cursor_editmode_nothing "hand2"
-            set ::cursor_editmode_connect "circle"
-            set ::cursor_editmode_disconnect "X_cursor"
+            set ::cursor_editmode_nothing "pointinghand"
+            set ::cursor_editmode_connect "closedhand"
+            set ::cursor_editmode_disconnect "poof"
             set ::cursor_editmode_resize "sb_h_double_arrow"
         }
         "win32" {

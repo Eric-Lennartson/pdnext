@@ -1,0 +1,9 @@
+=== BUGS =================================================================
+- radios leave behind inlets when deleted, or when snd and rcv are added
+=== Improvements =========================================================
+- have an easy way to add themes?
+- have iemgui's update colors based on themes
+- move the theming options into a better menu
+- create a preferences menu where all preferences are set, rather than
+  scattered all over the place
+- change cursor for inlet hovering to be the one that purr data uses.
