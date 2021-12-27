@@ -540,7 +540,7 @@ static t_symbol *gatom_escapit(t_symbol *s)
     if (!*s->s_name)
         return (gensym("-"));
     else if (*s->s_name == '-')
-    {
+    {   // why shmo????
         char shmo[100];
         shmo[0] = '-';
         strncpy(shmo+1, s->s_name, 99);
@@ -1029,10 +1029,12 @@ static void gatom_properties(t_gobj *z, t_glist *owner)
     t_gatom *x = (t_gatom *)z;
     char buf[200];
     sprintf(buf, "pdtk_gatom_dialog %%s %d %g %g %d {%s} {%s} {%s}\n",
-        x->a_text.te_width, x->a_draglo, x->a_draghi,
-            x->a_wherelabel, gatom_escapit(x->a_label)->s_name,
-                gatom_escapit(x->a_symfrom)->s_name,
-                    gatom_escapit(x->a_symto)->s_name);
+            x->a_text.te_width,
+            x->a_draglo, x->a_draghi,
+            x->a_wherelabel,
+            gatom_escapit(x->a_label)->s_name,
+            gatom_escapit(x->a_symfrom)->s_name,
+            gatom_escapit(x->a_symto)->s_name);
     gfxstub_new(&x->a_text.te_pd, x, buf);
 }
 
