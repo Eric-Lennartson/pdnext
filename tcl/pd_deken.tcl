@@ -25,14 +25,15 @@ package require Tcl 8.4
 # + require everything and all your script needs.
 #   If a requirement is missing,
 #   Pd will load, but the script will not.
+
 package require http 2
 # try enabling https if possible
-if { [catch {package require tls} ] } {} {
+if { [catch {package require tls} ] } {} else {
     ::tls::init -ssl2 false -ssl3 false -tls1 true
     ::http::register https 443 ::tls::socket
 }
 # try enabling PROXY support if possible
-if { [catch {package require autoproxy} ] } {} {
+if { [catch {package require autoproxy} ] } {} else {
     ::autoproxy::init
     if { ! [catch {package present tls} stdout] } {
         ::http::register https 443 ::autoproxy::tls_socket
@@ -49,9 +50,14 @@ namespace eval ::deken:: {
     variable installpath
     variable userplatform
     variable hideforeignarch
+    variable hideoldversions
 
     # whether to use http:// or https://
     variable protocol
+
+    # results
+    variable results
+    variable selected {}
 }
 
 namespace eval ::deken::preferences {
@@ -63,6 +69,7 @@ namespace eval ::deken::preferences {
     variable userplatform
     # boolean whether non-matching archs should be hidden
     variable hideforeignarch
+    variable hideoldversions
 }
 namespace eval ::deken::utilities { }
 
@@ -75,22 +82,19 @@ proc ::deken::versioncheck {version} {
         set v1 [split $version "."]
         foreach x $v0 y $v1 {
             if { $x > $y } {
-                ::pdwindow::debug "\[deken\]: "
-                ::pdwindow::debug [format [_ "installed version \[%1\$s\] > %2\$s...skipping!" ] $::deken::version $version ]
-                ::pdwindow::debug "\n"
+                set msg [format [_ "\[deken\] installed version \[%1\$s\] > %2\$s...skipping!" ] $::deken::version $version ]
+                ::pdwindow::debug "${msg}\n"
                 return 0
             }
             if { $x < $y } {
-                ::pdwindow::debug "\[deken\]: "
-                ::pdwindow::debug [format [_ "installed version \[%1\$s] < %2\$s...overwriting!" ] $::deken::version $version ]
-                ::pdwindow::debug "\n"
+                set msg [format [_ "\[deken\] installed version \[%1\$s\] < %2\$s...overwriting!" ] $::deken::version $version ]
+                ::pdwindow::debug "$msg\n"
                 set ::deken::version $version
                 return 1
             }
         }
-        ::pdwindow::debug "\[deken\]: "
-        ::pdwindow::debug [format [_ "installed version \[%1\$s\] == %2\$s...skipping!" ] $::deken::version $version ]
-        ::pdwindow::debug "\n"
+        set msg [format [_ "\[deken\] installed version \[%1\$s\] == %2\$s...skipping!" ] $::deken::version $version ]
+        ::pdwindow::debug "${msg}\n"
         return 0
     }
     set ::deken::version $version
@@ -98,28 +102,11 @@ proc ::deken::versioncheck {version} {
 }
 
 ## put the current version of this package here:
-if { [::deken::versioncheck 0.5.0] } {
-
-## FIXXXXME only initialize vars if not yet set
-set ::deken::installpath {}
-set ::deken::userplatform {}
-set ::deken::hideforeignarch 1
-set ::deken::show_readme 1
-set ::deken::remove_on_install 1
-set ::deken::add_to_path 0
-set ::deken::preferences::installpath {}
-set ::deken::preferences::userinstallpath {}
-set ::deken::preferences::platform {}
-set ::deken::preferences::userplatform {}
-set ::deken::preferences::hideforeignarch {}
-set ::deken::preferences::show_readme {}
-set ::deken::preferences::remove_on_install {}
-set ::deken::preferences::add_to_path {}
-set ::deken::preferences::add_to_path_temp {}
+if { [::deken::versioncheck 0.8.0] } {
 
 namespace eval ::deken:: {
     namespace export open_searchui
-    variable mytoplevelref
+    variable winid .externals_searchui
     variable platform
     variable architecture_substitutes
     variable installpath
@@ -127,19 +114,96 @@ namespace eval ::deken:: {
     variable statustimer
     variable backends
     variable progressvar
+    variable progresstext
+    variable progresstimer
     namespace export register
 }
 namespace eval ::deken::search:: { }
 
-set ::deken::installpath ""
-set ::deken::statustimer ""
-set ::deken::userplaform ""
+## FIXXXXME only initialize vars if not yet set
+set ::deken::backends {}
+set ::deken::installpath {}
+set ::deken::userplatform {}
 set ::deken::hideforeignarch false
+set ::deken::hideoldversions false
+set ::deken::show_readme 1
+set ::deken::remove_on_install 1
+set ::deken::add_to_path 0
+set ::deken::keep_package 0
+set ::deken::verify_sha256 1
+set ::deken::searchtype name
+set ::deken::statustimer {}
+set ::deken::progresstimer {}
+set ::deken::preferences::installpath {}
+set ::deken::preferences::userinstallpath {}
+set ::deken::preferences::platform {}
+set ::deken::preferences::userplatform {}
+set ::deken::preferences::hideforeignarch {}
+set ::deken::preferences::hideoldversions {}
+set ::deken::preferences::show_readme {}
+set ::deken::preferences::remove_on_install {}
+set ::deken::preferences::add_to_path {}
+set ::deken::preferences::add_to_path_temp {}
+set ::deken::preferences::keep_package {}
+set ::deken::preferences::verify_sha256 {}
+
+set ::deken::platform(os) $::tcl_platform(os)
+set ::deken::platform(machine) $::tcl_platform(machine)
+set ::deken::platform(bits) [ expr [ string length [ format %X -1 ] ] * 4 ]
+set ::deken::platform(floatsize) 32
+
+# architectures that can be substituted for each other
+array set ::deken::architecture_substitutes {}
+set ::deken::architecture_substitutes(x86_64) [list "amd64" ]
+set ::deken::architecture_substitutes(amd64) [list "x86_64" ]
+set ::deken::architecture_substitutes(i686) [list "i586" "i386"]
+set ::deken::architecture_substitutes(i586) [list "i386"]
+set ::deken::architecture_substitutes(armv6) [list "armv6l" "arm"]
+set ::deken::architecture_substitutes(armv6l) [list "armv6" "arm"]
+set ::deken::architecture_substitutes(armv7) [list "armv7l" "armv6l" "armv6" "arm"]
+set ::deken::architecture_substitutes(armv7l) [list "armv7" "armv6l" "armv6" "arm"]
+set ::deken::architecture_substitutes(PowerPC) [list "ppc"]
+set ::deken::architecture_substitutes(ppc) [list "PowerPC"]
+
+# normalize W32 OSs
+if { [ string match "Windows *" "$::deken::platform(os)" ] > 0 } {
+    # we are not interested in the w32 flavour, so we just use 'Windows' for all of them
+    set ::deken::platform(os) "Windows"
+}
+# normalize W32 CPUs
+if { "Windows" eq "$::deken::platform(os)" } {
+    # in redmond, intel only produces 32bit CPUs,...
+    if { "intel" eq "$::deken::platform(machine)" } { set ::deken::platform(machine) "i686" }
+    # ... and all 64bit CPUs are manufactured by amd
+    #if { "amd64" eq "$::deken::platform(machine)" } { set ::deken::platform(machine) "x86_64" }
+}
+
 
 set ::deken::protocol "http"
 if { ! [catch {package present tls} stdout] } {
     set ::deken::protocol "https"
 }
+
+
+# ######################################################################
+# ################ compatibility #######################################
+# ######################################################################
+
+# list-reverter (compat for tcl<8.5)
+if {[info commands lreverse] == ""} {
+    proc lreverse list {
+        set res {}
+        set i [llength $list]
+        while {$i} {
+            lappend res [lindex $list [incr i -1]]
+        }
+        set res
+    } ;# RS
+}
+
+# ######################################################################
+# ################ utilities ##########################################
+# ######################################################################
 
 proc ::deken::utilities::bool {value {fallback 0}} {
     catch {set fallback [expr bool($value) ] } stdout
@@ -151,10 +215,39 @@ proc ::deken::utilities::tristate {value {offset 0} {fallback 0} } {
     return $fallback
 }
 
-proc ::deken::utilities::is_writable_dir {path} {
+proc ::deken::utilities::expandpath {path} {
+    set map "@PD_PATH@"
+    lappend map $::sys_libdir
+    string map $map $path
+}
+
+proc ::deken::utilities::get_tmpfilename {{path ""} {ext ""}} {
+    for {set i 0} {true} {incr i} {
+        set tmpfile [file join ${path} dekentmp.${i}${ext}]
+        if {![file exists $tmpfile]} {
+            return $tmpfile
+        }
+    }
+}
+
+proc ::deken::utilities::get_tmpdir {} {
+    proc _iswdir {d} { "expr" [file isdirectory $d] * [file writable $d] }
+    set tmpdir ""
+    catch {set tmpdir $::env(TRASH_FOLDER)} ;# very old Macintosh. Mac OS X doesn't have this.
+    if {[_iswdir $tmpdir]} {return $tmpdir}
+    catch {set tmpdir $::env(TMP)}
+    if {[_iswdir $tmpdir]} {return $tmpdir}
+    catch {set tmpdir $::env(TEMP)}
+    if {[_iswdir $tmpdir]} {return $tmpdir}
+    set tmpdir "/tmp"
+    set tmpdir [pwd]
+    if {[_iswdir $tmpdir]} {return $tmpdir}
+}
+
+proc ::deken::utilities::is_writabledir {path} {
     set fs [file separator]
     set access [list RDWR CREAT EXCL TRUNC]
-    set tmpfile [::deken::get_tmpfilename $path]
+    set tmpfile [::deken::utilities::get_tmpfilename $path]
     # try creating tmpfile
     if {![catch {open $tmpfile $access} channel]} {
         close $channel
@@ -164,17 +257,86 @@ proc ::deken::utilities::is_writable_dir {path} {
     return false
 }
 
+proc ::deken::utilities::get_writabledir {paths} {
+    foreach p $paths {
+        set xp [ ::deken::utilities::expandpath $p ]
+        if { [ ::deken::utilities::is_writabledir $xp ] } { return $p }
+    }
+    return
+}
+
+proc ::deken::utilities::rmrecursive {path} {
+    # recursively remove ${path} if it exists, traversing into each directory
+    # to delete single items (rather than just unlinking the parent directory)
+    set errors 0
+    set myname [lindex [info level 0] 0]
+    set children [glob -nocomplain -directory $path -types hidden *]
+    lappend children {*}[glob -nocomplain -directory $path *]
+    foreach child $children[set children {}] {
+        if {[file tail $child] in {. ..}} {
+            continue
+        }
+        if {[file isdirectory $child]} {
+            if {[file type $child] ne "link"} {
+                incr errors [$myname $child]
+            }
+        }
+        if { [ catch { file delete -force $child } ] } {
+            incr errors
+        }
+    }
+    return $errors
+}
+
+# http://rosettacode.org/wiki/URL_decoding#Tcl
+proc ::deken::utilities::urldecode {str} {
+    set specialMap {"[" "%5B" "]" "%5D"}
+    set seqRE {%([0-9a-fA-F]{2})}
+    set replacement {[format "%c" [scan "\1" "%2x"]]}
+    set modStr [regsub -all $seqRE [string map $specialMap $str] $replacement]
+    encoding convertfrom utf-8 [subst -nobackslashes -novariables $modStr]
+}
+
+proc ::deken::utilities::verbose {level message} {
+    ::pdwindow::verbose ${level} "\[deken\] ${message}\n"
+}
+proc ::deken::utilities::debug {message} {
+    ::pdwindow::debug "${message}\n"
+}
+
+if { [catch {package require tkdnd} ] } {
+    proc ::deken::utilities::dnd_init {windowid} { }
+} else {
+proc ::deken::utilities::dnd_init {windowid} {
+    ::tkdnd::drop_target register $windowid DND_Files
+    bind $windowid <<Drop:DND_Files>> {::deken::utilities::dnd_drop_files %D}
+}
+proc ::deken::utilities::dnd_drop_files {files} {
+    foreach f $files {
+        if { [regexp -all -nocase "\.(zip|dek|tgz|tar\.gz)$" ${f} ] } {
+            set msg [format [_ "installing deken package '%s'" ] $f]
+            ::deken::status ${msg}
+            ::deken::utilities::verbose -1 ${msg}
+            ::deken::install_package_from_file $f
+        } else {
+            set msg [format [_ "ignoring '%s': doesn't look like a deken package" ] $f]
+            ::deken::status ${msg}
+            ::deken::utilities::verbose -1 ${msg}
+        }
+    }
+    return "link"
+}
+}
+
 if { [catch {package require zipfile::decode} ] } {
 proc ::deken::utilities::unzipper {zipfile {path .}} {
     ## this is w32 only
-    if { "Windows" eq "$::deken::platform(os)" } { } { return 0 }
-    if { "" eq $::deken::_vbsunzip } {
-        set ::deken::_vbsunzip [ file join [::deken::gettmpdir] deken_unzip.vbs ]
-    }
+    if {$::tcl_platform(platform) ne "windows"} { return 0 }
 
-    if {[file exists $::deken::_vbsunzip]} {} {
-        ## no script yet, create one
-        set script {
+    ## create script-file
+    set vbsscript [::deken::utilities::get_tmpfilename [::deken::utilities::get_tmpdir] ".vbs" ]
+    set script {
+On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 'The location of the zip file.
@@ -191,15 +353,21 @@ End If
 set objShell = CreateObject("Shell.Application")
 set FilesInZip=objShell.NameSpace(ZipFile).items
 objShell.NameSpace(ExtractTo).CopyHere(FilesInZip)
+'In case of an error, exit
+If Err.Number <> 0 Then
+  Err.Clear
+  WScript.Quit 1
+End If
+
 Set fso = Nothing
 Set objShell = Nothing
-}
-        if {![catch {set fileId [open $::deken::_vbsunzip "w"]}]} {
-            puts $fileId $script
-            close $fileId
-        }
     }
-    if {[file exists $::deken::_vbsunzip]} {} {
+    if {![catch {set fileId [open $vbsscript "w"]}]} {
+        puts $fileId $script
+        close $fileId
+    }
+
+    if {![file exists $vbsscript]} {
         ## still no script, give up
         return 0
     }
@@ -208,207 +376,215 @@ Set objShell = Nothing
     if { [ catch {
 	set zipfilezip ${zipfile}.zip
 	file rename ${zipfile} ${zipfilezip}
-	exec cscript $::deken::_vbsunzip "${zipfilezip}" .
+	exec cscript "${vbsscript}" "${zipfilezip}" .
 	file rename ${zipfilezip} ${zipfile}
-    } stdout ]
-     } {
-        ::pdwindow::debug "\[deken\] VBS-unzip: $::deken::_vbsunzip\n$stdout\n"
+    } stdout ] } {
+        catch { file rename ${zipfilezip} ${zipfile} }
+        catch { file delete "${vbsscript}" }
+        ::deken::utilities::debug "\[deken\] VBS-unzip($vbsscript): $stdout"
+        return 0
+    }
+    catch { file delete "${vbsscript}" }
+    return 1
+}
+} else { # successfully imported zipfile::decode
+proc ::deken::utilities::unzipper {zipfile {path .}} {
+    if { [catch {
+        ::zipfile::decode::unzipfile "${zipfile}" "${path}"
+    } stdout ] } {
+        ::deken::utilities::debug "\[deken\] unzip: $stdout"
         return 0
     }
     return 1
 }
-} { # successfully imported zipfile::decode
-proc ::deken::utilities::unzipper {zipfile {path .}} {
-    ::zipfile::decode::unzipfile "${zipfile}" "${path}"
-    return 1
 }
-}
-set ::deken::_vbsunzip ""
 
-proc ::deken::utilities::extract {installdir filename fullpkgfile} {
-    # installdir fullpkgfile filename
+proc ::deken::utilities::extract {installdir filename fullpkgfile {keep_package 1}} {
+    if { ! [ file isdirectory "${installdir}" ] } {
+        return 0
+    }
+    ::deken::status [format [_ "Installing %s" ] $filename ]
     set PWD [ pwd ]
     cd $installdir
     set success 1
     if { [ string match *.dek $fullpkgfile ] } then {
-        if { [ ::deken::utilities::unzipper $fullpkgfile  $installdir ] } { } {
+        if { ! [ ::deken::utilities::unzipper $fullpkgfile  $installdir ] } {
             if { [ catch { exec unzip -uo $fullpkgfile } stdout ] } {
-                ::pdwindow::debug "$stdout\n"
+                ::deken::utilities::debug "$stdout"
                 set success 0
             }
         }
     } elseif { [ string match *.zip $fullpkgfile ] } then {
-        if { [ ::deken::utilities::unzipper $fullpkgfile  $installdir ] } { } {
+        if { ! [ ::deken::utilities::unzipper $fullpkgfile  $installdir ] } {
             if { [ catch { exec unzip -uo $fullpkgfile } stdout ] } {
-                ::pdwindow::debug "$stdout\n"
+                ::deken::utilities::debug "$stdout"
                 set success 0
             }
         }
-    } elseif  { [ string match *.tar.* $fullpkgfile ]
+    } elseif { [ string match *.tar.* $fullpkgfile ]
                 || [ string match *.tgz $fullpkgfile ]
               } then {
         if { [ catch { exec tar xf $fullpkgfile } stdout ] } {
-            ::pdwindow::debug "$stdout\n"
+            ::deken::utilities::debug "$stdout"
             set success 0
         }
     }
     cd $PWD
 
     if { $success > 0 } {
-        ::pdwindow::debug "\[deken\]: "
-        ::pdwindow::debug [format [_ "successfully unzipped %1\$s into %2\$s"] $filename $installdir ]
-        ::pdwindow::debug "\n"
-        catch { file delete $fullpkgfile }
+        ::deken::utilities::debug [format [_ "\[deken\] Successfully unzipped %1\$s into %2\$s."] $filename $installdir ]
+        if { ! "${keep_package}" } {
+            catch { file delete $fullpkgfile }
+        }
     } else {
         # Open both the fullpkgfile folder and the zipfile itself
         # NOTE: in tcl 8.6 it should be possible to use the zlib interface to actually do the unzip
-        ::pdwindow::error "\[deken\]: "
-        ::pdwindow::error [_ "unable to extract package automatically" ]
-        ::pdwindow::post [_ "please perform the following steps manually:" ]
-        ::pdwindow::post [format [_ "1. unzip %s" ]  $fullpkgfile ]
+        set msg [_ "\[deken\] Unable to extract package automatically." ]
+        ::pdwindow::error "${msg}\n"
+        set msg ""
+        append msg [_ "Please perform the following steps manually:" ]
+        append msg "\n"
+        append msg [format [_ "1. Unzip %s." ]  $fullpkgfile ]
+        append msg "\n"
+        if { [string match "*.dek" $fullpkgfile] } {
+            append msg "  "
+            append msg [_ "You might need to change the file-extension from .dek to .zip" ]
+            append msg "\n"
+        }
+        append msg [format [_ "2. Copy the contents into %s." ] $installdir]
+        append msg "\n"
+        append msg [format [_ "3. Remove %s. (optional)" ]  $fullpkgfile ]
+        append msg "\n"
+
+        ::pdwindow::post "$msg"
+
         pd_menucommands::menu_openfile $fullpkgfile
-        ::pdwindow::post [format [_ "2. copy the contents into %s" ] $installdir]
-        ::pdwindow::post ""
         pd_menucommands::menu_openfile $installdir
     }
+    return $success
 }
 
 proc ::deken::utilities::uninstall {path library} {
     # recursively remove ${path}/${library} if it exists
     set fullpath [file join ${path} ${library}]
     if {[file exists ${fullpath}]} {
-        ::pdwindow::debug "\[deken\]: "
-        ::pdwindow::debug [format [_ "uninstalling '%s'" ] ${fullpath} ]
-        ::pdwindow::debug "\n"
+        ::deken::utilities::debug [format [_ "\[deken\] uninstalling '%s'" ] ${fullpath} ]
         if { [catch {
             file delete -force "${fullpath}"
         } stdout ] } {
-            ::pdwindow::debug [format [_ "uninstalling %1\$s from %2\$s failed!"] ${library} ${path}]
-            ::pdwindow::debug $stdout
-            ::pdwindow::debug "\n"
+            set msg [format [_ "Uninstalling %1\$s from %2\$s failed!"] ${library} ${path}]
+            ::deken::utilities::debug "$msg\n    $stdout"
+            return 0
         }
     }
+    return 1
 }
 
-proc ::deken::utilities::newwidget {basename} {
-    # calculate a widget name that has not yet been taken
-    set i 0
-    while {[winfo exists ${basename}${i}]} {incr i}
-    return ${basename}${i}
+if { [catch {package require sha256} ] } {
+    proc ::deken::utilities::verify_sha256 {url pkgfile} {
+        set msg [format [_ "skipping SHA256 verification of %s." ] $url ]
+        ::deken::status $msg
+        ::deken::utilities::verbose 0 $msg
+        return 1
+    }
+} else {  # successfully imported sha256
+    proc ::deken::utilities::verify_sha256 {url pkgfile} {
+        ::deken::status [format [_ "SHA256 verification of %s" ] $pkgfile ]
+        ::deken::syncgui
+
+        set retval 1
+        set isremote 1
+        if { [ catch {
+            # check if $url really is a local file
+            if { [file normalize $url] eq $url } {
+                # $url is really an absolute filename
+                # use it, if it exists
+                set hashfile "${url}.sha256"
+                set isremote 0
+                if { [file isfile $url ] && [file readable $url] } { } else {
+                    set hashfile ""
+                }
+            } else {
+                # otherwise fetch it from the internet
+                set hashfile [::deken::utilities::download_file ${url}.sha256 [::deken::utilities::get_tmpfilename [::deken::utilities::get_tmpdir] ".sha256" ] ]
+            }
+            if { "$hashfile" eq "" } {
+                ::deken::utilities::verbose 0 [format [_ "unable to fetch reference SHA256 for %s." ] $url ]
+                set retval 1
+            } else {
+                set fp [open $hashfile r]
+                set reference [string trim [string tolower [read $fp] ] ]
+                close $fp
+                if { $isremote } {
+                    catch { file delete $hashfile }
+                }
+
+                set hash [string trim [string tolower [ ::sha2::sha256 -hex -filename $pkgfile ] ] ]
+                if { "${hash}" eq "${reference}" } {
+                    set retval 1
+                } else {
+                    # SHA256 verification failed...
+                    set retval 0
+                }
+            }
+        } stdout ] } {
+            ::deken::utilities::verbose 0 "${stdout}"
+            # unable to verify
+            ::deken::utilities::verbose 0 [format [_ "unable to perform SHA256 verification for %s." ] $url ]
+            set retval 1
+        }
+        return ${retval}
+    }
 }
 
-if { [ catch { set ::deken::installpath [::pd_guiprefs::read dekenpath] } stdout ] } {
-    # this is a Pd without the new GUI-prefs
-    proc ::deken::set_installpath {installdir} {
-        set ::deken::installpath $installdir
+# download a file to a location
+# http://wiki.tcl.tk/15303
+proc ::deken::utilities::download_file {url outputfilename {progressproc {}}} {
+    set URL [string map {{[} "%5b" {]} "%5d"} $url]
+    set downloadfilename [::deken::utilities::get_tmpfilename [file dirname $outputfilename] ]
+    set f [open $downloadfilename w]
+    fconfigure $f -translation binary
+
+    if { [catch {
+        if { $progressproc eq {} } {
+            set httpresult [::http::geturl $URL -binary true -channel $f]
+        } else {
+            set httpresult [::http::geturl $URL -binary true -progress ${progressproc} -channel $f]
+        }
+        set ncode [::http::ncode $httpresult]
+        if {$ncode != 200} {
+            ## FIXXME: we probably should handle redirects correctly (following them...)
+            set err [::http::code $httpresult]
+            set msg [format [_ "\[deken\] Unable to download from %1\$s \[%2\$s\]" ] $url $err ]
+            ::pdwindow::error "$msg\n"
+            set outputfilename ""
+        }
+        ::http::cleanup $httpresult
+    } stdout ] } {
+        set msg [format [_ "Unable to download from '%s'!" ] $url ]
+        tk_messageBox \
+            -title [_ "Download failed" ] \
+            -message "${msg}\n$stdout" \
+            -icon error -type ok \
+            -parent .externals_searchui
+        set outputfilename ""
     }
-    proc ::deken::set_platform_options {platform hide} {
-        set ::deken::userplatform $platform
-        set ::deken::hideforeignarch [::deken::utilities::bool $hide ]
-    }
-    proc ::deken::set_install_options {remove readme add} {
-        set ::deken::remove_on_install [::deken::utilities::bool $remove]
-        set ::deken::show_readme [::deken::utilities::bool $readme]
-        set ::deken::add_to_path [::deken::utilities::tristate $add 0 0]
-    }
-} {
-    # Pd has a generic preferences system, that we can use
-    proc ::deken::set_installpath {installdir} {
-        set ::deken::installpath $installdir
-        ::pd_guiprefs::write dekenpath $installdir
-    }
-    # user requested platform (empty = DEFAULT)
-    set ::deken::userplatform [::pd_guiprefs::read deken_platform]
-    set ::deken::hideforeignarch [::deken::utilities::bool [::pd_guiprefs::read deken_hide_foreign_archs] 1]
-    proc ::deken::set_platform_options {platform hide} {
-        set ::deken::userplatform $platform
-        set ::deken::hideforeignarch [::deken::utilities::bool $hide ]
-        ::pd_guiprefs::write deken_platform "$platform"
-        ::pd_guiprefs::write deken_hide_foreign_archs $::deken::hideforeignarch
-    }
-    set ::deken::remove_on_install [::deken::utilities::bool [::pd_guiprefs::read deken_remove_on_install] 1]
-    set ::deken::show_readme [::deken::utilities::bool [::pd_guiprefs::read deken_show_readme] 1]
-    set ::deken::add_to_path [::deken::utilities::tristate [::pd_guiprefs::read deken_add_to_path] ]
 
-    proc ::deken::set_install_options {remove readme path} {
-        set ::deken::remove_on_install [::deken::utilities::bool $remove]
-        set ::deken::show_readme [::deken::utilities::bool $readme]
-        set ::deken::add_to_path [::deken::utilities::tristate $path]
-        ::pd_guiprefs::write deken_remove_on_install "$::deken::remove_on_install"
-        ::pd_guiprefs::write deken_show_readme "$::deken::show_readme"
-        ::pd_guiprefs::write deken_add_to_path "$::deken::add_to_path"
-    }
-}
+    flush $f
+    close $f
 
-set ::deken::backends [list]
-proc ::deken::register {fun} {
-    # register a searchfunction with deken.
-    # the searchfunction <fun> will be called with a <searchterm>,
-    # and must return a list of <result>.
-    # <searchterm> is a list of (whitespace separated) words.
-    # each word denotes a library or library-object to search for and may
-    # contain wildcards ("*").
-    # the <result> should be normalized via ::deken::search::normalize_result
-    # failing to do so, a <result> is a list <name> <cmd> <match> <comment> <status> <args...>
-    # - <title> non-empty name of the library (to be shown to the user as search-result)
-    # - <cmd>  the full command to run to install the library
-    # - <match> boolean value to indicate whether this entry matches the current architecture
-    # - <subtitle> additional text to be shown under the <name>
-    # - <status> additional text to be shown in the STATUS line if the mouse hovers over the result
-    # - <args>... additional args (ignored)
-    # the library <name> must be non-empty (and empty value is reserved for normalized results)
-
-    set ::deken::backends [linsert $::deken::backends 0 $fun]
-}
-
-proc ::deken::normalize_result {title
-                                cmd
-                                {match 1}
-                                {subtitle ""}
-                                {statusline ""}
-                                {contextmenus {}}
-                                args} {
-    ## normalize a search-result
-    # the function parameters are guaranteed to be a stable API (with the exception or args)
-    # but the value returned by this function is an implementation detail
-    # <title> the primary line displayed for the search-result
-    # - <cmd>  the full command to run to install the library
-    # - <match> boolean value to indicate whether this entry matches the current architecture
-    # - <subtitle> additional text to be shown under the <name>
-    # - <statusline> additional text to be shown in the STATUS line if the mouse hovers over the result
-    # - <contextmenus> list of <menuitem> <menucmd> pairs to be shown via a right-click context-menu
-    # - <args> RESERVED FOR FUTURE USE (do not use!)
-
-    return [list "" $title $cmd $match $subtitle $statusline $contextmenus]
-}
-
-
-proc ::deken::gettmpdir {} {
-    proc _iswdir {d} { expr [file isdirectory $d] * [file writable $d] }
-    set tmpdir ""
-    catch {set tmpdir $::env(TRASH_FOLDER)} ;# very old Macintosh. Mac OS X doesn't have this.
-    if {[_iswdir $tmpdir]} {return $tmpdir}
-    catch {set tmpdir $::env(TMP)}
-    if {[_iswdir $tmpdir]} {return $tmpdir}
-    catch {set tmpdir $::env(TEMP)}
-    if {[_iswdir $tmpdir]} {return $tmpdir}
-    set tmpdir "/tmp"
-    set tmpdir [pwd]
-    if {[_iswdir $tmpdir]} {return $tmpdir}
-}
-
-proc ::deken::get_tmpfilename {{path ""}} {
-    for {set i 0} {true} {incr i} {
-        set tmpfile [file join ${path} dekentmp.${i}]
-        if {![file exists $tmpfile]} {
-            return $tmpfile
+    if { "$outputfilename" != "" } {
+        catch { file delete $outputfilename }
+        if {[file exists $outputfilename]} {
+            ::deken::utilities::debug [format [_ "\[deken\] Unable to remove stray file %s" ] $outputfilename ]
+            set outputfilename ""
         }
     }
-}
-
-proc ::deken::get_writable_dir {paths} {
-    foreach p $paths {
-        if { [ ::deken::utilities::is_writable_dir $p ] } { return $p }
+    if { $outputfilename != "" && "$outputfilename" != "$downloadfilename" } {
+        if {[catch { file rename $downloadfilename $outputfilename}]} {
+            ::deken::utilities::debug [format [_ "\[deken\] Unable to rename downloaded file to %s" ] $outputfilename ]
+            set outputfilename ""
+        }
     }
     return
 }
@@ -593,15 +769,8 @@ proc ::deken::do_prompt_installdir {path {mytoplevel .externals_searchui}} {
         return [tk_chooseDirectory -title [_ "Install externals to directory:"] \
                     -initialdir ${path}]
     }
-}
 
-proc ::deken::prompt_installdir {} {
-    set installdir [::deken::do_prompt_installdir $::fileopendir]
-    if { "$installdir" != "" } {
-        ::deken::set_installpath $installdir
-        return 1
-    }
-    return 0
+    return $outputfilename
 }
 
 
@@ -611,11 +780,9 @@ proc ::deken::update_searchbutton {mytoplevel} {
     } {
         $::dekenWin.searchbit.button configure -text [_ "Search" ]
     }
+    list $pkgname $version $archs
 }
 
-proc ::deken::progress {x} {
-    ::pdwindow::debug "\[deken\]: = ${x}%"
-}
 
 # this function gets called when the menu is clicked
 proc ::deken::open_searchui {mytoplevel} {
@@ -736,12 +903,13 @@ proc ::deken::create_dialog {mytoplevel} {
 
 }
 
-proc ::deken::preferences::userpath_doit { } {
-    set installdir [::deken::do_prompt_installdir ${::deken::preferences::userinstallpath}]
+proc ::deken::preferences::userpath_doit { winid } {
+    set installdir [::deken::do_prompt_installdir ${::deken::preferences::userinstallpath} $winid]
     if { "${installdir}" != "" } {
         set ::deken::preferences::userinstallpath "${installdir}"
     }
 }
+
 proc ::deken::preferences::path_doit {rdb ckb path {mkdir true}} {
     # handler for the check/create button
     # if the path does not exist, disable the radiobutton and suggest to Create it
@@ -751,18 +919,18 @@ proc ::deken::preferences::path_doit {rdb ckb path {mkdir true}} {
     ${ckb} configure -state normal
     ${rdb} configure -state disabled
 
-    if { [file exists ${path}] } { } {
-        ${ckb} configure -text "Create"
+    if { ! [file exists ${path}] } {
+        ${ckb} configure -text [_ "Create"]
         if { $mkdir } {
             catch { file mkdir $path }
         }
     }
 
     if { [file exists ${path}] } {
-        ${ckb} configure -text "Check"
+        ${ckb} configure -text [_ "Check"]
     }
 
-    if { [::deken::utilities::is_writable_dir ${path} ] } {
+    if { [::deken::utilities::is_writabledir ${path} ] } {
         ${ckb} configure -state disabled
         ${rdb} configure -state normal
     }
@@ -770,8 +938,9 @@ proc ::deken::preferences::path_doit {rdb ckb path {mkdir true}} {
 
 proc ::deken::preferences::create_pathentry {toplevel row var path {generic false}} {
     # only add absolute paths to the pathentries
+    set xpath [ ::deken::utilities::expandpath $path ]
     if {! $generic} {
-        if { [file pathtype $path] != "absolute" } { return }
+        if { [file pathtype $xpath] != "absolute"} { return }
     }
 
     set chk [::deken::utilities::newwidget ${toplevel}.doit]
@@ -790,9 +959,9 @@ proc ::deken::preferences::create_pathentry {toplevel row var path {generic fals
 
 
     if {! $generic} {
-        ::deken::preferences::path_doit ${rdb} ${chk} ${path} false
+        ::deken::preferences::path_doit ${rdb} ${chk} ${xpath} false
     }
-    return [list ${rdb} ${chk}]
+    list ${rdb} ${chk}
 }
 
 proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
@@ -819,10 +988,11 @@ proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
 proc ::deken::preferences::create {mytoplevel} {
     set ::deken::preferences::installpath $::deken::installpath
     set ::deken::preferences::hideforeignarch $::deken::hideforeignarch
+    set ::deken::preferences::hideoldversions $::deken::hideoldversions
     if { $::deken::userplatform == "" } {
         set ::deken::preferences::platform DEFAULT
         set ::deken::preferences::userplatform [ ::deken::platform2string ]
-    } {
+    } else {
         set ::deken::preferences::platform USER
         set ::deken::preferences::userplatform $::deken::userplatform
     }
@@ -831,6 +1001,8 @@ proc ::deken::preferences::create {mytoplevel} {
     set ::deken::preferences::userinstallpath $::deken::installpath
 
     set ::deken::preferences::show_readme $::deken::show_readme
+    set ::deken::preferences::keep_package $::deken::keep_package
+    set ::deken::preferences::verify_sha256 $::deken::verify_sha256
     set ::deken::preferences::remove_on_install $::deken::remove_on_install
     set ::deken::preferences::add_to_path $::deken::add_to_path
     set ::deken::preferences::add_to_path_temp $::deken::preferences::add_to_path
@@ -868,7 +1040,11 @@ proc ::deken::preferences::create {mytoplevel} {
         grid $pathsframe.sep2 -column 0 -row $row -sticky we -pady 2 -columnspan 3
         incr row
     }
+    set extradir [file join ${::sys_libdir} extra ]
     foreach p $::sys_staticpath {
+        if { [file normalize $p] == $extradir } {
+            set p [file join @PD_PATH@ extra]
+        }
         ::deken::preferences::create_pathentry ${pathsframe} ${row} ::deken::preferences::installpath $p
         incr row
     }
@@ -923,7 +1099,7 @@ proc ::deken::preferences::create {mytoplevel} {
     ttk::entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform \
         
     if { "$::deken::preferences::platform" == "DEFAULT" } {
-        $mytoplevel.platform.userarch.entry configure -state disabled
+        $winid.platform.userarch.entry configure -state disabled
     }
 
     # hide non-matching architecture?
@@ -968,15 +1144,8 @@ proc ::deken::preferences::create {mytoplevel} {
     grid $mytoplevel.buttonframe.cancel -column 2 -row 0
 }
 
-proc ::deken::preferences::mapped {mytoplevel} {
-    set cnv $mytoplevel.installdir.cnv
-    catch {
-        #puts "bbox [$cnv bbox all]"
-        set bbox [$cnv bbox all]
-        if { "$bbox" != "" } {
-            $cnv configure -scrollregion $bbox
-        }
-    } stdout
+proc ::deken::progress {x} {
+    ::deken::status [format [_ "%s%% of download completed"] ${x}]
 }
 
 proc ::deken::preferences::apply {mytoplevel} {
@@ -985,118 +1154,139 @@ proc ::deken::preferences::apply {mytoplevel} {
         set installpath "${::deken::preferences::userinstallpath}"
     }
 
-    ::deken::set_installpath "$installpath"
-    set plat ""
-    if { "${::deken::preferences::platform}" == "USER" } {
-        set plat "${::deken::preferences::userplatform}"
+    set searchterm {}
+    if { $::deken::searchtype eq "${searchtype}" } {
+        append searchterm [$winid.searchbit.entry get]
     }
-    ::deken::set_platform_options "${plat}" "${::deken::preferences::hideforeignarch}"
-    ::deken::set_install_options \
-        "${::deken::preferences::remove_on_install}" \
-        "${::deken::preferences::show_readme}" \
-        "${::deken::preferences::add_to_path}"
+    if { ${searchterm} ne {} } {  append searchterm " " }
+    foreach xx $xxx {
+        foreach x $xx {
+            lappend searchterm $x
+        }
+    }
+
+    ${winid}.searchbit.entry delete 0 end
+    ${winid}.searchbit.entry insert end ${searchterm}
+
+    set ::deken::searchtype "${searchtype}"
+    ::deken::update_searchbutton $winid
 }
-proc ::deken::preferences::cancel {mytoplevel} {
-    ## FIXXME properly close the window/frame (for re-use in a tabbed pane)
-    if {[winfo exists .deken_preferences]} {destroy .deken_preferences}
-    #destroy $mytoplevel
+
+proc ::deken::open_search_objects {args}  {
+    ::deken::open_search_xxx "objects" $args
 }
-proc ::deken::preferences::ok {mytoplevel} {
-    ::deken::preferences::apply $mytoplevel
-    ::deken::preferences::cancel $mytoplevel
+
+proc ::deken::open_search_libraries {args}  {
+    ::deken::open_search_xxx "libraries" $args
+}
+proc ::deken::open_search_translations {args}  {
+    ::deken::open_search_xxx "translations" $args
 }
 
 
+proc ::deken::open_search_missing_libraries {args}  {
+    # LATER this should only display not-installed libraries
+    ::deken::open_search_xxx "libraries" $args
+}
 
 proc ::deken::initiate_search {mytoplevel} {
     set searchterm [$::dekenWin.searchbit.entry get]
     # let the user know what we're doing
     ::deken::clearpost
-    ::pdwindow::debug "\[deken\]: "
-    ::pdwindow::debug [_ "start searching for externals..."]
-    ::pdwindow::debug "${searchterm}\n"
+    ::deken::utilities::debug [format [_ "\[deken\] Start searching for externals... %s" ] ${searchterm}]
     set ::deken::progressvar 0
+    ::deken::progressstatus ""
     if { [ catch {
         set results [::deken::search_for ${searchterm}]
     } stdout ] } {
-        ::pdwindow::debug "\[deken\]: "
-        ::pdwindow::debug [format [_ "online? %s" ] $stdout ]
-        ::pdwindow::debug "\n"
-        ::deken::status [format "%s %s" [_ "Unable to perform search." ] [_ "Are you online?" ] ]
+        ::deken::utilities::debug [format [_ "\[deken\] online? %s" ] $stdout ]
+        ::deken::status [_ "Unable to perform search. Are you online?" ]
     } else {
-    # delete all text in the results
-    ::deken::clearpost
-    if {[llength $results] != 0} {
-        set counter 0
-        # build the list UI of results
-        foreach r $results {
-            ::deken::show_result $mytoplevel $counter $r 1
-            incr counter
-        }
-        if { "$::deken::hideforeignarch" } {
-            # skip display of non-matching archs
-        } {
-            foreach r $results {
-                ::deken::show_result $mytoplevel $counter $r 0
-                incr counter
-            }
-        }
-	::deken::scrollup
-    } else {
-        ::pdwindow::post "\[deken\]: "
-        ::pdwindow::post [_ "no matching externals found" ]
-        ::pdwindow::debug " - "
-        ::pdwindow::debug [_ "try using the full name e.g. 'freeverb'" ]
-        ::pdwindow::post "\n"
-        ::deken::status [_ "No matching externals found." ]
-    }
-}}
+        # delete all text in the results
+        ::deken::clearpost
 
-# display a single found entry
-proc ::deken::show_result {mytoplevel counter result showmatches} {
-    foreach {title cmd match comment status contextmenus} $result {break}
-
-    set tag ch$counter
-    #if { [ ($match) ] } { set matchtag archmatch } { set matchtag noarchmatch }
-    set matchtag [expr $match?"archmatch":"noarchmatch" ]
-    if {($match == $showmatches)} {
-        set comment [string map {"\n" "\n\t"} $comment]
-        ::deken::post "$title\n\t$comment\n" [list $tag $matchtag]
-        ::deken::highlightable_posttag $tag
-        #::deken::bind_posttag $tag <Enter> "+::deken::status {$status}"
-        ::deken::bind_posttag $tag <1> "$cmd"
-        if { "" ne $contextmenus } {
-            ::deken::bind_postmenu $mytoplevel $tag $contextmenus
+        set ::deken::results $results
+        if {[llength $results] != 0} {
+            ::deken::show_results $winid
+        } else {
+            ::pdwindow::post [_ "\[deken\] No matching externals found." ]
+            set msg [_ "Try using the full name e.g. 'freeverb~'." ]
+            ::pdwindow::debug " ${msg}"
+            ::pdwindow::post "\n"
+            ::deken::status [_ "No matching externals found." ]
         }
     }
 }
 
-# handle a clicked link
-proc ::deken::clicked_link {URL filename} {
+# display a single found entry
+proc ::deken::show_result {winid counter result showmatches} {
+    foreach {title cmd match comment status contextcmd pkgname} $result {break}
+    set tag ch$counter
+    set tags [list $tag [expr ${match}?"archmatch":"noarchmatch" ] ]
+    if { "$pkgname" ne "" } {lappend tags "/$pkgname"}
+
+    if {($match == $showmatches)} {
+        set comment [string map {"\n" "\n\t"} $comment]
+        ::deken::post "$title\n\t$comment\n" $tags
+        ::deken::highlightable_posttag $tag
+        #::deken::bind_posttag $tag <Enter> "+::deken::status {$status}"
+        ::deken::bind_posttag $tag <1> "$cmd"
+        if { "" ne $contextcmd } {
+            ::deken::bind_contextmenu $winid $tag $contextcmd
+        }
+    }
+}
+
+# display all found entry
+proc ::deken::show_results {winid} {
+    set counter 0
+    # build the list UI of results
+    foreach r $::deken::results {
+        ::deken::show_result $winid $counter $r 1
+        incr counter
+    }
+    if { "${::deken::hideforeignarch}" } {
+        # skip display of non-matching archs
+    } else {
+        set counter 0
+        foreach r $::deken::results {
+            ::deken::show_result $winid $counter $r 0
+            incr counter
+        }
+    }
+    ::deken::scrollup
+    $winid.results tag raise sel
+    $winid.results tag raise highlight
+}
+
+proc ::deken::ensure_installdir {{installdir ""} {extname ""}} {
     ## make sure that the destination path exists
     ### if ::deken::installpath is set, use the first writable item
     ### if not, get a writable item from one of the searchpaths
     ### if this still doesn't help, ask the user
-    set installdir [::deken::find_installpath]
-    set parsedname [::deken::parse_filename $filename]
-    set extname [lindex $parsedname 0]
+    if { "$installdir" != "" } {return $installdir}
 
-    if { "$installdir" == "" } {
-        if {[namespace exists ::pd_docsdir] && [::pd_docsdir::externals_path_is_valid]} {
-            # if the docspath is set, try the externals subdir
-            set installdir [::pd_docsdir::get_externals_path]
-        }
+    set installdir [::deken::find_installpath]
+    if { "$installdir" != "" } {return $installdir}
+
+    if {[namespace exists ::pd_docsdir] && [::pd_docsdir::externals_path_is_valid]} {
+        # if the docspath is set, try the externals subdir
+        set installdir [::pd_docsdir::get_externals_path]
     }
-    if { "$installdir" == "" } {
-        # ask the user (and remember the decision)
-        ::deken::prompt_installdir
-        set installdir [ ::deken::get_writable_dir [list $::deken::installpath ] ]
-    }
+    if { "$installdir" != "" } {return $installdir}
+
+    # ask the user (and remember the decision)
+    ::deken::prompt_installdir
+    set installdir [ ::deken::utilities::get_writabledir [list $::deken::installpath ] ]
+
+    set installdir [::deken::utilities::expandpath $installdir ]
     while {1} {
         if { "$installdir" == "" } {
-            set msg  [_ "Please select a (writable) installation directory!"]
-            set _args "-message $msg -type retrycancel -default retry -icon warning -parent .externals_searchui"
-            switch -- [eval tk_messageBox ${_args}] {
+            set result [tk_messageBox \
+                            -message [_ "Please select a (writable) installation directory!"] \
+                            -icon warning -type retrycancel -default retry \
+                            -parent .externals_searchui]
+            switch -- "${result}" {
                 cancel {return}
                 retry {
                     if {[::deken::prompt_installdir]} {
@@ -1107,9 +1297,11 @@ proc ::deken::clicked_link {URL filename} {
                 }
             }
         } else {
-            set msg [format [_ "Install %1\$s to %2\$s?" ] $extname $installdir]
-            set _args "-message \"$msg\" -type yesnocancel -default yes -icon question -parent .externals_searchui"
-            switch -- [eval tk_messageBox ${_args}] {
+            set result [tk_messageBox \
+                            -message [format [_ "Install %1\$s to %2\$s?" ] $extname $installdir] \
+                            -icon question -type yesnocancel -default yes \
+                            -parent .externals_searchui]
+            switch -- "${result}" {
                 cancel {return}
                 yes { }
                 no {
@@ -1136,128 +1328,60 @@ proc ::deken::clicked_link {URL filename} {
 
         if { "$installdir" != "" } {
             # try creating the installdir...just in case
-            if { [ catch { file mkdir $installdir } ] } {}
+            catch { file mkdir $installdir }
         }
         # check whether this is a writable directory
-        set installdir [ ::deken::get_writable_dir [list $installdir ] ]
+        set installdir [ ::deken::utilities::get_writabledir [list $installdir ] ]
         if { "$installdir" != "" } {
             # stop looping if we've found our dir
             break
         }
     }
-
-    set extpath [file join $installdir $extname]
-    set fullpkgfile [file join $installdir $filename]
-    ::pdwindow::debug "\[deken\]: "
-    ::pdwindow::debug [format [_ "commencing downloading of:\n%1\$s\ninto %2\$s..." ] $URL $installdir]
-    set fullpkgfile [::deken::download_file $URL $fullpkgfile]
-    if { "$fullpkgfile" eq "" } {
-        ::pdwindow::debug [_ "... aborting"]
-        ::pdwindow::debug "\n"
-        return
-    }
-    ::pdwindow::debug "\n"
-    if { "$::deken::remove_on_install" } {
-        ::deken::utilities::uninstall $installdir $extname
-    }
-
-    ::deken::utilities::extract $installdir $filename $fullpkgfile
-
-    if { "$::deken::show_readme" } {
-        foreach ext {pd html txt} {
-            set r [file join $extpath "README.deken.$ext"]
-            if {[file exists $r]} {
-                if { "$ext" == "pd" } {
-                    set directory [file normalize [file dirname $r]]
-                    set basename [file tail $r]
-                    pdsend "pd open [enquote_path $basename] [enquote_path $directory]"
-                } {
-                    pd_menucommands::menu_openfile $r
-                }
-                break
-            }
-        }
-    }
-
-    if { "$::deken::add_to_path" } {
-        # add to the search paths? bail if the version of pd doesn't support it
-        if {[uplevel 1 info procs add_to_searchpaths] eq ""} {return}
-        if {![file exists $extpath]} {
-            ::pdwindow::debug "\[deken\]: "
-            ::pdwindow::debug [format [_ "unable to add %s to search paths"] $extname]
-            ::pdwindow::debug "\n"
-            return
-        }
-        set doit yes
-        if { $::deken::add_to_path > 1 } {
-            set doit yes
-        } {
-            set msg [_ "Add %s to the Pd search paths?" ]
-            set _args "-message \"[format $msg $extname]\" -type yesno -default yes -icon question -parent .externals_searchui"
-            set doit [eval tk_messageBox ${_args}]
-        }
-        switch -- "${doit}" {
-            yes {
-                add_to_searchpaths [file join $installdir $extname]
-                ::pdwindow::debug "\[deken\]: "
-                ::pdwindow::debug [format [_ "added %s to search paths"] $extname]
-                ::pdwindow::debug "\n"
-                # if this version of pd supports it, try refreshing the helpbrowser
-                if {[uplevel 1 info procs ::helpbrowser::refresh] ne ""} {
-                    ::helpbrowser::refresh
-                }
-            }
-            no {
-                return
-            }
-        }
-    }
+    return $installdir
 }
 
-# download a file to a location
-# http://wiki.tcl.tk/15303
-proc ::deken::download_file {URL outputfilename} {
-    set URL [string map {{[} "%5b" {]} "%5d"} $URL]
-    set downloadfilename [::deken::get_tmpfilename [file dirname $outputfilename] ]
-    set f [open $downloadfilename w]
-    fconfigure $f -translation binary
-
-    set httpresult [::http::geturl $URL -binary true -progress "::deken::download_progress" -channel $f]
-    set ncode [::http::ncode $httpresult]
-    if {[expr $ncode != 200 ]} {
-        ## FIXXME: we probably should handle redirects correctly (following them...)
-        set err [::http::code $httpresult]
-        ::pdwindow::error "\[deken\]: "
-        ::pdwindow::error [format [_ "unable to download from %1\$s \[%2\$s\]" ] $URL $err ]
-        ::pdwindow::error "\n"
-        set outputfilename ""
+# handle a clicked link
+proc ::deken::clicked_link {URL filename} {
+    ## make sure that the destination path exists
+    ### if ::deken::installpath is set, use the first writable item
+    ### if not, get a writable item from one of the searchpaths
+    ### if this still doesn't help, ask the user
+    set installdir [::deken::ensure_installdir "" ${filename}]
+    if { "${installdir}" == "" } {
+        ::deken::utilities::debug [format [_ "Cancelling download of %s: No installation directory given." ] $filename]
+        ::deken::status [format [_ "Installing to non-existant directory failed" ] $filename]
+        return
     }
-    flush $f
-    close $f
-    ::http::cleanup $httpresult
-
-    if { "$outputfilename" != "" } {
-        catch { file delete $outputfilename }
-        if {[file exists $outputfilename]} {
-            ::pdwindow::debug "\[deken\]: "
-            ::pdwindow::debug [format [_ "unable to remove stray file %s" ] $outputfilename ]
-            ::pdwindow::debug "\n"
-            set outputfilename ""
+    set fullpkgfile [file join $installdir $filename]
+    ::pdwindow::debug [format [_ "Commencing downloading of:\n%1\$s\nInto %2\$s..." ] $URL $installdir]
+    ::deken::status [format [_ "Downloading '%s'" ] $filename] 0
+    ::deken::syncgui
+    set fullpkgfile [::deken::utilities::download_file $URL $fullpkgfile "::deken::download_progress"]
+    if { "$fullpkgfile" eq "" } {
+        ::deken::utilities::debug [_ "aborting."]
+        ::deken::status [format [_ "Downloading '%s' failed" ] $filename]
+        ::deken::progressstatus [_ "Download failed!" ]
+        ::deken::progress 0
+        return
+    }
+    ::deken::progressstatus [_ "Download completed! Verifying..." ]
+    ::deken::utilities::debug ""
+    if { ! [::deken::utilities::verify_sha256 ${URL} $fullpkgfile] } {
+        ::deken::status [format [_ "Checksum mismatch for '%s'" ] $filename] 0
+        if { "$::deken::verify_sha256" } {
+            if { ! "$::deken::keep_package" } {
+                catch { file delete $fullpkgfile }
+            }
+            tk_messageBox \
+                -title [_ "SHA256 verification failed" ] \
+                -message [format [_ "SHA256 verification of %s failed!" ] $fullpkgfile ] \
+                -icon error -type ok \
+                -parent .externals_searchui
+            ::deken::progress 0
+            return
         }
     }
-    if { $outputfilename != "" && "$outputfilename" != "$downloadfilename" } {
-        if {[catch { file rename $downloadfilename $outputfilename}]} {
-            ::pdwindow::debug "\[deken\]: "
-            ::pdwindow::debug [format [_ "unable to rename downloaded file to %s" ] $outputfilename ] error
-            ::pdwindow::debug "\n"
-            set outputfilename ""
-        }
-    }
-    if { "$outputfilename" eq "" } {
-        file delete $downloadfilename
-    }
-
-    return $outputfilename
+    ::deken::install_package ${fullpkgfile} ${filename} ${installdir} ${::deken::keep_package}
 }
 
 # print the download progress to the results window
@@ -1267,57 +1391,19 @@ proc ::deken::download_progress {token total current} {
     }
 }
 
-# parse a deken-packagefilename into it's components:
-# v0:: <pkgname>[-v<version>-]?{(<arch>)}-externals.<ext>
-# v1:: <pkgname>[\[<version\]]?{(<arch>)}
-# return: list <pkgname> <version> [list <arch> ...]
-proc ::deken::parse_filename {filename} {
-    set pkgname $filename
-    set archs [list]
-    set version ""
-    if { [ string match "*.dek" $filename ] } {
-        ## deken filename v1: <library>[v<version>](<arch1>)(<arch2>).dek
-        set archstring ""
-        regexp {^([^\[\]\(\)]+)((\[[^\[\]\(\)]+\])*)((\([^\[\]\(\)]+\))*)\.dek$} $filename _ pkgname optionstring _ archstring
-        foreach {o _} [lreplace [split $optionstring {[]}] 0 0] {
-            if {![string first v ${o}]} {
-                set version [string range $o 1 end]
-            } { # ignoring unknown option...
-            }
-        }
-        foreach {a _} [lreplace [split $archstring "()"] 0 0] { lappend archs $a }
-    } elseif { [ regexp {(.*)-externals\..*} $filename _ basename] } {
-        ## deken filename v0
-        set pkgname $basename
-        # basename <pkgname>[-v<version>-]?{(<arch>)}
-        ## strip off the archs
-        set baselist [split $basename () ]
-        # get pkgname + version
-        set pkgver [lindex $baselist 0]
-        if { ! [ regexp "(.*)-v(.*)-" $pkgver _ pkgname version ] } {
-            set pkgname $pkgver
-            set $version ""
-        }
-        # get archs
-        foreach {a _} [lreplace $baselist 0 0] {
-            # in filename.v0 the semantics of the last arch field ("bits") was unclear
-            # since this format predates float64 builds, we just force it to 32
-            regsub -- {-[0-9]+$} $a {-32} a
-            lappend archs $a
-        }
-        if { "x$archs$version" == "x" } {
-            # try again as <pkgname>-v<version>
-            if { ! [ regexp "(.*)-v(.*)" $pkgver _ pkgname version ] } {
-                set pkgname $pkgver
-                set $version ""
-            }
-        }
-    }
-    return [list $pkgname $version $archs]
-}
-
 # test for platform match with our current platform
 proc ::deken::architecture_match {archs} {
+    if { "translations" eq "${::deken::searchtype}" } {
+        foreach arch $archs {
+            if { "i18n" eq "${arch}" } {
+                return 1
+            }
+            if {[string match "i18n-*" ${arch}] } {
+                return 1
+            }
+        }
+        return 0
+    }
     # if there are no architecture sections this must be arch-independent
     if { ! [llength $archs] } { return 1}
     set OS "$::deken::platform(os)"
@@ -1337,7 +1423,7 @@ proc ::deken::architecture_match {archs} {
             # normalize arm-architectures by stripping away sub-architectures
             # TODO: leave any big-endian indicator in place
             regexp -- {(armv[0-9]*)[^0-9]*} $machine _ machine
-            if { "${os}" eq "${OS}" && "${floatsize}" eq "${FLOATSIZE}" } {
+            if { ("${os}" eq "${OS}") && (("${floatsize}" eq "${FLOATSIZE}") || ("${floatsize}" eq "0"))} {
                 ## so OS and floatsize match...
                 ## check whether the CPU matches as well
                 if { "${machine}" eq "${MACHINE}" } {return 1}
@@ -1362,7 +1448,7 @@ proc ::deken::search_for {term} {
             foreach r [ $searcher $term ] {
                 if { "" eq [lindex $r 0] } {
                     # data is already normalized
-                } {
+                } else {
                     # legacy data format
                     foreach {title cmd match comment status} $r {break}
                     set r [::deken::normalize_result $title $cmd $match $comment $status]
@@ -1370,35 +1456,62 @@ proc ::deken::search_for {term} {
                 lappend result [lrange $r 1 end]
             }
         } stdout] } {
-            ::pdwindow::debug "\[deken\]: $searcher: $stdout"
+            ::deken::utilities::debug "\[deken\] $searcher: $stdout"
         }
     }
     return $result
 }
 
-# create an entry for our search in the "help" menu (or re-use an existing one)
-set mymenu .menubar.help
-if { [catch {
-    $mymenu entryconfigure [_ "Find externals"] -command {::deken::open_searchui .externals_searchui}
-} _ ] } {
-    $mymenu add separator
-    $mymenu add command -label [_ "Find externals"] -command {::deken::open_searchui .externals_searchui}
+
+proc ::deken::initialize {} {
+    # console message to let them know we're loaded
+    ## but only if we are being called as a plugin (not as built-in)
+    if { "" != "$::current_plugin_loadpath" } {
+        ::deken::utilities::debug [format [_ "\[deken\] deken-plugin.tcl (Pd externals search) loaded from %s." ] $::current_plugin_loadpath ]
+    }
+    set msg [format [_ "\[deken\] Platform detected: %s" ] [::deken::platform2string 1] ]
+    ::pdwindow::verbose 0 "${msg}\n"
+
+    # try to set install path when plugin is loaded
+    set ::deken::installpath [::deken::find_installpath]
+
+
+    # create an entry for our search in the "help" menu (or re-use an existing one)
+    set mymenu .menubar.help
+    if { [catch {
+        $mymenu entryconfigure [_ "Find externals"] -command {::deken::open_searchui .externals_searchui}
+    } _ ] } {
+        $mymenu add separator
+        $mymenu add command -label [_ "Find externals"] -command {::deken::open_searchui .externals_searchui}
+    }
+    # bind all <$::modifier-Key-s> {::deken::open_helpbrowser .helpbrowser2}
 }
-# bind all <$::modifier-Key-s> {::deken::open_helpbrowser .helpbrowser2}
 
-# http://rosettacode.org/wiki/URL_decoding#Tcl
-proc urldecode {str} {
-    set specialMap {"[" "%5B" "]" "%5D"}
-    set seqRE {%([0-9a-fA-F]{2})}
-    set replacement {[format "%c" [scan "\1" "%2x"]]}
-    set modStr [regsub -all $seqRE [string map $specialMap $str] $replacement]
-    return [encoding convertfrom utf-8 [subst -nobackslash -novariable $modStr]]
+
+# ######################################################################
+# ################ search backends #####################################
+# ######################################################################
+
+proc ::deken::register {fun} {
+    # register a searchfunction with deken.
+    # the searchfunction <fun> will be called with a <searchterm>,
+    # and must return a list of <result>.
+    # <searchterm> is a list of (whitespace separated) words.
+    # each word denotes a library or library-object to search for and may
+    # contain wildcards ("*").
+    # the <result> should be normalized via ::deken::search::normalize_result
+    # failing to do so, a <result> is a list <name> <cmd> <match> <comment> <status> <args...>
+    # - <title> non-empty name of the library (to be shown to the user as search-result)
+    # - <cmd>  the full command to run to install the library
+    # - <match> boolean value to indicate whether this entry matches the current architecture
+    # - <subtitle> additional text to be shown under the <name>
+    # - <status> additional text to be shown in the STATUS line if the mouse hovers over the result
+    # - <args>... additional args (ignored)
+    # the library <name> must be non-empty (and empty value is reserved for normalized results)
+
+    set ::deken::backends [linsert $::deken::backends 0 $fun]
 }
 
-
-# ####################################################################
-# search backends
-# ####################################################################
 
 ## API draft
 
@@ -1436,15 +1549,20 @@ proc urldecode {str} {
 
 ## ####################################################################
 ## searching puredata.info
-proc ::deken::search::puredata.info {term} {
+namespace eval ::deken::search::puredata.info { }
+proc ::deken::search::puredata.info::search {term} {
     set searchresults [list]
     set dekenserver "${::deken::protocol}://deken.puredata.info/search"
     catch {set dekenserver $::env(DEKENSERVER)} stdout
     set queryterm {}
-    foreach x $term {lappend queryterm name $x}
-    if { [ catch {set queryterm [::http::formatQuery {*}$queryterm ] } stderr ] } {
-        set queryterm [ join $term "&name=" ]
-        set queryterm "name=${queryterm}"
+    if { ${::deken::searchtype} eq "translations" && ${term} eq "" } {
+        # special handling of searching for all translations (so we ONLY get translations)
+        set term {*}
+    }
+    foreach x $term {lappend queryterm ${::deken::searchtype} $x}
+    if { [ catch {set queryterm [::http::formatQuery {*}$queryterm ] } stdout ] } {
+        set queryterm [ join $term "&${::deken::searchtype}=" ]
+        set queryterm "${::deken::searchtype}=${queryterm}"
     }
 
     # deken-specific socket config
@@ -1455,17 +1573,27 @@ proc ::deken::search::puredata.info {term} {
     ::http::config -useragent "Deken/${::deken::version} ([::deken::platform2string]) ${pdversion} Tcl/[info patchlevel]"
 
     # fetch search result
-    set token [::http::geturl "${dekenserver}?${queryterm}"]
+    if { [catch {
+        set token [::http::geturl "${dekenserver}?${queryterm}"]
+    } stdout ] } {
+        set msg [format [_ "Searching for '%s' failed!" ] $term ]
+        tk_messageBox \
+            -title [_ "Search failed" ] \
+            -message "${msg}\n$stdout" \
+            -icon error -type ok \
+            -parent .externals_searchui
+        return
+    }
 
     # restore http settings
     ::http::config -accept $httpaccept
     ::http::config -useragent $httpagent
 
     set ncode [::http::ncode $token]
-    if {[expr $ncode != 200 ]} {
+    if { $ncode != 200 } {
         set err [::http::code $token]
-        ::pdwindow::debug [format "\[deken\]: %s %s" [_ "unable to perform search" ] ${err} ]
-        ::pdwindow::debug "\n"
+        set msg [_ "\[deken\] Unable to perform search."]
+        ::deken::utilities::debug "$msg\n   ${err}"
         return {}
     }
     set contents [::http::data $token]
@@ -1473,47 +1601,133 @@ proc ::deken::search::puredata.info {term} {
 
     set splitCont [split $contents "\n"]
     # loop through the resulting tab-delimited table
+    if { [catch {
+        set latestrelease0 [dict create]
+        set latestrelease1 [dict create]
+        set newestversion [dict create]
+        foreach ele $splitCont {
+            set ele [ string trim $ele ]
+            if { "" ne $ele } {
+                foreach {name URL creator date} [ split $ele "\t" ] {break}
+                set filename [ file tail $URL ]
+                foreach {pkgname version archs} [ ::deken::utilities::parse_filename $filename ] {break}
+
+                #if { $version eq "0.0.extended" } { set date "0000-00-00 00:02:00" }
+                set olddate {}
+                set match [::deken::architecture_match "$archs" ]
+
+                if { ${match} } {
+                    catch { set olddate [dict get ${latestrelease1} $pkgname] }
+
+                    set oldversion {}
+                    catch { set oldversion [dict get ${newestversion} $pkgname]}
+                    if { [::deken::versioncompare $version $oldversion] > 0 } {
+                        dict set newestversion $pkgname $version
+                    }
+                } else {
+                    catch { set olddate [dict get ${latestrelease0} $pkgname] }
+                }
+
+                if { $date > $olddate } {
+                    dict set latestrelease${match} $pkgname $date
+                }
+            }
+        }
+    } stdout ] } {
+        set latestrelease0 {}
+        set latestrelease1 {}
+        set newestversion {}
+    }
     foreach ele $splitCont {
         set ele [ string trim $ele ]
         if { "" ne $ele } {
-            set sele [ split $ele "\t" ]
-
-            set name  [ string trim [ lindex $sele 0 ]]
-            set URL   [ string trim [ lindex $sele 1 ]]
-            set creator [ string trim [ lindex $sele 2 ]]
-            set date    [regsub -all {[TZ]} [ string trim [ lindex $sele 3 ] ] { }]
-            set decURL [urldecode $URL]
-            set saveURL [string map {"[" "%%5B" "]" "%%5D"} $URL]
+            foreach {name URL creator date} [ split $ele "\t" ] {break}
+            set decURL [::deken::utilities::urldecode $URL]
             set filename [ file tail $URL ]
             set cmd [list ::deken::clicked_link $decURL $filename]
-            set pkgverarch [ ::deken::parse_filename $filename ]
+            set pkgverarch [ ::deken::utilities::parse_filename $filename ]
+            set pkgname [lindex $pkgverarch 0]
+            set version [lindex $pkgverarch 1]
             set archs [lindex $pkgverarch 2]
 
             set match [::deken::architecture_match "$archs" ]
-
             set comment [format [_ "Uploaded by %1\$s @ %2\$s" ] $creator $date ]
             set status $URL
-            set sortname [lindex $pkgverarch 0]--[lindex $pkgverarch 1]--$date
-            set menus [list \
-                           [_ "Install package" ] $cmd \
-                           [_ "Open webpage" ] "pd_menucommands::menu_openfile [file dirname ${URL}]" \
-                           [_ "Copy package URL" ] "clipboard clear; clipboard append $saveURL" \
-                           [_ "Copy SHA256 checksum URL" ] "clipboard clear; clipboard append ${saveURL}.sha256" \
-                           [_ "Copy OpenGPG signature URL" ] "clipboard clear; clipboard append ${saveURL}.asc" \
-                          ]
-            set res [list $sortname $filename $name $cmd $match $comment $status $menus]
+            set sortprefix "0000-00-00 00:01:00"
+            if { ${match} == 0 } {
+                catch { set sortprefix [dict get ${latestrelease0} $pkgname] }
+            } else {
+                if { "${::deken::hideoldversions}" } {
+                    # If this version is not the newest one, mark it as unmatched
+                    catch {
+                        set oldversion [dict get ${newestversion} $pkgname]
+                        if { [::deken::versioncompare $version $oldversion] < 0 } {
+                            set match 0
+                        }
+                    }
+                }
+            }
+            catch { set sortprefix [dict get ${latestrelease1} $pkgname] }
+            set sortname "${sortprefix}/${pkgname}/${version}/${date}"
+            set contextcmd [list ::deken::search::puredata.info::contextmenu %W %x %y $URL]
+            set res [list $sortname $filename $name $cmd $match $comment $status $contextcmd $pkgname]
             lappend searchresults $res
         }
     }
     set sortedresult []
     foreach r [lsort -command ::deken::versioncompare -decreasing -index 0 $searchresults ] {
-        foreach {_ _ title cmd match comment status menus} $r {
-            lappend sortedresult [::deken::normalize_result $title $cmd $match $comment $status $menus]
+        foreach {sortname filename title cmd match comment status menus pkgname} $r {
+            lappend sortedresult [::deken::normalize_result $title $cmd $match $comment $status $menus $pkgname]
             break
         }
     }
     return $sortedresult
 }
+proc ::deken::search::puredata.info::contextmenu {widget theX theY URL} {
+    set m .dekenresults_contextMenu
+    if { [winfo exists $m] } {
+        destroy $m
+    }
+    menu $m
 
-::deken::register ::deken::search::puredata.info
+    set saveURL [string map {"[" "%5B" "]" "%5D"} $URL]
+    set decURL [::deken::utilities::urldecode $URL]
+    set filename [ file tail $URL ]
+    set pkgverarch [ ::deken::utilities::parse_filename $filename ]
+    set pkgname [lindex $pkgverarch 0]
+    set cmd [list ::deken::clicked_link $decURL $filename]
+
+    set selcount 0
+    set selected 0
+    foreach {k v} $::deken::selected {
+        if { ${v} != {} } {incr selcount}
+        if { ($k eq $pkgname) && ($v eq $cmd) } {
+            set selected 1
+            break
+        }
+    }
+
+    if { $selected } {
+        set selmsg [_ "Deselect package" ]
+    } else {
+        set selmsg [_ "Select package for installation" ]
+    }
+    $m add command -label "${selmsg}" -command "::deken::menu_selectpackage .externals_searchui $pkgname {$cmd}"
+    $m add separator
+    if { $selcount } {
+        $m add command -label [_ "Install selected packages" ] -command "::deken::menu_installselected .externals_searchui"
+    } else {
+        $m add command -label [_ "Install package" ] -command $cmd
+    }
+    $m add separator
+    $m add command -label [_ "Open package webpage" ] -command "pd_menucommands::menu_openfile [file dirname ${URL}]"
+    $m add command -label [_ "Copy package URL" ] -command "clipboard clear; clipboard append $saveURL"
+    $m add command -label [_ "Copy SHA256 checksum URL" ] -command "clipboard clear; clipboard append ${saveURL}.sha256"
+    $m add command -label [_ "Copy OpenGPG signature URL" ] -command "clipboard clear; clipboard append ${saveURL}.asc"
+    tk_popup $m [expr [winfo rootx $widget] + $theX] [expr [winfo rooty $widget] + $theY]
+}
+
+
+::deken::initialize
+::deken::register ::deken::search::puredata.info::search
 }

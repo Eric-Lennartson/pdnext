@@ -78,13 +78,27 @@ proc audio_popup {name buttonname varname devlist} {
     tk_popup $name.popup $x $y 0
 }
 
+
+# check if the value has an 'unchangeable' marker (a '!'-prefix)
+# returns the value (without the marker) and a boolean whether the marker was set
+# e.g. '!44100' -> {44100 1}
+proc ::dialog_audio::isfixed {value} {
+    set fixed 0
+    if { [string match "!*" ${value}] } {
+        set fixed 1
+    }
+    list [string trimleft "${value}" "!"] $fixed
+}
+
 # start a dialog window to select audio devices and settings.  "multi"
 # is 0 if only one device is allowed; 1 if one apiece may be specified for
 # input and output; and 2 if we can select multiple devices.  "longform"
 # (which only makes sense if "multi" is 2) asks us to make controls for
 # opening several devices; if not, we get an extra button to turn longform
 # on and restart the dialog.
-
+#
+# sr, advance, callback and blocksize can be prefixed with '!', indicating
+# that these values must not be changed by the GUI
 proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
         indev1 indev2 indev3 indev4 \
         inchan1 inchan2 inchan3 inchan4 \
@@ -130,10 +144,10 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     set audio_outchan4 [expr ( $outchan4 > 0 ? $outchan4 : -$outchan4 ) ]
     set audio_outenable4 [expr $outchan4 > 0 ]
 
-    set audio_sr $sr
-    set audio_advance $advance
-    set audio_callback $callback
-    set audio_blocksize $blocksize
+    foreach {audio_sr audio_isfixedsr} [::dialog_audio::isfixed $sr] {}
+    foreach {audio_advance audio_isfixedadvance} [::dialog_audio::isfixed $advance] {}
+    foreach {audio_callback audio_isfixedcallback} [::dialog_audio::isfixed $callback] {}
+    foreach {audio_blocksize audio_isfixedbs} [::dialog_audio::isfixed $blocksize] {}
 
     toplevel $mytoplevel
     wm withdraw $mytoplevel
@@ -145,26 +159,26 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     $mytoplevel configure -menu $::dialog_menubar
     ::pd_bindings::dialog_bindings $mytoplevel "audio"
 
-    ttk::frame $mytoplevel.w -padding 5 
+    ttk::frame $mytoplevel.w -padding 5
     set ::audioWin $mytoplevel.w
 
 # Settings Widgets
-    ttk::labelframe $::audioWin.settings -text " Settings " -padding "3 2 3 3" 
-    
-    ttk::label $::audioWin.settings.sampleRateLabel -text "Sample rate:" 
+    ttk::labelframe $::audioWin.settings -text " Settings " -padding "3 2 3 3"
+
+    ttk::label $::audioWin.settings.sampleRateLabel -text "Sample rate:"
     ttk::combobox $::audioWin.settings.sampleRate -textvariable audio_sr -width 8 \
-        -values {44100 48000 882000 96000 176000 192000} 
-    bind $::audioWin.settings.sampleRate <<ComboboxSelected>> { 
+        -values {44100 48000 882000 96000 176000 192000}
+    bind $::audioWin.settings.sampleRate <<ComboboxSelected>> {
         $::audioWin.settings.sampleRate selection clear
     }
 
-    ttk::label $::audioWin.settings.delayLabel -text "Delay (msec):" 
-    ttk::entry $::audioWin.settings.delay -textvariable audio_advance -width 4 
+    ttk::label $::audioWin.settings.delayLabel -text "Delay (msec):"
+    ttk::entry $::audioWin.settings.delay -textvariable audio_advance -width 4
 
-    ttk::label $::audioWin.settings.blockSizeLabel -text "Block size:" 
+    ttk::label $::audioWin.settings.blockSizeLabel -text "Block size:"
     ttk::combobox $::audioWin.settings.blockSize -textvariable audio_blocksize -width 4 \
-        -values {64 128 256 512 1024 2048} 
-    bind $::audioWin.settings.blockSize <<ComboboxSelected>> { 
+        -values {64 128 256 512 1024 2048}
+    bind $::audioWin.settings.blockSize <<ComboboxSelected>> {
         $::audioWin.settings.blockSize selection clear
     }
 
@@ -178,16 +192,16 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     # }
 
 # Input Widgets
-    ttk::labelframe $::audioWin.inputs -text " Input " -padding "3 2 3 3" 
+    ttk::labelframe $::audioWin.inputs -text " Input Device " -padding "3 2 3 3"
 
     # input device 1
     ttk::checkbutton $::audioWin.inputs.enableInput -variable audio_inenable1 \
          ;#-text "1:"
     ttk::button $::audioWin.inputs.inputSelect -text [lindex $audio_indevlist $audio_indev1] \
         -command [list audio_popup $mytoplevel $::audioWin.inputs.inputSelect audio_indev1 $audio_indevlist] \
-        -width 18 
-    ttk::label $::audioWin.inputs.numChannelsLabel -text "Channels:" 
-    ttk::entry $::audioWin.inputs.numChannels -textvariable audio_inchan1 -width 3 
+        -width 18
+    ttk::label $::audioWin.inputs.numChannelsLabel -text "Channels:"
+    ttk::entry $::audioWin.inputs.numChannels -textvariable audio_inchan1 -width 3
 
 # Multi Input Code (inactive for now)
     # input device 2
@@ -242,7 +256,7 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     # }
 
 # Output Widgets
-    ttk::labelframe $::audioWin.outputs -text " Output " -padding "3 2 3 3" 
+    ttk::labelframe $::audioWin.outputs -text " Output Device " -padding "3 2 3 3"
 
     # output device 1
     ttk::checkbutton $::audioWin.outputs.enableOutput -variable audio_outenable1 \
@@ -253,10 +267,10 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
     # } else {
         ttk::button $::audioWin.outputs.outputSelect -text [lindex $audio_outdevlist $audio_outdev1] \
             -command  [list audio_popup $mytoplevel $::audioWin.outputs.outputSelect audio_outdev1 $audio_outdevlist] \
-            -width 18 
+            -width 18
     # }
-    ttk::label $::audioWin.outputs.numChannelsLabel -text "Channels:" 
-    ttk::entry $::audioWin.outputs.numChannels -textvariable audio_outchan1 -width 3 
+    ttk::label $::audioWin.outputs.numChannelsLabel -text "Channels:"
+    ttk::entry $::audioWin.outputs.numChannels -textvariable audio_outchan1 -width 3
 
 # Multi Output Code (inactive for now)
     # if {$multi == 0} {
@@ -332,18 +346,17 @@ proc ::dialog_audio::pdtk_audio_dialog {mytoplevel \
 # Button Widgets
     ttk::button $::audioWin.saveall -text "Save All Settings" -width -1 \
         -command "::dialog_audio::apply $mytoplevel; pdsend \"pd save-preferences\"" \
-        
 
-    ttk::frame $::audioWin.buttonframe 
+    ttk::frame $::audioWin.buttonframe
     ttk::button $::audioWin.buttonframe.cancel -text "Cancel" \
         -command "::dialog_audio::cancel $mytoplevel" \
-        
+
     ttk::button $::audioWin.buttonframe.apply -text "Apply" \
         -command "::dialog_audio::apply $mytoplevel" \
-        
+
     ttk::button $::audioWin.buttonframe.ok -text "OK" \
         -command "::dialog_audio::ok $mytoplevel" -default active \
-        
+
 
 # Layout
     grid $::audioWin -column 0 -row 0 -sticky nwes

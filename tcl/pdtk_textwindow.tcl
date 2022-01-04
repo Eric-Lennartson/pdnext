@@ -23,7 +23,10 @@ proc pdtk_textwindow_open {name geometry title font} {
             [concat pdtk_textwindow_close $name 1]
         bind $name <<Modified>> "pdtk_textwindow_dodirty $name"
         text $name.text -relief raised -highlightthickness 0 -bd 2 \
-            -font [get_font_for_size $font] -yscrollcommand "$name.scroll set"
+            -font [get_font_for_size $font] \
+            -exportselection 1 -undo 1 \
+            -yscrollcommand "$name.scroll set"
+
 		set tmpcol [::pdtk_canvas::get_color text_window_text $name]
 		if {$tmpcol ne ""} {
 			$name.text configure -foreground $tmpcol
@@ -40,11 +43,19 @@ proc pdtk_textwindow_open {name geometry title font} {
 		if {$tmpcol ne ""} {
 			$name.text configure -selectbackground $tmpcol
 		}
+		set tmpcol [::pdtk_canvas::get_color text_window_hl_text $name]
+		if {$tmpcol ne ""} {
+			$name.text configure -selectforeground $tmpcol
+		}
         scrollbar $name.scroll -command "$name.text yview"
         pack $name.scroll -side right -fill y
         pack $name.text -side left -fill both -expand 1
         bind $name.text <$::modifier-Key-s> "pdtk_textwindow_send $name"
         bind $name.text <$::modifier-Key-w> "pdtk_textwindow_close $name 1"
+        bind $name.text <$::modifier-Key-a> "pdtk_textwindow_selectall $name; break"
+        bind $name.text <$::modifier-Key-z> "pdtk_textwindow_undo $name; break"
+        bind $name.text <$::modifier-Shift-Key-Z> "pdtk_textwindow_redo $name; break"
+        bind $name.text <$::modifier-Shift-Key-z> "pdtk_textwindow_redo $name; break"
         focus $name.text
     }
 }
@@ -114,5 +125,24 @@ proc pdtk_textwindow_close {name ask} {
             if {$answer == "yes"} {pdtk_textwindow_send $name}
             if {$answer != "cancel"} {pdsend [concat $name close]}
         } else {pdsend [concat $name close]}
+    }
+}
+
+proc pdtk_textwindow_selectall {name} {
+    if {[winfo exists $name]} {
+        $name.text tag add sel 1.0 end
+        $name.text mark set insert end
+    }
+}
+
+proc pdtk_textwindow_undo {name} {
+    if {[winfo exists $name]} {
+        catch {$name.text edit undo}
+    }
+}
+
+proc pdtk_textwindow_redo {name} {
+    if {[winfo exists $name]} {
+        catch {$name.text edit redo}
     }
 }

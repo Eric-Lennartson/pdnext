@@ -14,7 +14,9 @@
 # signal_cord - signal cord and outline of signal inlets
 # msg_cord - message cord and outline of message inlets
 # msg_iolet - message inlet/outlet fill
+# msg_iolet_border - border/outline of message inlet
 # signal_iolet - signal inlet/outlet fill
+# signal_iolet_border - border/outline of signal iolet
 # graph_outline - outline of arrays and GOP patches in the parent patch
 # graph_text - color of the names of GOP patches in the parent patch
 # selection_rectangle - selection rectangle color in edit mode
@@ -25,9 +27,11 @@
 # atom_box_text - text of gatoms
 # atom_box_label - label of gatoms
 # atom_box_outline - outline of gatoms
+# atom_box_focus_outline - outline of gatoms with keyboard focus
 # text_window_fill - [text] window background
 # text_window_text - [text] window text
 # text_window_highlight - like txt_highlight but for [text] window
+# text_window_hl_text - color of highlighted text in [text] window
 # text_window_cursor - [text] window cursor
 # pdwindow_fill - background of post window
 # pdwindow_fatal_text - text for fatal errors
@@ -38,6 +42,7 @@
 # helpbrowser_fill
 # helpbrowser_text
 # helpbrowser_highlight - like txt_highlight but for help browser
+# helpbrowser_hl_text - text highlight color (defaults to helpbrowser_text)
 
 # this is an example of a color plugin for pure data (saved as a .tcl file)
 array set ::pd_colors {
@@ -68,8 +73,9 @@ atom_box_label "black"
 atom_box_outline "cyan"
 text_window_fill "black"
 text_window_text "white"
-text_window_highlight "#00FF00"
-text_window_cursor "#00FF00"
+text_window_hl_text "white"
+text_window_highlight "green"
+text_window_cursor "green"
 pdwindow_fill "#000"
 pdwindow_fatal_text "#D00"
 pdwindow_fatal_highlight "#FFE0E8"
@@ -79,11 +85,13 @@ pdwindow_debug_text "green"
 helpbrowser_fill "#000"
 helpbrowser_text "deep sky blue"
 helpbrowser_highlight "red"
+helpbrowser_hl_text "white"
 canvas_text_cursor "deep sky blue"
 }
 set ::pd_colors(txt_highlight_front) $::pd_colors(selected)
 set ::pd_colors(msg_iolet_border) $::pd_colors(msg_cord)
 set ::pd_colors(signal_iolet_border) $::pd_colors(signal_cord)
+set ::pd_colors(atom_box_focus_outline) $::pd_colors(atom_box_outline)
 
 # how to set individual colors
 #set ::pd_colors(msg_box_fill) "white"

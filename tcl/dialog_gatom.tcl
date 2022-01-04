@@ -2,6 +2,7 @@ package provide dialog_gatom 0.1
 package require wheredoesthisgo
 
 namespace eval ::dialog_gatom:: {
+    variable sizes {0 8 10 12 16 24 36}
     namespace export pdtk_gatom_dialog
 }
 
@@ -16,7 +17,7 @@ array set gatomlabel_radio {}
 
 ############ pdtk_gatom_dialog -- run a gatom dialog #########
 
-# manages string bullshit
+# todo redo the escaping and unescaping, this is horrible
 proc ::dialog_gatom::escape {sym} {
     if {[string length $sym] == 0} {
         set ret "-"
@@ -24,10 +25,10 @@ proc ::dialog_gatom::escape {sym} {
         if {[string equal -length 1 $sym "-"]} {
             set ret [string replace $sym 0 0 "--"]
         } else {
-            set ret [string map {"$" "#"} $sym]
+            set ret $sym
         }
     }
-    return [unspace_text $ret]
+    return [string map {"$" {\$}} [unspace_text $ret]]
 }
 
 # manages string bullshit
@@ -35,9 +36,9 @@ proc ::dialog_gatom::unescape {sym} {
     if {[string equal -length 1 $sym "-"]} {
         set ret [string replace $sym 0 0 ""]
     } else {
-        set ret [string map {"#" "$"} $sym]
+        set ret $sym
     }
-    return $ret
+    return [respace_text $ret]
 }
 
 proc ::dialog_gatom::apply {mytoplevel} {
@@ -50,7 +51,8 @@ proc ::dialog_gatom::apply {mytoplevel} {
         [::dialog_gatom::escape [$::f.settings.lblEntry get]] \
         $gatomlabel_radio($mytoplevel) \
         [::dialog_gatom::escape [$::f.settings.rcvEntry get]] \
-        [::dialog_gatom::escape [$::f.settings.sndEntry get]]"
+        [::dialog_gatom::escape [$::f.settings.sndEntry get]] \
+        $::dialog_gatom::fontsize"
 }
 
 proc ::dialog_gatom::cancel {mytoplevel} {
@@ -64,11 +66,11 @@ proc ::dialog_gatom::ok {mytoplevel} {
 
 # set up the panel with the info from pd
 proc ::dialog_gatom::pdtk_gatom_dialog {mytoplevel initwidth initlower initupper \
-                                     initgatomlabel_radio \
-                                     initgatomlabel initreceive initsend} {
+    initgatomlabel_radio  initgatomlabel initreceive initsend  fontsize} {
+
     global gatomlabel_radio
     set gatomlabel_radio($mytoplevel) $initgatomlabel_radio
-
+    set ::dialog_gatom::fontsize $fontsize
     if {[winfo exists $mytoplevel]} {
         wm deiconify $mytoplevel
         raise $mytoplevel
@@ -113,40 +115,56 @@ proc ::dialog_gatom::create_dialog {mytoplevel} {
 
     # width widgets
     ttk::labelframe $::f.settings -text " Atom Box "
-    ttk::label $::f.settings.widthLabel -text "Width:" 
-    ttk::entry $::f.settings.widthEntry -width 6 
-    ttk::separator $::f.settings.sep1 -orient "horizontal" 
+    ttk::label $::f.settings.widthLabel -text "Width:"
+    ttk::entry $::f.settings.widthEntry -width 6
+    ttk::separator $::f.settings.sep1 -orient "horizontal"
     # Limits widgets
-    ttk::label $::f.settings.minLabel -text "Minimum:" 
-    ttk::entry $::f.settings.minEntry -width 6 
-    ttk::label $::f.settings.maxLabel -text "Maximum:" 
-    ttk::entry $::f.settings.maxEntry -width 6 
-    ttk::separator $::f.settings.sep2 -orient "horizontal" 
+    ttk::label $::f.settings.minLabel -text "Minimum:"
+    ttk::entry $::f.settings.minEntry -width 6
+    ttk::label $::f.settings.maxLabel -text "Maximum:"
+    ttk::entry $::f.settings.maxEntry -width 6
+    ttk::separator $::f.settings.sep2 -orient "horizontal"
     # send and recieve widgets
-    ttk::label $::f.settings.sndLabel -text "Send symbol:" 
-    ttk::entry $::f.settings.sndEntry -width 10 
-    ttk::label $::f.settings.rcvLabel -text "Receive symbol:" 
-    ttk::entry $::f.settings.rcvEntry -width 10 
-    ttk::separator $::f.settings.sep3 -orient "horizontal" 
+    ttk::label $::f.settings.sndLabel -text "Send symbol:"
+    ttk::entry $::f.settings.sndEntry -width 10
+    ttk::label $::f.settings.rcvLabel -text "Receive symbol:"
+    ttk::entry $::f.settings.rcvEntry -width 10
+    ttk::separator $::f.settings.sep3 -orient "horizontal"
     # gatom label and position widgets
-    ttk::label $::f.settings.gatomLabel -text "Label:" 
-    ttk::entry $::f.settings.lblEntry -width 10 
-    # ttk::frame $::f.settings.pad 
-    ttk::labelframe $::f.settings.position -text " Position " 
+    ttk::label $::f.settings.gatomLabel -text "Label:"
+    ttk::entry $::f.settings.lblEntry -width 10
+    # ttk::frame $::f.settings.pad
+    ttk::labelframe $::f.settings.position -text " Position "
     ttk::radiobutton $::f.settings.position.left -value 0 \
-        -text "Left" -variable gatomlabel_radio($mytoplevel) 
+        -text "Left" -variable gatomlabel_radio($mytoplevel)
     ttk::radiobutton $::f.settings.position.right -value 1 \
-        -text "Right" -variable gatomlabel_radio($mytoplevel) 
+        -text "Right" -variable gatomlabel_radio($mytoplevel)
     ttk::radiobutton $::f.settings.position.top -value 2 \
-        -text "Top" -variable gatomlabel_radio($mytoplevel) 
+        -text "Top" -variable gatomlabel_radio($mytoplevel)
     ttk::radiobutton $::f.settings.position.bottom -value 3 \
-        -text "Bottom" -variable gatomlabel_radio($mytoplevel) 
+        -text "Bottom" -variable gatomlabel_radio($mytoplevel)
+    # font size widgets
+    ttk::labelframe $::f.settings.fontsize -text " Font Size "
+    ttk::radiobutton $::f.settings.fontsize.radioAuto -value 0 \
+        -text "Auto" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio8 -value 8 \
+        -text "8" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio10 -value 10 \
+        -text "10" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio12 -value 12 \
+        -text "12" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio16 -value 16 \
+        -text "16" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio24 -value 24 \
+        -text "24" -variable ::dialog_gatom::fontsize
+    ttk::radiobutton $::f.settings.fontsize.radio36 -value 36 \
+        -text "36" -variable ::dialog_gatom::fontsize
     # cancel ok and apply widgets
     ttk::frame $::f.buttonFrame
     ttk::button $::f.buttonFrame.cancel -text "Cancel" \
-        -command "::dialog_gatom::cancel $mytoplevel" 
+        -command "::dialog_gatom::cancel $mytoplevel"
     ttk::button $::f.buttonFrame.apply -text "Apply" \
-        -command "::dialog_gatom::apply $mytoplevel" 
+        -command "::dialog_gatom::apply $mytoplevel"
     ttk::button $::f.buttonFrame.ok -text "OK" \
         -command "::dialog_gatom::ok $mytoplevel" -default active
 
@@ -155,7 +173,7 @@ proc ::dialog_gatom::create_dialog {mytoplevel} {
     grid $::f.settings -column 0 -row 0 -sticky nwes
     # width ########################################################
     grid $::f.settings.widthLabel -column 0 -row 1 -sticky w -padx 10
-    grid $::f.settings.widthEntry -column 1 -row 1 -sticky w 
+    grid $::f.settings.widthEntry -column 1 -row 1 -sticky w
     grid $::f.settings.sep1 -column 0 -row 2 -sticky we -padx 12
     # min/max #####################################################
     grid $::f.settings.minLabel -column 0 -row 3 -sticky w -padx 10
@@ -178,9 +196,18 @@ proc ::dialog_gatom::create_dialog {mytoplevel} {
     grid $::f.settings.position.right  -column 1 -row 0 -padx 3 -pady 1
     grid $::f.settings.position.top    -column 2 -row 0 -padx 3 -pady 1
     grid $::f.settings.position.bottom -column 3 -row 0 -padx 3 -pady 1
+    # font size ######################################################
+    grid $::f.settings.fontsize -column 0 -row 11 -columnspan 3 -pady 3 -padx 6
+    grid $::f.settings.fontsize.radioAuto -column 0 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio8 -column 1 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio10 -column 2 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio12 -column 3 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio16 -column 4 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio24 -column 5 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize.radio36 -column 6 -row 0 -padx 3 -pady 1
     # ok/apply/cancel ################################################
     grid $::f.buttonFrame -column 0 -row 1 -pady 1
-    grid $::f.buttonFrame.ok -column 0 -row 0 
+    grid $::f.buttonFrame.ok -column 0 -row 0
     grid $::f.buttonFrame.apply -column 1 -row 0 -padx 2
     grid $::f.buttonFrame.cancel -column 2 -row 0
 

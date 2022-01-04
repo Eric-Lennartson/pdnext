@@ -50,7 +50,7 @@ proc ::dialog_path::create_dialog {mytoplevel} {
     # scroll box is defined in scrollbox.tcl and scrollboxwindow.tcl
     ::scrollboxwindow::make $mytoplevel $::sys_searchpath \
         dialog_path::add dialog_path::edit dialog_path::commit \
-        [_ "Search Paths"] \
+        [_ "Search paths for objects, help, audio, text and other files"] \
         450 300 1
     wm withdraw $mytoplevel
     wm resizable $mytoplevel 0 0
@@ -59,11 +59,11 @@ proc ::dialog_path::create_dialog {mytoplevel} {
 
 # Widgets (Some widgets are defined in scrollboxwindow and scrollbox)
 # Path options
-    ttk::frame $mytoplevel.w.pathOptions 
+    ttk::frame $mytoplevel.w.pathOptions
     ttk::checkbutton $mytoplevel.w.pathOptions.extra -text "Standard Paths" \
-        -variable use_standard_paths_button 
+        -variable use_standard_paths_button
     ttk::checkbutton $mytoplevel.w.pathOptions.verbose -text "Verbose" \
-        -variable verbose_button 
+        -variable verbose_button
 
 # Docs Directory
     # add docsdir path widgets if pd_docsdir is loaded
@@ -73,19 +73,19 @@ proc ::dialog_path::create_dialog {mytoplevel} {
         set docspath $::pd_docsdir::docspath
         ttk::labelframe $mytoplevel.w.docspath -text " Documents Directory " \
             -padding 5
-        ttk::frame $mytoplevel.w.docspath.path 
+        ttk::frame $mytoplevel.w.docspath.path
         ttk::entry $mytoplevel.w.docspath.path.entry -textvariable docspath -width 38 \
-            -takefocus 0 -state readonly 
+            -takefocus 0 -state readonly
         ttk::button $mytoplevel.w.docspath.path.browse -text [_ "Browse"] \
             -command "::dialog_path::browse_docspath $mytoplevel" \
-            
-        ttk::frame $mytoplevel.w.docspath.buttons 
+
+        ttk::frame $mytoplevel.w.docspath.buttons
         ttk::button $mytoplevel.w.docspath.buttons.reset -text [_ "Reset"] \
             -command "::dialog_path::reset_docspath $mytoplevel" \
-            
+
         ttk::button $mytoplevel.w.docspath.buttons.disable -text [_ "Disable"] \
             -command "::dialog_path::disable_docspath $mytoplevel" \
-            
+
         # scroll to right for long paths
         $mytoplevel.w.docspath.path.entry xview moveto 1
     }
@@ -95,20 +95,20 @@ proc ::dialog_path::create_dialog {mytoplevel} {
     if {[namespace exists ::deken]} {
         ttk::labelframe $mytoplevel.w.installpath -text " Externals Install Directory " \
             -padding 5
-        ttk::frame $mytoplevel.w.installpath.path 
+        ttk::frame $mytoplevel.w.installpath.path
         ttk::entry $mytoplevel.w.installpath.path.entry -textvariable installpath -width 38 \
             -takefocus 0 -state readonly
         ttk::button $mytoplevel.w.installpath.path.browse -text [_ "Browse"] \
             -command "::dialog_path::browse_installpath $mytoplevel" \
-            
 
-        ttk::frame $mytoplevel.w.installpath.buttons 
+
+        ttk::frame $mytoplevel.w.installpath.buttons
         ttk::button $mytoplevel.w.installpath.buttons.reset -text [_ "Reset"] \
             -command "::dialog_path::reset_installpath $mytoplevel" \
-            
+
         ttk::button $mytoplevel.w.installpath.buttons.clear -text [_ "Clear"] \
             -command "::dialog_path::clear_installpath $mytoplevel" \
-            
+
         # scroll to right for long paths
         $mytoplevel.w.installpath.path.entry xview moveto 1
     }
@@ -142,7 +142,7 @@ proc ::dialog_path::create_dialog {mytoplevel} {
         grid $mytoplevel.w.docspath.buttons.disable -column 1 -row 0
     }
 
-    # Deken 
+    # Deken
     if {[namespace exists ::deken]} {
         grid $mytoplevel.w.installpath -column 0 -row 4 -sticky nwes -pady 4
         grid $mytoplevel.w.installpath.path -column 0 -row 0

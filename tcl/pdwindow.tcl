@@ -1,7 +1,11 @@
 
 package provide pdwindow 0.1
 
+package require pd_connect
+
 namespace eval ::pdwindow:: {
+    variable maxlogbuffer 21000 ;# if the logbuffer grows beyond this number, cut it
+    variable keeplogbuffer 1000 ;# if the logbuffer gets automatically cut, keep this many elements
     variable logbuffer {}
     variable tclentry {}
     variable tclentry_history {"console show"}
@@ -10,7 +14,9 @@ namespace eval ::pdwindow:: {
     variable logmenuitems
     variable maxloglevel 4
 
-    variable lastlevel 0
+    # private variables
+    variable _lastlevel 0       ;# loglevel of last post (for automatic endpost level)
+    variable _curlogbuffer 0    ;# number of \n currently in the logbuffer
 
     namespace export create_window
     namespace export pdtk_post
@@ -61,7 +67,45 @@ proc ::pdwindow::busyrelease {} {
 
 proc ::pdwindow::buffer_message {object_id level message} {
     variable logbuffer
-    lappend logbuffer $object_id $level $message
+    variable maxlogbuffer
+    variable keeplogbuffer
+    variable _curlogbuffer
+    lappend logbuffer [list $object_id $level $message]
+    set lfi 0
+    while { [set lfi [string first "\n" $message $lfi]] >= 0 } {
+        incr lfi
+        incr _curlogbuffer
+    }
+    # what we are actually counting here is not the number of *lines* in the logbuffer,
+    # but the number of buffer_messages, which is much higher
+    # e.g. printing a 10 element list ([1 2 3 4 5 6 7 8 9 10( -> [print])
+    # will add 22 messages (one prefix, one per atom, one per space-between-atoms, one LF)
+    # LATER we could try to track "\n"
+    # buffer-size limiting is only done if maxlogbuffer is > 0
+    if {$maxlogbuffer > 0 && $_curlogbuffer > $maxlogbuffer} {
+        # so we now have more lines (counting "\n") in the buffer than we actually want
+        set keeplines ${keeplogbuffer}
+        if {$keeplines > $maxlogbuffer} {set keeplines $maxlogbuffer}
+        set count 0
+        set keepitems 0
+        # check how many elements we need to save to keep ${keeplines} lines
+        foreach x [lreverse $logbuffer] {
+            set x [lindex $x 2]
+            set lfi 0
+            while { [set lfi [string first "\n" $x $lfi] ] >= 0} { incr lfi
+                incr count
+            }
+            if { $count >= $keeplines } {
+                break
+            }
+            incr keepitems
+        }
+        set logbuffer [lrange $logbuffer end-$keepitems end]
+        set msg [format [_ "dropped %d lines from the Pd window" ] [expr $_curlogbuffer - $count]]
+        set _curlogbuffer 0
+        ::pdwindow::verbose 10 "$msg\n"
+        ::pdwindow::filter_logbuffer
+    }
 }
 
 proc ::pdwindow::insert_log_line {object_id level message} {
@@ -79,22 +123,29 @@ proc ::pdwindow::insert_log_line {object_id level message} {
     }
 }
 
-# this has 'args' to satisfy trace, but its not used
-proc ::pdwindow::filter_buffer_to_text {args} {
+proc ::pdwindow::filter_logbuffer {} {
     variable logbuffer
     variable maxloglevel
     $::win.text.internal delete 0.0 end
     set i 0
-    foreach {object_id level message} $logbuffer {
-        if { $level <= $::loglevel || $maxloglevel == $::loglevel} {
-            insert_log_line $object_id $level $message
+    foreach logentry $logbuffer {
+        foreach {object_id level message} $logentry {
+            if { $level <= $::loglevel || $maxloglevel == $::loglevel} {
+                insert_log_line $object_id $level $message
+            }
         }
         # this could take a while, so update the GUI every 10000 lines
         if { [expr $i % 10000] == 0} {update idletasks}
         incr i
     }
     $::win.text.internal yview end
-    ::pdwindow::verbose 10 "the Pd window filtered $i lines\n"
+    return $i
+}
+# this has 'args' to satisfy trace, but its not used
+proc ::pdwindow::filter_buffer_to_text {args} {
+    set i [::pdwindow::filter_logbuffer]
+    set msg [format [_ "the Pd window filtered %d lines" ] $i ]
+    ::pdwindow::verbose 10 "$msg\n"
 }
 
 proc ::pdwindow::select_by_id {args} {
@@ -110,7 +161,7 @@ proc ::pdwindow::select_by_id {args} {
 # information about the patches they are building
 proc ::pdwindow::logpost {object_id level message} {
     variable maxloglevel
-    variable lastlevel $level
+    variable _lastlevel $level
 
     buffer_message $object_id $level $message
     if {[llength [info commands .pdwindow.w.text.internal]] &&
@@ -123,7 +174,7 @@ proc ::pdwindow::logpost {object_id level message} {
         after idle $::win.text.internal yview end
     }
     # -stderr only sets $::stderr if 'pd-gui' is started before 'pd'
-    if {$::stderr} {puts stderr $message}
+    if {$::stderr} {puts -nonewline stderr $message}
 }
 
 # shortcuts for posting to the Pd window
@@ -138,8 +189,8 @@ proc ::pdwindow::pdtk_post {message} {post $message}
 
 proc ::pdwindow::endpost {} {
     variable linecolor
-    variable lastlevel
-    logpost {} $lastlevel "\n"
+    variable _lastlevel
+    logpost {} $_lastlevel "\n"
     set linecolor [expr ! $linecolor]
 }
 
@@ -154,6 +205,7 @@ proc ::pdwindow::verbose {level message} {
 # clear the log and the buffer
 proc ::pdwindow::clear_console {} {
     variable logbuffer {}
+    variable _curlogbuffer 0
     $::win.text.internal delete 0.0 end
 }
 
@@ -165,8 +217,10 @@ proc ::pdwindow::save_logbuffer_to_file {} {
     set f [open $filename w]
     puts $f "Pd $::PD_MAJOR_VERSION.$::PD_MINOR_VERSION-$::PD_BUGFIX_VERSION$::PD_TEST_VERSION on $::tcl_platform(os) $::tcl_platform(machine)"
     puts $f "--------------------------------------------------------------------------------"
-    foreach {object_id level message} $logbuffer {
-        puts -nonewline $f $message
+    foreach logentry $logbuffer {
+        foreach {object_id level message} $logentry {
+            puts -nonewline $f $message
+        }
     }
     ::pdwindow::post "saved console to: $filename\n"
     close $f
@@ -246,7 +300,7 @@ proc ::pdwindow::pdwindow_bindings {} {
     } else {
         # TODO should it possible to close the Pd window and keep Pd open?
         bind .pdwindow <$::modifier-Key-w>   "wm iconify .pdwindow"
-        wm protocol .pdwindow WM_DELETE_WINDOW "pdsend \"pd verifyquit\""
+        wm protocol .pdwindow WM_DELETE_WINDOW "::pd_connect::menu_quit"
     }
 }
 
@@ -347,11 +401,11 @@ proc ::pdwindow::create_window {} {
     # wants, but if I wanted to change that in the future
     # and start with a different size, use this line
     # wm geometry .pdwindow <dimensions and offset here>
-    
+
 
 # Widgets
     ttk::frame .pdwindow.w
-    set ::win .pdwindow.w 
+    set ::win .pdwindow.w
     ttk::frame $::win.header -padding 5 -style header.TFrame
     # TODO make this a button, for now this is a checkbox
     ttk::checkbutton $::win.header.dsp -text [_ "DSP"] -variable ::dsp \
@@ -372,10 +426,10 @@ proc ::pdwindow::create_window {} {
         -textvariable ::loglevel -width 2
 
     menu $::win.header.logmenu.items
-    foreach i $logmenuitems { 
+    foreach i $logmenuitems {
         $::win.header.logmenu.items add command -label $i
     }
-    foreach i $logmenuitems { 
+    foreach i $logmenuitems {
         $::win.header.logmenu.items entryconfigure $i -command "::pdwindow::loglevel_updated $i" 
     }
 
@@ -383,7 +437,7 @@ proc ::pdwindow::create_window {} {
     #$::win.header.logmenu configure -takefocus 1
     ttk::frame $::win.tcl -borderwidth 0
 
-    ttk::frame $::win.console 
+    ttk::frame $::win.console
 
     # TODO this should use the pd_font_$size created in pd-gui.tcl
     tk::text $::win.text -bd 0 -font {$::font_family 10} \
@@ -500,7 +554,7 @@ proc ::pdwindow::set_colors {} {
         ttk::style configure s.TLabel      -background "#1c1c1c" -foreground "#ddc7a1"
         ttk::style configure dio.TLabel    -background "#1c1c1c" -foreground "#1c1c1c"
         ttk::style configure s.TMenubutton -background "#1c1c1c" -foreground "#ddc7a1"
-        ttk::style map s.TMenubutton -foreground [list hover "#292828"] 
+        ttk::style map s.TMenubutton -foreground [list hover "#292828"]
     } else {
         ttk::style configure s.TCheckbutton -background "#2b2b2b" -foreground "#EEECE3"
         ttk::style map s.TCheckbutton      -background [list active "#444444"]
@@ -508,7 +562,7 @@ proc ::pdwindow::set_colors {} {
         ttk::style configure s.TLabel      -background "#2b2b2b" -foreground "#EEECE3"
         ttk::style configure dio.TLabel    -background "#2b2b2b" -foreground "#2b2b2b"
         ttk::style configure s.TMenubutton -background "#2b2b2b" -foreground "#292828"
-        ttk::style map s.TMenubutton -foreground [list hover "#EEECE3"] 
+        ttk::style map s.TMenubutton -foreground [list hover "#EEECE3"]
     }
 
     $::win.header configure -style s.TFrame
