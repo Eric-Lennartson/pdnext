@@ -133,7 +133,7 @@ proc ::scrollbox::release { mytoplevel x y } {
 # edit_method - method to be called when we edit an existing item
 proc ::scrollbox::make { mytoplevel listdata add_method edit_method } {
     # This frame will encompass all the widgets in path and startup dialogs as well
-    ttk::frame $mytoplevel.w -padding 5 
+    ttk::frame $mytoplevel.w -padding 5
 
     ttk::frame $mytoplevel.w.listbox
     # WARN, this width value is very fragile, improvements?
@@ -145,23 +145,23 @@ proc ::scrollbox::make { mytoplevel listdata add_method edit_method } {
     set col [::pdtk_canvas::get_color scrollbox_fill $mytoplevel]
     if {$col ne ""} {
         $mytoplevel.w.listbox.box configure  -background $col
-    }   
+    }
     set col [::pdtk_canvas::get_color text $mytoplevel]
     if {$col ne ""} {
         $mytoplevel.w.listbox.box configure -foreground $col
-    } 
+    }
     set col [::pdtk_canvas::get_color selected $mytoplevel]
     if {$col ne ""} {
         $mytoplevel.w.listbox.box configure -selectforeground $col
-    } 
+    }
     set col [::pdtk_canvas::get_color txt_highlight $mytoplevel]
     if {$col ne ""} {
         $mytoplevel.w.listbox.box configure -selectbackground $col
-    }  
+    }
 
     # Create a scrollbar and keep it in sync with the current
     # listbox view
-    ttk::scrollbar "$mytoplevel.w.listbox.scrollbar" -command [list $mytoplevel.w.listbox.box yview]] 
+    ttk::scrollbar "$mytoplevel.w.listbox.scrollbar" -command [list $mytoplevel.w.listbox.box yview]]
 
     # Populate the listbox widget
     # Here's where we can change the line color
@@ -195,13 +195,13 @@ proc ::scrollbox::make { mytoplevel listdata add_method edit_method } {
     ttk::frame $mytoplevel.w.actions
     ttk::button $mytoplevel.w.actions.add_path -text [_ "New..." ] \
         -command "::scrollbox::add_item $mytoplevel $add_method" \
-        
+
     ttk::button $mytoplevel.w.actions.edit_path -text [_ "Edit..." ] \
         -command "::scrollbox::edit_item $mytoplevel $edit_method" \
-        
+
     ttk::button $mytoplevel.w.actions.delete_path -text [_ "Delete" ] \
         -command "::scrollbox::delete_item $mytoplevel" \
-        
+
 
     $mytoplevel.w.listbox.box activate end
     $mytoplevel.w.listbox.box selection set end
