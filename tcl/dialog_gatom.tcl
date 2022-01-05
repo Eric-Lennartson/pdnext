@@ -191,20 +191,20 @@ proc ::dialog_gatom::create_dialog {mytoplevel} {
     grid $::f.settings.gatomLabel -column 0 -row 9 -sticky w -padx 10
     grid $::f.settings.lblEntry -column 1 -row 9 -sticky w
     # label position ################################################
-    grid $::f.settings.position -column 0 -row 10 -columnspan 3 -pady 3 -padx 6
+    grid $::f.settings.position -column 0 -row 10 -columnspan 3 -padx 5 -sticky w
     grid $::f.settings.position.left   -column 0 -row 0 -padx 3 -pady 1
     grid $::f.settings.position.right  -column 1 -row 0 -padx 3 -pady 1
     grid $::f.settings.position.top    -column 2 -row 0 -padx 3 -pady 1
     grid $::f.settings.position.bottom -column 3 -row 0 -padx 3 -pady 1
     # font size ######################################################
-    grid $::f.settings.fontsize -column 0 -row 11 -columnspan 3 -pady 3 -padx 6
-    grid $::f.settings.fontsize.radioAuto -column 0 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio8 -column 1 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio10 -column 2 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio12 -column 3 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio16 -column 4 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio24 -column 5 -row 0 -padx 3 -pady 1
-    grid $::f.settings.fontsize.radio36 -column 6 -row 0 -padx 3 -pady 1
+    grid $::f.settings.fontsize -column 0 -row 11 -columnspan 3 -padx 5 -pady 2 -sticky w
+    grid $::f.settings.fontsize.radioAuto -column 0 -row 0 -pady 1
+    grid $::f.settings.fontsize.radio8 -column 1 -row 0  -pady 1
+    grid $::f.settings.fontsize.radio10 -column 2 -row 0  -pady 1
+    grid $::f.settings.fontsize.radio12 -column 3 -row 0  -pady 1
+    grid $::f.settings.fontsize.radio16 -column 4 -row 0 -pady 1
+    grid $::f.settings.fontsize.radio24 -column 5 -row 0  -pady 1
+    grid $::f.settings.fontsize.radio36 -column 6 -row 0 -pady 1
     # ok/apply/cancel ################################################
     grid $::f.buttonFrame -column 0 -row 1 -pady 1
     grid $::f.buttonFrame.ok -column 0 -row 0
@@ -213,7 +213,6 @@ proc ::dialog_gatom::create_dialog {mytoplevel} {
 
     # live updates on macOS
     if {$::windowingsystem eq "aqua"} {
-
         # call apply on radiobutton changes
         $::f.settings.position.left config -command [ concat ::dialog_gatom::apply $mytoplevel ]
         $::f.settings.position.right config -command [ concat ::dialog_gatom::apply $mytoplevel ]
