@@ -76,7 +76,7 @@ proc ::helpbrowser::check_destroy {level} {
 
 # create the base frame and root listbox, build path references
 proc ::helpbrowser::make_frame {mytoplevel} {
-    scrollbar $mytoplevel.sx -command [list $mytoplevel.c xview] \
+    ttk::scrollbar $mytoplevel.sx -command [list $mytoplevel.c xview] \
         -orient horizontal
     canvas $mytoplevel.c -xscrollcommand [list $mytoplevel.sx set] \
         -highlightthickness 0

@@ -2,6 +2,15 @@
 - replace iemguis with guis of my own making
 - update the deken dialog. keeping old version for now.
 - go through and get the fork working.
+  - check all dialogs
+    - gatom DONE
+    - iemgui DONE
+    - pdwindow
+    - pd-gui
+    - pd_menus DONE
+    - helpbrowser DONE
+    - dialog_path
+    - dialog_audio
 ==== BUGS =================================================================
 - radios leave behind inlets when deleted, or when snd and rcv are added
 ==== Improvements =========================================================
