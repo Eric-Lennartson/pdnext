@@ -58,6 +58,7 @@ proc ::dialog_path::create_dialog {mytoplevel} {
     set readonly_color [lindex [$mytoplevel configure -background] end] ;# Change this color?
 
 # Widgets (Some widgets are defined in scrollboxwindow and scrollbox)
+# $mytoplevel.w is defined in scrollbox.tcl
 # Path options
     ttk::frame $mytoplevel.w.pathOptions
     ttk::checkbutton $mytoplevel.w.pathOptions.extra -text "Standard Paths" \

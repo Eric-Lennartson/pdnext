@@ -5,12 +5,12 @@
   - check all dialogs
     - gatom DONE
     - iemgui DONE
-    - pdwindow
-    - pd-gui
+    - pdwindow DONE
+    - pd-gui DONE
     - pd_menus DONE
     - helpbrowser DONE
-    - dialog_path
-    - dialog_audio
+    - dialog_path DONE (some weird errors but nothing about the code itself)
+    - dialog_audio DONE
 ==== BUGS =================================================================
 - radios leave behind inlets when deleted, or when snd and rcv are added
 ==== Improvements =========================================================
