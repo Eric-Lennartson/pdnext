@@ -79,16 +79,16 @@ proc ::scrollboxwindow::make {mytoplevel listdata add_method edit_method commit_
 
     # buttons
     # $mytoplevel.w is defined in scrollbox.tcl
-    ttk::frame $mytoplevel.w.buttonframe 
+    ttk::frame $mytoplevel.w.buttonframe
 
     ttk::button $mytoplevel.w.buttonframe.cancel -text "Cancel" \
         -command "::scrollboxwindow::cancel $mytoplevel" \
-        
+
     ttk::button $mytoplevel.w.buttonframe.apply -text "Apply" \
         -command "::scrollboxwindow::apply $mytoplevel $commit_method" \
-        
+
     ttk::button $mytoplevel.w.buttonframe.ok -text "OK" \
         -command "::scrollboxwindow::ok $mytoplevel $commit_method" \
-        
+
 
 }
