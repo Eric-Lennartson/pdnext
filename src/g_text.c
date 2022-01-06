@@ -25,6 +25,11 @@
 
 #define MESSAGE_CLICK_WIDTH 5
 
+/* Widths of a different atom types*/
+#define A_FLOAT_WIDTH 8
+#define A_SYM_WIDTH 10
+#define A_LIST_WIDTH 20
+
 t_class *text_class;
 static t_class *message_class;
 static t_class *gatom_class;
@@ -1160,8 +1165,8 @@ void canvas_atom(t_glist *gl, t_atomtype type,
         pd_vmess(&gl->gl_pd, gensym("editmode"), "i", 1);
         x->a_text.te_xpix = xpix;
         x->a_text.te_ypix = ypix;
-        x->a_text.te_width = (x->a_flavor == A_FLOAT ? 8 :
-            (x->a_flavor == A_SYMBOL ? 10 : 20));
+        x->a_text.te_width = (x->a_flavor == A_FLOAT ? A_FLOAT_WIDTH :
+                             (x->a_flavor == A_SYMBOL ? A_SYM_WIDTH : A_LIST_WIDTH));
         glist_add(gl, &x->a_text.te_g);
         glist_noselect(gl);
         glist_select(gl, &x->a_text.te_g);
@@ -1173,18 +1178,15 @@ void canvas_atom(t_glist *gl, t_atomtype type,
     }
 }
 
-void canvas_floatatom(t_glist *gl, t_symbol *s, int argc, t_atom *argv)
-{
+void canvas_floatatom(t_glist *gl, t_symbol *s, int argc, t_atom *argv) {
     canvas_atom(gl, A_FLOAT, s, argc, argv);
 }
 
-void canvas_symbolatom(t_glist *gl, t_symbol *s, int argc, t_atom *argv)
-{
+void canvas_symbolatom(t_glist *gl, t_symbol *s, int argc, t_atom *argv) {
     canvas_atom(gl, A_SYMBOL, s, argc, argv);
 }
 
-void canvas_listbox(t_glist *gl, t_symbol *s, int argc, t_atom *argv)
-{
+void canvas_listbox(t_glist *gl, t_symbol *s, int argc, t_atom *argv) {
     canvas_atom(gl, A_LIST, s, argc, argv);
 }
 
