@@ -1467,7 +1467,7 @@ proc ::deken::create_dialog {mytoplevel} {
             -variable ::deken::searchtype -value libraries
         ttk::radiobutton $::dekenWin.filter.objects -text "Objects" \
             -variable ::deken::searchtype -value objects
-        ttk::radiobutton $::dekenWin.filter.libraries -text "Both" \
+        ttk::radiobutton $::dekenWin.filter.both -text "Both" \
             -variable ::deken::searchtype -value name
 
     ttk::frame $::dekenWin.status
