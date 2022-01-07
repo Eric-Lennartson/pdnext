@@ -851,7 +851,7 @@ proc ::deken::preferences::create {mytoplevel} {
     ttk::button $mytoplevel.buttonframe.ok -text [_ "OK"] \
         -command "::deken::preferences::ok $mytoplevel"
 
-# Layout
+# Prefrences Layout
     #Install Directories
     grid $mytoplevel.installdir  -column 0 -row 0 -sticky nwes -pady 2
     grid $mytoplevel.installdir.cnv -column 0 -row 0
@@ -1316,6 +1316,15 @@ proc ::deken::highlightable_posttag {tagname} {
         $mytoplevelref.w.resultsFrame.results tag raise highlight
     }
 }
+proc ::deken::bind_contextmenu {winid tagname cmd} {
+    if { [winfo exists $winid] } {
+        if {$::windowingsystem eq "aqua"} {
+            $winid.results tag bind $tagname <2> $cmd
+        } else {
+            $winid.results tag bind $tagname <3> $cmd
+        }
+    }
+}
 
 proc ::deken::menu_selectpackage {winid pkgname installcmd} {
     set results ${winid}.results
@@ -1606,7 +1615,7 @@ proc ::deken::initiate_search {mytoplevel} {
 
         set ::deken::results $results
         if {[llength $results] != 0} {
-            ::deken::show_results $winid
+            ::deken::show_results $::dekenWin.resultsFrame
         } else {
             ::pdwindow::post [_ "\[deken\] No matching externals found." ]
             set msg [_ "Try using the full name e.g. 'freeverb~'." ]
