@@ -1459,7 +1459,6 @@ proc ::deken::create_dialog {mytoplevel} {
         focus $::dekenWin.searchbit.entry
         ttk::button $::dekenWin.searchbit.button -width -1 -text "Show all" -default active \
             -command "::deken::initiate_search $mytoplevel"
-        ttk::label $::dekenWin.searchbit.warning -text "Only install externals uploaded by people you trust."
 
     ttk::frame $::dekenWin.filter
         ttk::label $::dekenWin.filter.label -text "Search For:"
@@ -1469,6 +1468,7 @@ proc ::deken::create_dialog {mytoplevel} {
             -variable ::deken::searchtype -value objects
         ttk::radiobutton $::dekenWin.filter.both -text "Both" \
             -variable ::deken::searchtype -value name
+        ttk::label $::dekenWin.filter.warning -text "Only install externals uploaded by people you trust."
 
     ttk::frame $::dekenWin.status
         ttk::button $::dekenWin.status.preferences -width -1 -text "Preferences" \
@@ -1510,13 +1510,19 @@ proc ::deken::create_dialog {mytoplevel} {
     grid $::dekenWin.searchbit -column 0 -row 0 -sticky nsew
     grid $::dekenWin.searchbit.entry -column 0 -row 0
     grid $::dekenWin.searchbit.button -column 1 -row 0
-    grid $::dekenWin.searchbit.warning -column 0 -row 1 -sticky w
 
-    grid $::dekenWin.resultsFrame -column 0 -row 1 -sticky nsew
+    grid $::dekenWin.filter -column 0 -row 1 -pady 2 -sticky nsew
+    grid $::dekenWin.filter.label     -column 0 -row 0 -sticky w
+    grid $::dekenWin.filter.libraries -column 1 -row 0 -sticky w
+    grid $::dekenWin.filter.objects   -column 2 -row 0 -sticky w
+    grid $::dekenWin.filter.both      -column 3 -row 0 -sticky w
+    grid $::dekenWin.filter.warning   -column 0 -row 1 -columnspan 4 -pady 2 -sticky w
+
+    grid $::dekenWin.resultsFrame -column 0 -row 2 -sticky nsew
     grid $::dekenWin.resultsFrame.results -column 0 -row 0
     grid $::dekenWin.resultsFrame.ys -column 1 -row 0 -sticky ns
 
-    grid $::dekenWin.progress -column 0 -row 2
+    grid $::dekenWin.progress -column 0 -row 3
 
     # creating and gridding the progress bar, there's a weird if and catch statement attached
     # HOW TO REMOVE THIS IT IS UGLY
