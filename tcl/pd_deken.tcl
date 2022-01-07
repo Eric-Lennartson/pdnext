@@ -178,12 +178,10 @@ if { "Windows" eq "$::deken::platform(os)" } {
     #if { "amd64" eq "$::deken::platform(machine)" } { set ::deken::platform(machine) "x86_64" }
 }
 
-
 set ::deken::protocol "http"
 if { ! [catch {package present tls} stdout] } {
     set ::deken::protocol "https"
 }
-
 
 # ######################################################################
 # ################ compatibility #######################################
@@ -586,322 +584,74 @@ proc ::deken::utilities::download_file {url outputfilename {progressproc {}}} {
             set outputfilename ""
         }
     }
-    return
-}
-
-# find an install path, either from prefs or on the system
-# returns an empty string if nothing was found
-proc ::deken::find_installpath {{ignoreprefs false}} {
-    set installpath ""
-    if { [ info exists ::deken::installpath ] && !$ignoreprefs } {
-        ## any previous choice?
-        set installpath [ ::deken::get_writable_dir [list $::deken::installpath ] ]
-    }
-    if { "$installpath" == "" } {
-        ## search the default paths
-        set installpath [ ::deken::get_writable_dir $::sys_staticpath ]
-    }
-    if { "$installpath" == "" } {
-        # let's use the first of $::sys_staticpath, if it does not exist yet
-        set userdir [lindex $::sys_staticpath 0]
-        if { [file exists ${userdir} ] } {} {
-            set installpath $userdir
-        }
-    }
-    return $installpath
-}
-
-proc ::deken::platform2string {{verbose 0}} {
-    if { $verbose } {
-        return $::deken::platform(os)-$::deken::platform(machine)-float$::deken::platform(floatsize)
-    } {
-        return $::deken::platform(os)-$::deken::platform(machine)-$::deken::platform(floatsize)
-    }
-}
-
-# list-reverter (compat for tcl<8.5)
-if {[info command lreverse] == ""} {
-    proc lreverse list {
-        set res {}
-        set i [llength $list]
-        while {$i} {
-            lappend res [lindex $list [incr i -1]]
-        }
-        set res
-    } ;# RS
-}
-
-set ::deken::platform(os) $::tcl_platform(os)
-set ::deken::platform(machine) $::tcl_platform(machine)
-set ::deken::platform(bits) [ expr [ string length [ format %X -1 ] ] * 4 ]
-set ::deken::platform(floatsize) 32
-
-# normalize W32 OSs
-if { [ string match "Windows *" "$::deken::platform(os)" ] > 0 } {
-    # we are not interested in the w32 flavour, so we just use 'Windows' for all of them
-    set ::deken::platform(os) "Windows"
-}
-# normalize W32 CPUs
-if { "Windows" eq "$::deken::platform(os)" } {
-    # in redmond, intel only produces 32bit CPUs,...
-    if { "intel" eq "$::deken::platform(machine)" } { set ::deken::platform(machine) "i686" }
-    # ... and all 64bit CPUs are manufactured by amd
-    #if { "amd64" eq "$::deken::platform(machine)" } { set ::deken::platform(machine) "x86_64" }
-}
-
-# console message to let them know we're loaded
-## but only if we are being called as a plugin (not as built-in)
-if { "" != "$::current_plugin_loadpath" } {
-    ::pdwindow::debug "\[deken\]: "
-    ::pdwindow::debug [format [_ "deken-plugin.tcl (Pd externals search) loaded from %s" ]  $::current_plugin_loadpath ]
-    ::pdwindow::debug "\n"
-}
-::pdwindow::verbose 0 "\[deken\]: "
-::pdwindow::verbose 0 [format [_ "platform detected: %s" ] [::deken::platform2string 1] ]
-::pdwindow::verbose 0 "\n"
-
-# architectures that can be substituted for eachother
-array set ::deken::architecture_substitutes {}
-set ::deken::architecture_substitutes(x86_64) [list "amd64" ]
-set ::deken::architecture_substitutes(amd64) [list "x86_64" ]
-set ::deken::architecture_substitutes(i686) [list "i586" "i386"]
-set ::deken::architecture_substitutes(i586) [list "i386"]
-set ::deken::architecture_substitutes(armv6l) [list "armv6" "arm"]
-set ::deken::architecture_substitutes(armv7l) [list "armv7" "armv6l" "armv6" "arm"]
-set ::deken::architecture_substitutes(PowerPC) [list "ppc"]
-set ::deken::architecture_substitutes(ppc) [list "PowerPC"]
-
-# try to set install path when plugin is loaded
-set ::deken::installpath [::deken::find_installpath]
-
-# allow overriding deken platform from Pd-core
-proc ::deken::set_platform {os machine bits floatsize} {
-    if { $os != $::deken::platform(os) ||
-         $machine != $::deken::platform(machine) ||
-         $bits != $::deken::platform(bits) ||
-         $floatsize != $::deken::platform(floatsize)
-     } {
-        set ::deken::platform(os) ${os}
-        set ::deken::platform(machine) ${machine}
-        set ::deken::platform(bits) ${bits}
-        set ::deken::platform(floatsize) ${floatsize}
-
-        ::pdwindow::verbose 1 "\[deken\]: "
-        ::pdwindow::verbose 1 [format [_ "platform re-detected: %s" ] [::deken::platform2string 1] ]
-        ::pdwindow::verbose 1 "\n"
-    }
-}
-
-proc ::deken::versioncompare {a b} {
-    # compares to versions, the Debian way
-    # each version string is split into numeric and non-numeric elements
-    # the elements are compared pairwise
-    # "~" sorts before everything else
-    foreach x [regexp -all -inline {\d+|\D+} [string map {~ \t} $a]] y [regexp -all -inline {\d+|\D+} [string map {~ \t} $b]] {
-        if { "$x" == "" } { set x " " }
-        if { "$y" == "" } { set y " " }
-        set c [dict get {1 0 {0 1} -1 {1 0} 1} [lsort -indices -dictionary -unique [list $x $y]]]
-        if { $c != "0" } {return $c}
-    }
-    return 0
-}
-
-proc ::deken::status {{msg ""}} {
-    after cancel $::deken::statustimer
-    if {"" ne $msg} {
-        set ::deken::statustext "STATUS: $msg"
-        set ::deken::statustimer [after 3000 [list set ::deken::statustext ""]]
-    } {
-        set ::deken::statustext ""
-    }
-}
-proc ::deken::scrollup {} {
-    variable mytoplevelref
-    $mytoplevelref.w.resultsFrame.results see 0.0
-}
-proc ::deken::post {msg {tag ""}} {
-    variable mytoplevelref
-    $mytoplevelref.w.resultsFrame.results insert end "$msg\n" $tag
-    $mytoplevelref.w.resultsFrame.results see end
-}
-proc ::deken::clearpost {} {
-    variable mytoplevelref
-    $mytoplevelref.w.resultsFrame.results delete 1.0 end
-}
-proc ::deken::bind_posttag {tag key cmd} {
-    variable mytoplevelref
-    $mytoplevelref.w.resultsFrame.results tag bind $tag $key $cmd
-}
-proc ::deken::highlightable_posttag {tag} {
-    variable mytoplevelref
-    ::deken::bind_posttag $tag <Enter> \
-        "$mytoplevelref.w.resultsFrame.results tag add highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tag ]"
-    ::deken::bind_posttag $tag <Leave> \
-        "$mytoplevelref.w.resultsFrame.results tag remove highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tag ]"
-    # make sure that the 'highlight' tag is topmost
-    $mytoplevelref.w.resultsFrame.results tag raise highlight
-}
-proc ::deken::bind_postmenu {mytoplevel tag menus} {
-    set cmd "::deken::result_contextmenu %W %x %y $menus"
-    if {$::windowingsystem eq "aqua"} {
-        $::dekenWin.resultsFrame.results tag bind $tag <2> $cmd
-    } else {
-        $::dekenWin.resultsFrame.results tag bind $tag <3> $cmd
-    }
-}
-proc ::deken::result_contextmenu {widget theX theY args} {
-    set m .dekenresults_contextMenu
-    if { [winfo exists $m] } {
-        destroy $m
-    }
-    menu $m
-    foreach {title cmd} $args {
-        $m add command -label $title -command $cmd
-    }
-    tk_popup $m [expr [winfo rootx $widget] + $theX] [expr [winfo rooty $widget] + $theY]
-}
-
-proc ::deken::do_prompt_installdir {path {mytoplevel .externals_searchui}} {
-    if {[winfo exists $mytoplevel]} {
-        return [tk_chooseDirectory -title [_ "Install externals to directory:"] \
-                    -initialdir ${path} -parent .externals_searchui]
-    } {
-        return [tk_chooseDirectory -title [_ "Install externals to directory:"] \
-                    -initialdir ${path}]
+    if { "$outputfilename" eq "" } {
+        file delete $downloadfilename
     }
 
     return $outputfilename
 }
 
-
-proc ::deken::update_searchbutton {mytoplevel} {
-    if { [$::dekenWin.searchbit.entry get] == "" } {
-        $::dekenWin.searchbit.button configure -text [_ "Show all" ]
-    } {
-        $::dekenWin.searchbit.button configure -text [_ "Search" ]
+# parse a deken-packagefilename into it's components:
+# v0:: <pkgname>[-v<version>-]?{(<arch>)}-externals.<ext>
+# v1:: <pkgname>[\[<version\]]?{(<arch>)}
+# return: list <pkgname> <version> [list <arch> ...]
+proc ::deken::utilities::parse_filename {filename} {
+    set pkgname $filename
+    set archs [list]
+    set version ""
+    if { [ string match "*.dek" $filename ] } {
+        ## deken filename v1: <library>[v<version>](<arch1>)(<arch2>).dek
+        set archstring ""
+        regexp {^([^\[\]\(\)]+)((\[[^\[\]\(\)]+\])*)((\([^\[\]\(\)]+\))*)\.dek$} $filename _ pkgname optionstring _ archstring
+        foreach {o _} [lreplace [split $optionstring {[]}] 0 0] {
+            if {![string first v ${o}]} {
+                set version [string range $o 1 end]
+            } else { # ignoring unknown option...
+            }
+        }
+        foreach {a _} [lreplace [split $archstring "()"] 0 0] { lappend archs $a }
+    } elseif { [ regexp {(.*)-externals\..*} $filename _ basename] } {
+        ## deken filename v0
+        set pkgname $basename
+        # basename <pkgname>[-v<version>-]?{(<arch>)}
+        ## strip off the archs
+        set baselist [split $basename () ]
+        # get pkgname + version
+        set pkgver [lindex $baselist 0]
+        if { ! [ regexp "(.*)-v(.*)-" $pkgver _ pkgname version ] } {
+            set pkgname $pkgver
+            set version ""
+        }
+        # get archs
+        foreach {a _} [lreplace $baselist 0 0] {
+            # in filename.v0 the semantics of the last arch field ("bits") was unclear
+            # since this format predates float64 builds, we just force it to 32
+            regsub -- {-[0-9]+$} $a {-32} a
+            lappend archs $a
+        }
+        if { "x$archs$version" == "x" } {
+            # try again as <pkgname>-v<version>
+            if { ! [ regexp "(.*)-v(.*)" $pkgver _ pkgname version ] } {
+                set pkgname $pkgver
+                set version ""
+            }
+        }
     }
     list $pkgname $version $archs
 }
 
+# ######################################################################
+# ################ preferences #########################################
+# ######################################################################
 
-# this function gets called when the menu is clicked
-proc ::deken::open_searchui {mytoplevel} {
-    if {[winfo exists $mytoplevel]} {
-        wm deiconify $mytoplevel
-        raise $mytoplevel
-    } else {
-        ::deken::create_dialog $mytoplevel
-        $::dekenWin.resultsFrame.results tag configure error -foreground "#ea6962"
-        $::dekenWin.resultsFrame.results tag configure warn -foreground "#bd6f3e"
-        $::dekenWin.resultsFrame.results tag configure info -foreground "#999999"
-        set col [::pdtk_canvas::get_color selected $mytoplevel]
-        if {$col ne ""} {
-            $::dekenWin.resultsFrame.results tag configure highlight -foreground $col
-        }
-        $::dekenWin.resultsFrame.results tag configure archmatch
-        $::dekenWin.resultsFrame.results tag configure noarchmatch -foreground "#999999"
-    }
-    ::deken::post [_ "To get a list of all available externals, try an empty search."] info
+proc ::deken::preferences::newwidget {basename} {
+    # calculate a widget name that has not yet been taken
+    set i 0
+    while {[winfo exists ${basename}${i}]} {incr i}
+    return ${basename}${i}
 }
 
-# build the externals search dialog window
-proc ::deken::create_dialog {mytoplevel} {
-    toplevel $mytoplevel -class DialogWindow
-    variable mytoplevelref $mytoplevel
-    wm title $mytoplevel [_ "Deken - A Package Manager for Pure Data Externals"]
-    wm transient $mytoplevel
-    wm resizable $mytoplevel 0 0
-
-    if {$::windowingsystem eq "aqua"} {
-        $mytoplevel configure -menu $::dialog_menubar
-    }
-
-# Widgets
-    ttk::frame $mytoplevel.w -padding 5 
-    set ::dekenWin $mytoplevel.w
-
-    ttk::frame $::dekenWin.searchbit 
-
-    ttk::entry $::dekenWin.searchbit.entry -width 55 
-    bind $::dekenWin.searchbit.entry <Key-Return> "::deken::initiate_search $mytoplevel"
-    bind $::dekenWin.searchbit.entry <KeyRelease> "::deken::update_searchbutton $mytoplevel"
-    focus $::dekenWin.searchbit.entry
-    ttk::button $::dekenWin.searchbit.button -width -1 -text "Show all" -default active \
-        -command "::deken::initiate_search $mytoplevel" 
-    ttk::label $::dekenWin.searchbit.warning -text "Only install externals uploaded by people you trust." \
-        
-
-    ttk::frame $::dekenWin.status 
-    ttk::button $::dekenWin.status.preferences -width -1 -text "Preferences" -command "::deken::preferences::show" \
-        
-    ttk::label $::dekenWin.status.label -textvariable ::deken::statustext 
-
-    ttk::frame $::dekenWin.resultsFrame  -padding "4 0"
-    tk::text $::dekenWin.resultsFrame.results -takefocus 0 -cursor hand2 -relief flat \
-        -height 30 -yscrollcommand "$::dekenWin.resultsFrame.ys set" \
-        -borderwidth 0 -highlightthickness 0
-    
-    set col [::pdtk_canvas::get_color scrollbox_fill $mytoplevel]
-    if {$col ne ""} {
-        $::dekenWin.resultsFrame.results configure -background $col \
-            -highlightcolor $col
-    }
-    set col [::pdtk_canvas::get_color text $mytoplevel]
-    if {$col ne ""} {
-        $::dekenWin.resultsFrame.results configure -foreground $col
-    }
-    set col [::pdtk_canvas::get_color selected $mytoplevel]
-    if {$col ne ""} {
-        $::dekenWin.resultsFrame.results configure -selectforeground $col
-    }
-    set col [::pdtk_canvas::get_color cursor $mytoplevel]
-    if {$col ne ""} {
-        $::dekenWin.resultsFrame.results configure -insertbackground $col
-    }
-    set col [::pdtk_canvas::get_color helpbrowser_highlight $mytoplevel]
-    if {$col ne ""} {
-        $::dekenWin.resultsFrame.results configure -selectbackground $col
-    }
-    
-    ttk::scrollbar $::dekenWin.resultsFrame.ys -orient vertical -command "$::dekenWin.resultsFrame.results yview"
-    ttk::frame $::dekenWin.progress  -padding "0 8" 
-
-# Layout
-    grid $::dekenWin -column 0 -row 0 -sticky nsew
-    grid $::dekenWin.searchbit -column 0 -row 0 -sticky nsew
-    grid $::dekenWin.searchbit.entry -column 0 -row 0
-    grid $::dekenWin.searchbit.button -column 1 -row 0
-    grid $::dekenWin.searchbit.warning -column 0 -row 1 -sticky w
-
-    grid $::dekenWin.resultsFrame -column 0 -row 1 -sticky nsew
-    grid $::dekenWin.resultsFrame.results -column 0 -row 0
-    grid $::dekenWin.resultsFrame.ys -column 1 -row 0 -sticky ns
-
-    grid $::dekenWin.progress -column 0 -row 2
-
-    # creating and gridding the progress bar, there's a weird if and catch statement attached
-    # HOW TO REMOVE THIS IT IS UGLY
-    if { [ catch {
-        ttk::progressbar $::dekenWin.progress.bar -orient horizontal -length 575 -maximum 100 -mode determinate -variable ::deken::progressvar } stdout ] } {
-    } {
-        grid $::dekenWin.progress.bar -column 0 -row 3 -sticky w
-
-        proc ::deken::progress {x} {
-            set ::deken::progressvar $x
-            if {$x < 100} {
-                set term [$::dekenWin.searchbit.entry get]
-                ::deken::status [format "Installing '%s'..." $term]
-            } else {
-                ::deken::status "Done!"
-            }
-        }
-    }
-
-    grid $::dekenWin.status -column 0 -row 4 -sticky e
-    grid $::dekenWin.status.label -column 0 -row 0
-    grid $::dekenWin.status.preferences -column 1 -row 0
-
-}
+# create pathpad and packpad funcs here
 
 proc ::deken::preferences::userpath_doit { winid } {
     set installdir [::deken::do_prompt_installdir ${::deken::preferences::userinstallpath} $winid]
@@ -943,12 +693,12 @@ proc ::deken::preferences::create_pathentry {toplevel row var path {generic fals
         if { [file pathtype $xpath] != "absolute"} { return }
     }
 
-    set chk [::deken::utilities::newwidget ${toplevel}.doit]
-    set pad [::deken::utilities::newwidget ${toplevel}.pad]
-    set rdb [::deken::utilities::newwidget ${toplevel}.path]
+    set rdb [::deken::preferences::newwidget ${toplevel}.path]
+    set chk [::deken::preferences::newwidget ${toplevel}.doit]
+    set pad [::deken::preferences::newwidget ${toplevel}.pad]
 
-    ttk::radiobutton ${rdb} -value ${path} -text "${path}" -variable $var \
-        
+    ttk::radiobutton ${rdb} -value ${path} -text "${path}" -variable $var
+
     ttk::frame ${pad}  -width 10
     ttk::button ${chk} -text "..." -width -1 \
         -command "::deken::preferences::path_doit ${rdb} ${chk} ${path}"
@@ -964,20 +714,6 @@ proc ::deken::preferences::create_pathentry {toplevel row var path {generic fals
     list ${rdb} ${chk}
 }
 
-proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
-    if {[winfo exists $mytoplevel]} {
-        wm deiconify $mytoplevel
-        raise $mytoplevel
-    } else {
-        toplevel $mytoplevel
-        wm title $mytoplevel "Deken Preferences"
-
-        ttk::frame $mytoplevel.frame -padding 5 
-        grid $mytoplevel.frame -column 0 -row 0
-        ::deken::preferences::create $mytoplevel.frame
-    }
-}
-
 # this dialog allows us to select:
 #  - which directory to extract to
 #    - including all (writable) elements from $::sys_staticpath
@@ -985,6 +721,7 @@ proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
 #    - a directory chooser
 #  - whether to delete directories before re-extracting
 #  - whether to filter-out non-matching architectures
+
 proc ::deken::preferences::create {mytoplevel} {
     set ::deken::preferences::installpath $::deken::installpath
     set ::deken::preferences::hideforeignarch $::deken::hideforeignarch
@@ -1021,7 +758,7 @@ proc ::deken::preferences::create {mytoplevel} {
     [lindex $pathdoit 0] configure \
         -value "USER" \
         -textvariable ::deken::preferences::userinstallpath \
-        -variable ::deken::preferences::installpath 
+        -variable ::deken::preferences::installpath
 
     [lindex $pathdoit 1] configure \
         -text "..." \
@@ -1064,14 +801,13 @@ proc ::deken::preferences::create {mytoplevel} {
         -padding 5
 
     ttk::checkbutton $mytoplevel.install.remove -text [_ "Try to remove libraries before (re)installing them?"] \
-        -variable ::deken::preferences::remove_on_install 
-    
+        -variable ::deken::preferences::remove_on_install
+
     ttk::checkbutton $mytoplevel.install.readme -text [_ "Show README of newly installed libraries (if present)?"] \
-        -variable ::deken::preferences::show_readme 
-    
+        -variable ::deken::preferences::show_readme
 
     ttk::checkbutton $mytoplevel.install.add_to_path -text [_ "Should newly installed libraries be added to Pd's search path?"] \
-        -variable ::deken::preferences::add_to_path 
+        -variable ::deken::preferences::add_to_path
     catch { $mytoplevel.install.add_to_path configure \
                 -tristatevalue 1 \
                 -onvalue 2 \
@@ -1088,35 +824,32 @@ proc ::deken::preferences::create {mytoplevel} {
     ttk::radiobutton $mytoplevel.platform.default -value "DEFAULT" \
         -text [format [_ "Default platform: %s" ] [::deken::platform2string ] ] \
         -variable ::deken::preferences::platform \
-        -command "$mytoplevel.platform.userarch.entry configure -state disabled" \
-        
-    ttk::frame $mytoplevel.platform.userarch 
+        -command "$mytoplevel.platform.userarch.entry configure -state disabled"
+
+    ttk::frame $mytoplevel.platform.userarch
     ttk::radiobutton $mytoplevel.platform.userarch.radio -value "USER" \
         -text [_ "User-defined platform:" ] \
         -variable ::deken::preferences::platform \
-        -command "$mytoplevel.platform.userarch.entry configure -state normal" \
-        
-    ttk::entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform \
-        
+        -command "$mytoplevel.platform.userarch.entry configure -state normal"
+
+    ttk::entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform
+
     if { "$::deken::preferences::platform" == "DEFAULT" } {
         $winid.platform.userarch.entry configure -state disabled
     }
 
     # hide non-matching architecture?
     ttk::checkbutton $mytoplevel.platform.hide_foreign -text [_ "Hide foreign architectures?"] \
-        -variable ::deken::preferences::hideforeignarch 
-    
+        -variable ::deken::preferences::hideforeignarch
+
     # buttons
-    ttk::frame $mytoplevel.buttonframe 
+    ttk::frame $mytoplevel.buttonframe
     ttk::button $mytoplevel.buttonframe.cancel -text [_ "Cancel"] \
-        -command "::deken::preferences::cancel $mytoplevel" \
-        
+        -command "::deken::preferences::cancel $mytoplevel"
     ttk::button $mytoplevel.buttonframe.apply -text [_ "Apply"] \
-        -command "::deken::preferences::apply $mytoplevel" \
-        
+        -command "::deken::preferences::apply $mytoplevel"
     ttk::button $mytoplevel.buttonframe.ok -text [_ "OK"] \
-        -command "::deken::preferences::ok $mytoplevel" \
-        
+        -command "::deken::preferences::ok $mytoplevel"
 
 # Layout
     #Install Directories
@@ -1144,15 +877,675 @@ proc ::deken::preferences::create {mytoplevel} {
     grid $mytoplevel.buttonframe.cancel -column 2 -row 0
 }
 
-proc ::deken::progress {x} {
-    ::deken::status [format [_ "%s%% of download completed"] ${x}]
+# no mapped function because I removed the scrollbars in the prefs window.
+
+proc ::deken::preferences::show {{mytoplevel .deken_preferences}} {
+    if {[winfo exists $mytoplevel]} {
+        wm deiconify $mytoplevel
+        raise $mytoplevel
+    } else {
+        toplevel $mytoplevel
+        wm title $mytoplevel "Deken Preferences"
+
+        ttk::frame $mytoplevel.frame -padding 5
+        grid $mytoplevel.frame -column 0 -row 0
+        ::deken::preferences::create $mytoplevel.frame
+    }
 }
 
-proc ::deken::preferences::apply {mytoplevel} {
+proc ::deken::preferences::apply {winid} {
     set installpath "${::deken::preferences::installpath}"
     if { "$installpath" == "USER" } {
         set installpath "${::deken::preferences::userinstallpath}"
     }
+
+    ::deken::set_installpath "$installpath"
+    set plat ""
+    if { "${::deken::preferences::platform}" == "USER" } {
+        set plat "${::deken::preferences::userplatform}"
+    }
+    ::deken::set_platform_options ${plat} ${::deken::preferences::hideforeignarch} ${::deken::preferences::hideoldversions}
+    ::deken::set_install_options \
+        "${::deken::preferences::remove_on_install}" \
+        "${::deken::preferences::show_readme}" \
+        "${::deken::preferences::add_to_path}" \
+        "${::deken::preferences::keep_package}" \
+        "${::deken::preferences::verify_sha256}"
+}
+proc ::deken::preferences::cancel {winid} {
+    ## FIXXME properly close the window/frame (for re-use in a tabbed pane)
+    if {[winfo exists .deken_preferences]} {destroy .deken_preferences}
+    #destroy $winid
+}
+proc ::deken::preferences::ok {winid} {
+    ::deken::preferences::apply $winid
+    ::deken::preferences::cancel $winid
+}
+
+# ######################################################################
+# ################ core ################################################
+# ######################################################################
+
+if { [ catch { set ::deken::installpath [::pd_guiprefs::read dekenpath] } stdout ] } {
+    # this is a Pd without the new GUI-prefs
+    proc ::deken::set_installpath {installdir} {
+        set ::deken::installpath $installdir
+    }
+    proc ::deken::set_platform_options {platform hideforeignarch {hideoldversions 0}} {
+        set ::deken::userplatform $platform
+        set ::deken::hideforeignarch [::deken::utilities::bool $hideforeignarch ]
+        set ::deken::hideoldversions [::deken::utilities::bool $hideoldversions ]
+    }
+    proc ::deken::set_install_options {remove readme add keep verify256} {
+        set ::deken::remove_on_install [::deken::utilities::bool $remove]
+        set ::deken::show_readme [::deken::utilities::bool $readme]
+        set ::deken::add_to_path [::deken::utilities::tristate $add 0 0]
+        set ::deken::keep_package [::deken::utilities::bool $keep]
+        set ::deken::verify_sha256 [::deken::utilities::bool $verify256]
+    }
+} else {
+    catch {set ::deken::installpath [lindex ${::deken::installpath} 0]}
+    # Pd has a generic preferences system, that we can use
+    proc ::deken::set_installpath {installdir} {
+        set ::deken::installpath $installdir
+        ::pd_guiprefs::write dekenpath [list $installdir]
+    }
+    # user requested platform (empty = DEFAULT)
+    set ::deken::userplatform [::pd_guiprefs::read deken_platform]
+    catch {set ::deken::userplatform [lindex ${deken::userplatform} 0 ]}
+    set ::deken::hideforeignarch [::deken::utilities::bool [::pd_guiprefs::read deken_hide_foreign_archs] 1]
+    set ::deken::hideoldversions [::deken::utilities::bool [::pd_guiprefs::read deken_hide_old_versions] 1]
+    proc ::deken::set_platform_options {platform hideforeignarch {hideoldversions 0}} {
+        set ::deken::userplatform $platform
+        set ::deken::hideforeignarch [::deken::utilities::bool $hideforeignarch ]
+        set ::deken::hideoldversions [::deken::utilities::bool $hideoldversions ]
+        ::pd_guiprefs::write deken_platform [list $platform]
+        ::pd_guiprefs::write deken_hide_foreign_archs $::deken::hideforeignarch
+        ::pd_guiprefs::write deken_hide_old_versions $::deken::hideoldversions
+    }
+    set ::deken::remove_on_install [::deken::utilities::bool [::pd_guiprefs::read deken_remove_on_install] 1]
+    set ::deken::show_readme [::deken::utilities::bool [::pd_guiprefs::read deken_show_readme] 1]
+    set ::deken::keep_package [::deken::utilities::bool [::pd_guiprefs::read deken_keep_package] 0]
+    set ::deken::verify_sha256 [::deken::utilities::bool [::pd_guiprefs::read deken_verify_sha256] 1]
+    set ::deken::add_to_path [::deken::utilities::tristate [::pd_guiprefs::read deken_add_to_path] ]
+
+    proc ::deken::set_install_options {remove readme path keep verify256} {
+        set ::deken::remove_on_install [::deken::utilities::bool $remove]
+        set ::deken::show_readme [::deken::utilities::bool $readme]
+        set ::deken::add_to_path [::deken::utilities::tristate $path]
+        set ::deken::keep_package [::deken::utilities::bool $keep]
+        set ::deken::verify_sha256 [::deken::utilities::bool $verify256]
+        ::pd_guiprefs::write deken_remove_on_install "$::deken::remove_on_install"
+        ::pd_guiprefs::write deken_show_readme "$::deken::show_readme"
+        ::pd_guiprefs::write deken_add_to_path "$::deken::add_to_path"
+        ::pd_guiprefs::write deken_keep_package "$::deken::keep_package"
+        ::pd_guiprefs::write deken_verify_sha256 "$::deken::verify_sha256"
+    }
+}
+
+proc ::deken::normalize_result {title
+                                cmd
+                                {match 1}
+                                {subtitle ""}
+                                {statusline ""}
+                                {contextcmd {}}
+                                {pkgname ""}
+                                args} {
+    ## normalize a search-result
+    # the function parameters are guaranteed to be a stable API (with the exception or args)
+    # but the value returned by this function is an implementation detail
+    # <title> the primary line displayed for the search-result
+    # - <cmd> the full command to run to install the library
+    # - <match> boolean value to indicate whether this entry matches the current architecture
+    # - <subtitle> additional text to be shown under the <name>
+    # - <statusline> additional text to be shown in the STATUS line if the mouse hovers over the result
+    # - <contextcmd> the full command to be executed when the user right-clicks the menu-entry
+    # - <pkgname> the library name (typically this gets parsed from the package filename)
+    # - <args> RESERVED FOR FUTURE USE (this is a variadic placeholder. do not use!)
+
+    list "" $title $cmd $match $subtitle $statusline $contextcmd $pkgname
+}
+
+# find an install path, either from prefs or on the system
+# returns an empty string if nothing was found
+proc ::deken::find_installpath {{ignoreprefs false}} {
+    set installpath ""
+    if { [ info exists ::deken::installpath ] && !$ignoreprefs } {
+        ## any previous choice?
+        set installpath [ ::deken::utilities::get_writabledir [list $::deken::installpath ] ]
+    }
+    if { "$installpath" == "" } {
+        ## search the default paths
+        set installpath [ ::deken::utilities::get_writabledir $::sys_staticpath ]
+    }
+    if { "$installpath" == "" } {
+        # let's use the first of $::sys_staticpath, if it does not exist yet
+        set userdir [lindex $::sys_staticpath 0]
+        if { ! [file exists ${userdir} ] } {
+            set installpath $userdir
+        }
+    }
+    return $installpath
+}
+
+proc ::deken::platform2string {{verbose 0}} {
+    if { $verbose } {
+        return $::deken::platform(os)-$::deken::platform(machine)-float$::deken::platform(floatsize)
+    } else {
+        return $::deken::platform(os)-$::deken::platform(machine)-$::deken::platform(floatsize)
+    }
+}
+
+# allow overriding deken platform from Pd-core
+proc ::deken::set_platform {os machine bits floatsize} {
+    if { $os != $::deken::platform(os) ||
+         $machine != $::deken::platform(machine) ||
+         $bits != $::deken::platform(bits) ||
+         $floatsize != $::deken::platform(floatsize)
+     } {
+        set ::deken::platform(os) ${os}
+        set ::deken::platform(machine) ${machine}
+        set ::deken::platform(bits) ${bits}
+        set ::deken::platform(floatsize) ${floatsize}
+
+        ::deken::utilities::verbose 1 [format [_ "Platform re-detected: %s" ] [::deken::platform2string 1] ]
+    }
+}
+
+proc ::deken::versioncompare {a b} {
+    # compares two versions, the Debian way
+    # each version string is split into numeric and non-numeric elements
+    # the elements are compared pairwise
+    # "~" sorts before everything else
+    # sidenote: in practice the version we get here are of the form "<date>/<library>/<version>/<date>"
+    # we probably should only use this version-comparision for the <version> part,
+    # and use 'string compare' for the other parts
+    foreach x [regexp -all -inline {\d+|\D+} [string map {~ \t} $a]] y [regexp -all -inline {\d+|\D+} [string map {~ \t} $b]] {
+        if { "$x" == "" } { set x " " }
+        if { "$y" == "" } { set y " " }
+        if { [catch {
+           set c [dict get {1 0 {0 1} -1 {1 0} 1} [lsort -indices -dictionary -unique [list $x $y]]]
+        } stdout ] } {
+          # Tcl<8.5 (as found the PowerPC builds) lacks 'dict' and 'lsort -indices'
+          if { [catch {
+            # "string compare" does not sort numerically
+            set c [expr 2 * ($x > $y) + ($x == $y) - 1]
+          } stdout] } {
+            set c [string compare $x $y]
+          }
+        }
+        if { $c != "0" } {return $c}
+    }
+    return 0
+}
+
+proc ::deken::install_package_from_file {{pkgfile ""}} {
+    set types {}
+    lappend types [list [_ "Deken Packages" ] .dek]
+    lappend types [list [_ "ZIP Files" ] .zip]
+    if {$::tcl_platform(platform) ne "windows"} {
+        lappend types [list [_ "TAR Files" ] {.tar.gz .tgz} ]
+    }
+    lappend types [list [_ "All Files" ]  *  ]
+    if { "${pkgfile}" eq ""} {
+        set pkgfile [tk_getOpenFile -defaultextension dek -filetypes $types]
+    }
+    if { "${pkgfile}" eq "" } { return }
+
+    # user picked one
+    # perform checks and install it
+    set pkgfile [file normalize $pkgfile]
+
+    if { "$::deken::verify_sha256" } {
+        if { ! [::deken::utilities::verify_sha256 ${pkgfile} ${pkgfile}] } {
+            ::deken::status [format [_ "Checksum mismatch for '%s'" ] $pkgfile] 0
+            set msg [format [_ "SHA256 verification of %s failed!" ] $pkgfile ]
+
+            set result "retry"
+            while { "$result" eq "retry" } {
+                set result [tk_messageBox \
+                                -title [_ "SHA256 verification failed" ] \
+                                -message "${msg}" \
+                                -icon error -type abortretryignore \
+                                -parent .externals_searchui]
+                # we don't have a good strategy if the user selects 'retry'
+                # so we just display the dialog again...
+            }
+            if { "$result" eq "abort" } { return }
+        }
+    }
+    ::deken::install_package ${pkgfile} "" "" 1
+}
+
+proc ::deken::install_package {fullpkgfile {filename ""} {installdir ""} {keep 1}}  {
+    # fullpkgfile: the file to extract
+    # filename   : the package file name (usually the basename of $fullpkgfile)
+    #              but might be different depending on the download)
+    # installdir : where to put stuff into
+    # keep       : whether to remove the fullpkgfile after successful extraction
+    if { "${filename}" == "" } {
+        set filename [file tail ${fullpkgfile}]
+    }
+    set installdir [::deken::ensure_installdir ${installdir} ${filename}]
+    set parsedname [::deken::utilities::parse_filename $filename]
+    set extname [lindex $parsedname 0]
+    set extpath [file join $installdir $extname]
+
+
+    set deldir ""
+    if { "$::deken::remove_on_install" } {
+        ::deken::status [format [_ "Removing %s" ] $extname ]
+
+        if { ! [::deken::utilities::uninstall $installdir $extname] } {
+            # ouch uninstalling failed.
+            # on msw, lets assume this is because some of the files in the folder are locked.
+            # so move the folder out of the way and proceed
+            set deldir [::deken::utilities::get_tmpfilename $installdir]
+            if { [ catch {
+                file mkdir $deldir
+                file rename [file join ${installdir} ${extname}] [file join ${deldir} ${extname}]
+            } ] } {
+                ::deken::utilities::debug [format [_ "\[deken\] temporarily moving %1\$s into %2\$s failed." ] $extname $deldir ]
+                set deldir ""
+            }
+        }
+    }
+
+    ::deken::status [format [_ "Installing package %s" ] $extname ] 0
+    ::deken::syncgui
+    ::deken::progress 0
+    if { [::deken::utilities::extract $installdir $filename $fullpkgfile $keep] > 0 } {
+        ::deken::progressstatus [_ "Installation completed!" ]
+        set msg [format [_ "Successfully installed %s!" ] $extname ]
+        ::deken::status "${msg}" 0
+        ::pdwindow::post "\[deken\] $msg\n"
+        set install_failed 0
+    } else {
+        ::deken::progressstatus [_ "Installation failed!" ]
+        set msg [format [_ "Failed to install %s!" ] $extname ]
+        ::deken::status ${msg} 0
+        tk_messageBox \
+            -title [_ "Package installation failed" ] \
+            -message "${msg}" \
+            -icon error -type ok \
+            -parent .externals_searchui
+        set install_failed 1
+    }
+
+    if { "$deldir" != "" } {
+        # try getting rid of the directory to be deleted
+        # we already tried once (and failed), so this time we iterate over each file
+        set rmerrors [::deken::utilities::rmrecursive $deldir]
+        # and if there are still files around, ask the user to delete them.
+        if { $rmerrors > 0 } {
+            set result [tk_messageBox \
+                            -message [format [_ "Failed to completely remove %1\$s.\nPlease manually remove the directory %2\$s after quitting Pd." ] $extname $deldir] \
+                            -icon warning -type okcancel -default ok \
+                            -parent .externals_searchui]
+            switch -- $result {
+                ok {
+                    ::pd_menucommands::menu_openfile $deldir
+                }
+            }
+        }
+        set deldir ""
+    }
+
+    if { ${install_failed} } { return }
+
+    if { "$::deken::show_readme" } {
+        foreach ext {pd html pdf txt} {
+            set r [file join $extpath "README.deken.$ext"]
+            if {[file exists $r]} {
+                if { "$ext" == "pd" } {
+                    set directory [file normalize [file dirname $r]]
+                    set basename [file tail $r]
+                    pdsend "pd open [enquote_path $basename] [enquote_path $directory]"
+                } else {
+                    pd_menucommands::menu_openfile $r
+                }
+                break
+            }
+        }
+    }
+
+    if { "$::deken::add_to_path" } {
+        # add to the search paths? bail if the version of pd doesn't support it
+        if {[uplevel 1 info procs add_to_searchpaths] eq ""} {return}
+        if {![file exists $extpath]} {
+            ::deken::utilities::debug [format [_ "\[deken\] Unable to add %s to search paths"] $extname]
+            return
+        }
+        set result yes
+        if { $::deken::add_to_path > 1 } {
+            set result yes
+        } else {
+            set result [tk_messageBox \
+                            -message [format [_ "Add %s to the Pd search paths?" ]  $extname] \
+                            -icon question -type yesno -default yes \
+                            -parent .externals_searchui]
+        }
+        switch -- "${result}" {
+            yes {
+                add_to_searchpaths [file join $installdir $extname]
+                ::deken::utilities::debug [format [_ "\[deken\] Added %s to search paths"] $extname]
+                # if this version of pd supports it, try refreshing the helpbrowser
+                if {[uplevel 1 info procs ::helpbrowser::refresh] ne ""} {
+                    ::helpbrowser::refresh
+                }
+            }
+            no {
+                return
+            }
+        }
+    }
+}
+
+##### GUI ########
+proc ::deken::bind_globalshortcuts {toplevel} {
+    set closescript "destroy $toplevel"
+    bind $toplevel <$::modifier-Key-w> $closescript
+}
+
+proc ::deken::status {{msg ""} {timeout 5000}} {
+    after cancel $::deken::statustimer
+    if {"" ne $msg} {
+        set ::deken::statustext "$msg"
+        if { $timeout != "0" } {
+            set ::deken::statustimer [after $timeout [list set "::deken::statustext" ""]]
+        }
+    } else {
+        set ::deken::statustext ""
+    }
+}
+
+proc ::deken::progressstatus {{msg ""} {timeout 5000}} {
+   after cancel $::deken::progresstimer
+    if {"" ne $msg} {
+        set ::deken::progresstext "$msg"
+        if { $timeout != "0" } {
+            set ::deken::progresstimer [after $timeout [list set "::deken::progresstext" ""]]
+        }
+    } else {
+        set ::deken::progresstext ""
+    }
+}
+
+proc ::deken::syncgui {} {
+    update idletasks
+}
+
+proc ::deken::scrollup {} {
+    variable mytoplevelref
+    if { [winfo exists $mytoplevelref] } {
+        $mytoplevelref.w.resultsFrame.results see 0.0
+    }
+}
+
+proc ::deken::post {msg {tag ""}} {
+    variable mytoplevelref
+    if { [winfo exists $mytoplevelref] } {
+        $mytoplevelref.w.resultsFrame.results insert end "$msg\n" $tag
+        $mytoplevelref.w.resultsFrame.results see end
+    }
+}
+
+proc ::deken::clearpost {} {
+    variable mytoplevelref
+    if { [winfo exists $mytoplevelref] } {
+        $mytoplevelref.w.resultsFrame.results delete 1.0 end
+    }
+    set ::deken::selected {}
+}
+
+proc ::deken::bind_posttag {tag key cmd} {
+    variable mytoplevelref
+    if { [winfo exists $mytoplevelref] } {
+        $mytoplevelref.w.resultsFrame.results tag bind $tag $key $cmd
+    }
+}
+
+proc ::deken::highlightable_posttag {tagname} {
+    variable mytoplevelref
+    if { [winfo exists $mytoplevelref] } {
+        ::deken::bind_posttag $tagname <Enter> \
+            "$mytoplevelref.w.resultsFrame.results tag add highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tagname ]"
+        ::deken::bind_posttag $tagname <Leave> \
+            "$mytoplevelref.w.resultsFrame.results tag remove highlight [ $mytoplevelref.w.resultsFrame.results tag ranges $tagname ]"
+        # make sure that the 'highlight' tag is topmost
+        $mytoplevelref.w.resultsFrame.results tag raise highlight
+    }
+}
+
+proc ::deken::menu_selectpackage {winid pkgname installcmd} {
+    set results ${winid}.results
+
+    # set/unset the selection in a "dict"
+    set state {}
+    set counter 1
+    foreach {k v} $::deken::selected {
+        if { $k eq $pkgname } {
+            if { $v ne $installcmd } {
+                set state 1
+                lset ::deken::selected $counter $installcmd
+            } else {
+                set state 0
+                lset ::deken::selected $counter {}
+            }
+            break
+        }
+        incr counter 2
+    }
+    if { ${state} eq {} } {
+        # not found in the dict; just add it
+        lappend ::deken::selected $pkgname $installcmd
+        set state 1
+    }
+
+    # set/unset the visual representation (via tags)
+    set counter 0
+    foreach {a b} [$results tag ranges /$pkgname] {$results tag remove sel $a $b}
+    if { $state } {
+        foreach r $::deken::results {
+            if { [lindex $r 1] eq ${installcmd} } {
+                foreach {a b} [$results tag ranges ch$counter] {$results tag add sel $a $b}
+            }
+            incr counter
+        }
+    }
+}
+
+proc ::deken::menu_installselected {winid} {
+    set counter 0
+    foreach {k v} $::deken::selected {
+        if { $v ne {} } {
+            eval $v
+            incr counter
+        }
+    }
+    if { $counter == 0 } {
+        ::deken::status [_ "No packages selected for installation."]
+    } elseif { $counter > 1 } {
+        ::deken::status [format [_ "Processed %d packages selected for installation."] $counter ]
+    }
+    # clear the selection
+    set ::deken::selected {}
+    foreach {a b} [${winid}.results tag ranges sel] {${winid}.results tag remove sel $a $b}
+}
+
+proc ::deken::do_prompt_installdir {path {winid {}}} {
+    set msg [_ "Install externals to directory:"]
+    if { $winid eq {} } {
+        set winid $::deken::winid
+    }
+    if {[winfo exists $winid]} {
+        tk_chooseDirectory -title "${msg}" -initialdir ${path} -parent $winid
+    } else {
+        tk_chooseDirectory -title "${msg}" -initialdir ${path}
+    }
+}
+
+proc ::deken::prompt_installdir {} {
+    set installdir [::deken::do_prompt_installdir $::fileopendir]
+    if { "$installdir" != "" } {
+        ::deken::set_installpath $installdir
+        return 1
+    }
+    return 0
+}
+
+proc ::deken::update_searchbutton {mytoplevel} {
+    if { [$::dekenWin.searchbit.entry get] == "" } {
+        $::dekenWin.searchbit.button configure -text [_ "Show all" ]
+    } {
+        $::dekenWin.searchbit.button configure -text [_ "Search" ]
+    }
+}
+
+proc ::deken::progress {x} {
+    ::deken::status [format [_ "%s%% of download completed"] ${x}]
+}
+
+# this function gets called when the menu is clicked
+proc ::deken::open_searchui {mytoplevel} {
+    if {[winfo exists $mytoplevel]} {
+        wm deiconify $mytoplevel
+        raise $mytoplevel
+    } else {
+        ::deken::create_dialog $mytoplevel
+        $::dekenWin.resultsFrame.results tag configure error -foreground "#ea6962"
+        $::dekenWin.resultsFrame.results tag configure warn -foreground "#bd6f3e"
+        $::dekenWin.resultsFrame.results tag configure info -foreground "#999999"
+        set col [::pdtk_canvas::get_color selected $mytoplevel]
+        if {$col ne ""} {
+            $::dekenWin.resultsFrame.results tag configure highlight -foreground $col
+        }
+        $::dekenWin.resultsFrame.results tag configure archmatch
+        $::dekenWin.resultsFrame.results tag configure noarchmatch -foreground "#999999"
+    }
+    ::deken::clearpost
+    ::deken::post [_ "Enter an exact library or object name."] info
+    set msg [_ "e.g. 'freeverb~'"]
+    ::deken::post "\t${msg}" info
+    ::deken::post [_ "Use the '*' wildcard to match any number of characters."] info
+    set msg [_ "e.g. '*-plugin' will match 'deken-plugin' (and more)."]
+    ::deken::post "\t${msg}" info
+    ::deken::post "" info
+    ::deken::post [_ "You can restrict the search to only-libraries or only-objects."] info
+    ::deken::post [_ "To get a list of all available externals, try an empty search."] info
+    ::deken::post [_ "Right-clicking a search result will give you more options..." ] info
+}
+
+# build the externals search dialog window
+proc ::deken::create_dialog {mytoplevel} {
+    toplevel $mytoplevel -class DialogWindow
+    variable mytoplevelref $mytoplevel
+    wm title $mytoplevel [_ "Deken - A Package Manager for Pure Data Externals"]
+    wm transient $mytoplevel
+    wm resizable $mytoplevel 0 0
+
+    if {$::windowingsystem eq "aqua"} {
+        $mytoplevel configure -menu $::dialog_menubar
+    }
+
+# Widgets
+    ttk::frame $mytoplevel.w -padding 5
+    set ::dekenWin $mytoplevel.w
+
+    ttk::frame $::dekenWin.searchbit
+        ttk::entry $::dekenWin.searchbit.entry -width 55
+        bind $::dekenWin.searchbit.entry <Key-Return> "::deken::initiate_search $mytoplevel"
+        bind $::dekenWin.searchbit.entry <KeyRelease> "::deken::update_searchbutton $mytoplevel"
+        focus $::dekenWin.searchbit.entry
+        ttk::button $::dekenWin.searchbit.button -width -1 -text "Show all" -default active \
+            -command "::deken::initiate_search $mytoplevel"
+        ttk::label $::dekenWin.searchbit.warning -text "Only install externals uploaded by people you trust."
+
+    ttk::frame $::dekenWin.filter
+        ttk::label $::dekenWin.filter.label -text "Search For:"
+        ttk::radiobutton $::dekenWin.filter.libraries -text "Libraries" \
+            -variable ::deken::searchtype -value libraries
+        ttk::radiobutton $::dekenWin.filter.objects -text "Objects" \
+            -variable ::deken::searchtype -value objects
+        ttk::radiobutton $::dekenWin.filter.libraries -text "Both" \
+            -variable ::deken::searchtype -value name
+
+    ttk::frame $::dekenWin.status
+        ttk::button $::dekenWin.status.preferences -width -1 -text "Preferences" \
+            -command "::deken::preferences::show"
+        ttk::label $::dekenWin.status.label -textvariable ::deken::statustext
+
+    ttk::frame $::dekenWin.resultsFrame  -padding "4 0"
+    tk::text $::dekenWin.resultsFrame.results -takefocus 0 -cursor hand2 -relief flat \
+        -height 30 -yscrollcommand "$::dekenWin.resultsFrame.ys set" \
+        -borderwidth 0 -highlightthickness 0
+
+    set col [::pdtk_canvas::get_color scrollbox_fill $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -background $col \
+            -highlightcolor $col
+    }
+    set col [::pdtk_canvas::get_color text $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -foreground $col
+    }
+    set col [::pdtk_canvas::get_color selected $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -selectforeground $col
+    }
+    set col [::pdtk_canvas::get_color cursor $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -insertbackground $col
+    }
+    set col [::pdtk_canvas::get_color helpbrowser_highlight $mytoplevel]
+    if {$col ne ""} {
+        $::dekenWin.resultsFrame.results configure -selectbackground $col
+    }
+
+    ttk::scrollbar $::dekenWin.resultsFrame.ys -orient vertical -command "$::dekenWin.resultsFrame.results yview"
+    ttk::frame $::dekenWin.progress  -padding "0 8"
+
+# Layout
+    grid $::dekenWin -column 0 -row 0 -sticky nsew
+    grid $::dekenWin.searchbit -column 0 -row 0 -sticky nsew
+    grid $::dekenWin.searchbit.entry -column 0 -row 0
+    grid $::dekenWin.searchbit.button -column 1 -row 0
+    grid $::dekenWin.searchbit.warning -column 0 -row 1 -sticky w
+
+    grid $::dekenWin.resultsFrame -column 0 -row 1 -sticky nsew
+    grid $::dekenWin.resultsFrame.results -column 0 -row 0
+    grid $::dekenWin.resultsFrame.ys -column 1 -row 0 -sticky ns
+
+    grid $::dekenWin.progress -column 0 -row 2
+
+    # creating and gridding the progress bar, there's a weird if and catch statement attached
+    # HOW TO REMOVE THIS IT IS UGLY
+    if { [ catch {
+        ttk::progressbar $::dekenWin.progress.bar -orient horizontal -length 575 -maximum 100 -mode determinate -variable ::deken::progressvar } stdout ] } {
+    } {
+        grid $::dekenWin.progress.bar -column 0 -row 3 -sticky w
+
+        proc ::deken::progress {x} {
+            set ::deken::progressvar $x
+            if {$x < 100} {
+                set term [$::dekenWin.searchbit.entry get]
+                ::deken::status [format "Installing '%s'..." $term]
+            } else {
+                ::deken::status "Done!"
+            }
+        }
+    }
+
+    grid $::dekenWin.status -column 0 -row 4 -sticky e
+    grid $::dekenWin.status.label -column 0 -row 0
+    grid $::dekenWin.status.preferences -column 1 -row 0
+
+}
+
+proc ::deken::open_search_xxx {searchtype xxx}  {
+    set winid .externals_searchui
+    ::deken::open_searchui $winid
+    ::deken::clearpost
 
     set searchterm {}
     if { $::deken::searchtype eq "${searchtype}" } {
