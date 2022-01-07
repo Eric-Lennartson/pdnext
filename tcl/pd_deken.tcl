@@ -800,14 +800,21 @@ proc ::deken::preferences::create {mytoplevel} {
     ttk::labelframe $mytoplevel.install -text " Installation options " \
         -padding 5
 
-    ttk::checkbutton $mytoplevel.install.remove -text [_ "Try to remove libraries before (re)installing them?"] \
+    ttk::checkbutton $mytoplevel.install.verify256 -text [_ "Try to verify the libraries' checksum before (re)installing them"] \
+        -variable ::deken::preferences::verify_sha256
+
+    ttk::checkbutton $mytoplevel.install.remove -text [_ "Try to remove libraries before (re)installing them"] \
         -variable ::deken::preferences::remove_on_install
 
-    ttk::checkbutton $mytoplevel.install.readme -text [_ "Show README of newly installed libraries (if present)?"] \
+    ttk::checkbutton $mytoplevel.install.readme -text [_ "Show README of newly installed libraries (if present)"] \
         -variable ::deken::preferences::show_readme
 
-    ttk::checkbutton $mytoplevel.install.add_to_path -text [_ "Should newly installed libraries be added to Pd's search path?"] \
+    ttk::checkbutton $mytoplevel.install.keeppackage -text [_ "Keep package files after installation"] \
+        -variable ::deken::preferences::keep_package
+
+    ttk::checkbutton $mytoplevel.install.add_to_path -text [_ "Add newly installed libraries to Pd's search path"] \
         -variable ::deken::preferences::add_to_path
+
     catch { $mytoplevel.install.add_to_path configure \
                 -tristatevalue 1 \
                 -onvalue 2 \
@@ -835,12 +842,17 @@ proc ::deken::preferences::create {mytoplevel} {
     ttk::entry $mytoplevel.platform.userarch.entry -textvariable ::deken::preferences::userplatform
 
     if { "$::deken::preferences::platform" == "DEFAULT" } {
-        $winid.platform.userarch.entry configure -state disabled
+        $mytoplevel.platform.userarch.entry configure -state disabled
     }
 
+    ttk::separator $mytoplevel.platform.sep
+
     # hide non-matching architecture?
-    ttk::checkbutton $mytoplevel.platform.hide_foreign -text [_ "Hide foreign architectures?"] \
+    ttk::checkbutton $mytoplevel.platform.hide_foreign -text [_ "Hide foreign architectures"] \
         -variable ::deken::preferences::hideforeignarch
+
+    ttk::checkbutton $mytoplevel.platform.only_newest -text [_ "Only show the newest version of a library\n(treats other versions like foreign architectures)"] \
+        -variable ::deken::preferences::hideoldversions
 
     # buttons
     ttk::frame $mytoplevel.buttonframe
@@ -858,18 +870,22 @@ proc ::deken::preferences::create {mytoplevel} {
     grid $pathsframe -column 0 -row 0 ;# Pathsframe is for the canvas
     # Installation Options
     grid $mytoplevel.install -column 0 -row 1 -sticky nwes -pady 2
-    grid $mytoplevel.install.remove -column 0 -row 0 -sticky w
-    grid $mytoplevel.install.readme -column 0 -row 1  -sticky w
-    grid $mytoplevel.install.add_to_path -column 0 -row 2  -sticky w
+    grid $mytoplevel.install.verify256   -column 0 -row 0 -sticky w
+    grid $mytoplevel.install.remove      -column 0 -row 1 -sticky w
+    grid $mytoplevel.install.readme      -column 0 -row 2 -sticky w
+    grid $mytoplevel.install.keeppackage -column 0 -row 3 -sticky w
+    grid $mytoplevel.install.add_to_path -column 0 -row 4 -sticky w
     # Platform Settings
     grid $mytoplevel.platform -column 0 -row 2 -sticky nwes -pady 2
     grid $mytoplevel.platform.default -column 0 -row 0  -sticky w
 
-    grid $mytoplevel.platform.userarch -column 0 -row 1  -sticky w
+    grid $mytoplevel.platform.userarch -column 0 -row 1  -sticky we
     grid $mytoplevel.platform.userarch.radio -column 0 -row 0  -sticky w
     grid $mytoplevel.platform.userarch.entry -column 1 -row 0  -sticky w
+    grid $mytoplevel.platform.sep          -column 0 -row 2 -pady 5 -sticky we
+    grid $mytoplevel.platform.hide_foreign -column 0 -row 3 -sticky w
+    grid $mytoplevel.platform.only_newest  -column 0 -row 4 -sticky w
 
-    grid $mytoplevel.platform.hide_foreign -column 0 -row 2  -sticky w
     # Buttons
     grid $mytoplevel.buttonframe -column 0 -row 3 -pady 2
     grid $mytoplevel.buttonframe.ok -column 0 -row 0
