@@ -1,22 +1,11 @@
 ==== Todo =================================================================
 - replace iemguis with guis of my own making
-- update the deken dialog. keeping old version for now.
-- go through and get the fork working.
-  - check all dialogs
-    - gatom DONE
-    - iemgui DONE
-    - pdwindow DONE
-    - pd-gui DONE
-    - pd_menus DONE
-    - helpbrowser DONE
-    - dialog_path DONE (some weird errors but nothing about the code itself)
-    - dialog_audio DONE
 ==== BUGS =================================================================
 - radios leave behind inlets when deleted, or when snd and rcv are added
+  - doesn't matter, I'm removing iemguis anyways.
 ==== Improvements =========================================================
+- How can I build pd with my own icons?
 - have an easy way to add themes?
-- have iemgui's update colors based on themes
 - move the theming options into a better menu
 - create a preferences menu where all preferences are set, rather than
   scattered all over the place
-- change cursor for inlet hovering to be the one that purr data uses.
