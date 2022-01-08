@@ -194,146 +194,8 @@ msgstr "Copier"
 msgid "Paste"
 msgstr "Coller"
 
-msgid "Array Properties"
-msgstr "Propriétés du tableau"
-
-msgid "Array"
-msgstr "Tableau"
-
-msgid "Name:"
-msgstr "Nom :"
-
-msgid "Size:"
-msgstr "Taille :"
-
-msgid "Save contents"
-msgstr "Enregistrer le contenu"
-
-msgid "Draw as:"
-msgstr "Dessiner en :"
-
-msgid "Polygon"
-msgstr "Polygone"
-
-msgid "Points"
-msgstr "Points"
-
-msgid "Bezier curve"
-msgstr "Courbe de Bézier"
-
-msgid "Put array into:"
-msgstr "Placer le tableau dans :"
-
-msgid "New graph"
-msgstr "Nouveau graphique"
-
-msgid "Last graph"
-msgstr "Graphique précédent"
-
-msgid "Options"
-msgstr "Options"
-
-msgid "Open List View..."
-msgstr "Ouvrir en liste..."
-
-msgid "Delete array"
-msgstr "Supprimer le tableau"
-
-msgid "Cancel"
-msgstr "Annuler"
-
-msgid "Apply"
-msgstr "Appliquer"
-
-msgid "OK"
-msgstr "OK"
-
-msgid "Audio Settings"
-msgstr "Paramètres audio"
-
-msgid "Settings"
-msgstr "Paramètres"
-
-msgid "Sample rate:"
-msgstr "Fréquence d'échantillonnage :"
-
-msgid "Delay (msec):"
-msgstr "Délai(ms) :"
-
-msgid "48k"
-msgstr "48k"
-
-msgid "44.1k"
-msgstr "44,1k"
-
-msgid "96k"
-msgstr "96k"
-
-msgid "Block size:"
-msgstr "Échantillons par bloc :"
-
-msgid "Use callbacks"
-msgstr "Utiliser des callbacks"
-
-msgid "Input Devices"
-msgstr "Périphériques d'entrée"
-
-msgid "Channels:"
-msgstr "Nombre de canaux :"
-
-msgid "Output Devices"
-msgstr "Périphériques de sortie"
-
-msgid "(same as input device)..."
-msgstr "(même que le périphérique d'entrée)..."
-
-msgid "Use Multiple Devices"
-msgstr "Utiliser plusieurs périphériques"
-
-msgid "Save All Settings"
-msgstr "Enregistrer tous les réglages"
-
 msgid "WARNING: unknown graphme flags received in pdtk_canvas_dialog"
 msgstr "ATTENTION: unknown graphme flags received in pdtk_canvas_dialog"
-
-msgid "Canvas Properties"
-msgstr "Propriétés du Canvas"
-
-msgid "Scale"
-msgstr "Échelle"
-
-msgid "X units per pixel:"
-msgstr "Unités par pixel en X :"
-
-msgid "Y units per pixel:"
-msgstr "Unités par pixel en Y :"
-
-msgid "Appearance on parent patch"
-msgstr "Aspect dans le patch parent"
-
-msgid "Graph-On-Parent"
-msgstr "Graph-On-Parent (dessiner dans le patch parent)"
-
-msgid "Hide object name and arguments"
-msgstr "Cacher le nom et les arguments de l'objet"
-
-msgid "Range and size"
-msgstr "Intervalle et taille"
-
-msgid "X range: from"
-msgstr "Intervalle X : de"
-
-msgid "to"
-msgstr "à"
-
-msgid "Margin:"
-msgstr "Marges :"
-
-msgid "Y range: from"
-msgstr "Intervalle Y : de"
-
-msgid "Data Properties"
-msgstr "Propriétés de la donnée"
 
 #, tcl-format
 msgid "Found '%1$s' in %2$s"
@@ -361,6 +223,9 @@ msgstr "Fenêtre Pd"
 msgid "Match whole word only"
 msgstr "Mot entier seulement"
 
+msgid "Cancel"
+msgstr "Annuler"
+
 msgid "Close"
 msgstr "Fermer"
 
@@ -386,162 +251,15 @@ msgstr "seulement X"
 msgid "Y only"
 msgstr "seulement Y"
 
-msgid "Atom Box Properties"
-msgstr "Propriétés de la boîte Nombre/Symbole"
-
-msgid "Width:"
-msgstr "Largeur :"
-
-msgid "Limits"
-msgstr "Limites"
-
-msgid "Lower:"
-msgstr "Inférieur :"
-
-msgid "Upper:"
-msgstr "Supérieur :"
-
-msgid "Label"
-msgstr "Label"
-
-msgid "Left"
-msgstr "Gauche"
-
-msgid "Right"
-msgstr "Droite"
-
-msgid "Top"
-msgstr "Haut"
-
-msgid "Bottom"
-msgstr "Bas"
-
-msgid "Messages"
-msgstr "Messages"
-
-msgid "Send symbol:"
-msgstr "Envoyer au symbole :"
-
-msgid "Receive symbol:"
-msgstr "Recevoir du symbole :"
-
-msgid "Background color"
-msgstr "Couleur de l'arrière plan"
-
-msgid "Foreground color"
-msgstr "Couleur du premier plan"
+msgid "Apply"
+msgstr "Appliquer"
 
 msgid "Label color"
 msgstr "Couleur du label"
 
-msgid "Init"
-msgstr "Initialisation"
-
-msgid "No init"
-msgstr "Pas d'init."
-
-msgid "Jump on click"
-msgstr "Instantané"
-
-msgid "Steady on click"
-msgstr "Glissant"
-
-msgid "Bang"
-msgstr "Bang"
-
-msgid "Flash Time (msec)"
-msgstr "Durée du flash (ms)"
-
-msgid "Intrrpt:"
-msgstr "Intrrpt :"
-
-msgid "Hold:"
-msgstr "Maintient :"
-
-msgid "Toggle"
-msgstr "Interrupteur"
-
-msgid "Non Zero Value"
-msgstr "Valeur si coché"
-
-msgid "Value:"
-msgstr "Valeur :"
-
-msgid "Number2"
-msgstr "Nombre2"
-
-msgid "Width (digits):"
-msgstr "Largeur (chiffres) :"
-
-msgid "Height:"
-msgstr "Hauteur :"
-
-msgid "Output Range"
-msgstr "Plage de valeurs"
-
-msgid "Log height:"
-msgstr "Hauteur du log :"
-
-msgid "Vslider"
-msgstr "Slider vertical"
-
-msgid "Hslider"
-msgstr "Slider horizontal"
-
-msgid "Vradio"
-msgstr "Sélecteur vertical"
-
-msgid "Num cells:"
-msgstr "Nombre de cases :"
-
-msgid "Hradio"
-msgstr "Sélecteur horizontal"
-
-msgid "VU Meter"
-msgstr "VU-mètre"
-
-msgid "Canvas"
-msgstr "Canvas"
-
-msgid "Visible Rectangle (pix)"
-msgstr "Rectangle visible (pix)"
-
 #, tcl-format
 msgid "%s Properties"
 msgstr "Propriétés de l'objet %s"
-
-msgid "Parameters"
-msgstr "Paramètres"
-
-msgid "X offset:"
-msgstr "Offset en X :"
-
-msgid "Y offset:"
-msgstr "Offset en Y :"
-
-msgid "Colors"
-msgstr "Couleurs"
-
-msgid "Background"
-msgstr "Arrière plan"
-
-msgid "Front"
-msgstr "Premier plan"
-
-msgid "Compose color"
-msgstr "Créer la couleur"
-
-msgid "Test label"
-msgstr "Label de test"
-
-msgid "Send a Pd message"
-msgstr "Envoyer un message à Pd"
-
-msgid "(use arrow keys for history)"
-msgstr "(Utiliser les flèches pour accéder à l'historique)"
-
-msgid "MIDI Settings"
-msgstr "Paramètres MIDI"
 
 msgid "ALSA MIDI Settings"
 msgstr "Paramètres MIDI (ALSA)"
@@ -552,18 +270,16 @@ msgstr "Ports d'entrée :"
 msgid "Out Ports:"
 msgstr "Ports de sortie :"
 
-msgid "Pd search path for objects, help, audio, text and other files"
+msgid "Save All Settings"
+msgstr "Enregistrer tous les réglages"
+
+msgid "OK"
+msgstr "OK"
+
+#, fuzzy
+msgid "Search paths for objects, help, audio, text and other files"
 msgstr ""
 "Chemins pour la recherche d'objets, aides, sons, textes et autres fichiers"
-
-msgid "Use standard paths"
-msgstr "Utiliser les chemins standards"
-
-msgid "Verbose"
-msgstr "Verbeux"
-
-msgid "Pd Documents Directory"
-msgstr "Dossier des Documents"
 
 msgid "Browse"
 msgstr "Choisir"
@@ -573,9 +289,6 @@ msgstr "Réinitialiser"
 
 msgid "Disable"
 msgstr "Désactiver"
-
-msgid "Externals Install Directory"
-msgstr "Dossier d'installation des Externals"
 
 msgid "Clear"
 msgstr "Effacer"
@@ -595,10 +308,8 @@ msgstr "Ajouter une bibliothèque"
 msgid "Edit library"
 msgstr "Éditer la bibliothèque"
 
-msgid "Pd libraries to load on startup"
-msgstr "Bibliothèques à charger au démarrage"
-
-msgid "Startup flags:"
+#, fuzzy
+msgid "Startup Libraries"
 msgstr "Options au démarrage :"
 
 msgid "Defeat real-time scheduling"
@@ -714,17 +425,16 @@ msgstr "Créer"
 msgid "Check"
 msgstr "Vérifier"
 
-msgid "Installation options:"
-msgstr "Options d'installation :"
-
 msgid "Try to verify the libraries' checksum before (re)installing them"
 msgstr ""
 "Essayer de vérifier la somme de contrôle (checksum) des bibliothèques avant "
 "de les (ré)installer"
 
+#, fuzzy
 msgid "Try to remove libraries before (re)installing them"
 msgstr "Essayer de supprimer les bibliothèques avant de les (ré)installer"
 
+#, fuzzy
 msgid "Show README of newly installed libraries (if present)"
 msgstr ""
 "Afficher le README (si présent) des bibliothèques nouvellement installées"
@@ -732,13 +442,11 @@ msgstr ""
 msgid "Keep package files after installation"
 msgstr "Garder les fichiers paquets après l'installation"
 
+#, fuzzy
 msgid "Add newly installed libraries to Pd's search path"
 msgstr ""
 "Ajouter les bibliothèques nouvellement installées aux chemins de recherche "
 "de Pd"
-
-msgid "Platform settings:"
-msgstr "Réglages de plateforme :"
 
 #, tcl-format
 msgid "Default platform: %s"
@@ -747,6 +455,7 @@ msgstr "Plateforme par défaut : %s"
 msgid "User-defined platform:"
 msgstr "Plateforme définie par l'utilisateur :"
 
+#, fuzzy
 msgid "Hide foreign architectures"
 msgstr "Cacher les autres architectures"
 
@@ -757,11 +466,7 @@ msgstr ""
 "Ne montrer que la version la plus récente de la bibliothèque\n"
 "(considérer les autres versions comme autre architecture)"
 
-#, tcl-format
-msgid "Deken %s Preferences"
-msgstr "Préférences de Deken %s"
-
-#, tcl-format
+#, fuzzy, tcl-format
 msgid "Platform re-detected: %s"
 msgstr "Plateforme re-détectée : %s"
 
@@ -883,37 +588,8 @@ msgstr ""
 "En cliquant avec le bouton droit de la souris sur un résultat de recherche, "
 "vous obtiendrez plus d'options..."
 
-msgid "Find externals"
-msgstr "Installer des objets supplémentaires"
-
-msgid "Search for: "
-msgstr "Rechercher des :"
-
-msgid "libraries"
-msgstr "bibliothèques"
-
-msgid "objects"
-msgstr "objets"
-
-msgid "both"
-msgstr "les deux"
-
-msgid "translations"
-msgstr "traductions"
-
-msgid "Only install externals uploaded by people you trust."
+msgid "Deken - A Package Manager for Pure Data Externals"
 msgstr ""
-"N'installez que des objets ou bibliothèques provenant de sources de "
-"confiance."
-
-msgid "Preferences..."
-msgstr "Préférences..."
-
-msgid "Install DEK file..."
-msgstr "Installer un fichier DEK..."
-
-msgid "More..."
-msgstr "Plus..."
 
 #, tcl-format
 msgid "[deken] Start searching for externals... %s"
@@ -945,8 +621,8 @@ msgstr "Installer %1$s dans %2$s ?"
 #, tcl-format
 msgid "Cancelling download of %s: No installation directory given."
 msgstr ""
-"Annulation du téléchargement de %s : aucun répertoire d'installation n'a "
-"été indiqué."
+"Annulation du téléchargement de %s : aucun répertoire d'installation n'a été "
+"indiqué."
 
 msgid "Installing to non-existant directory failed"
 msgstr "L'installation dans un répertoire inexistant a échoué"
@@ -989,6 +665,9 @@ msgstr "[deken] deken-plugin.tcl (recherche d'externals Pd) chargé depuis %s"
 #, tcl-format
 msgid "[deken] Platform detected: %s"
 msgstr "[deken] Plateforme détectée : %s"
+
+msgid "Find externals"
+msgstr "Installer des objets supplémentaires"
 
 #, tcl-format
 msgid "Searching for '%s' failed!"
@@ -1138,9 +817,6 @@ msgstr "Nouveau"
 msgid "Open"
 msgstr "Ouvrir"
 
-msgid "Message..."
-msgstr "Message..."
-
 msgid "Cut"
 msgstr "Couper"
 
@@ -1159,14 +835,47 @@ msgstr "Message"
 msgid "Number"
 msgstr "Nombre"
 
+msgid "List"
+msgstr ""
+
 msgid "Symbol"
 msgstr "Symbole"
 
 msgid "Comment"
 msgstr "Commentaire"
 
+msgid "Bang"
+msgstr "Bang"
+
+msgid "Toggle"
+msgstr "Interrupteur"
+
+msgid "Number2"
+msgstr "Nombre2"
+
+msgid "Vslider"
+msgstr "Slider vertical"
+
+msgid "Hslider"
+msgstr "Slider horizontal"
+
+msgid "Vradio"
+msgstr "Sélecteur vertical"
+
+msgid "Hradio"
+msgstr "Sélecteur horizontal"
+
+msgid "VU Meter"
+msgstr "VU-mètre"
+
+msgid "Canvas"
+msgstr "Canvas"
+
 msgid "Graph"
 msgstr "Graphique"
+
+msgid "Array"
+msgstr "Tableau"
 
 msgid "Find..."
 msgstr "Rechercher..."
@@ -1225,6 +934,9 @@ msgstr "Liste des objets..."
 msgid "puredata.info"
 msgstr "puredata.info"
 
+msgid "Check for updates"
+msgstr ""
+
 msgid "Report a bug"
 msgstr "Signaler un problème"
 
@@ -1262,6 +974,9 @@ msgstr "Zoomer les nouvelles fenêtres"
 #, fuzzy
 msgid "Bezier Cables"
 msgstr "Courbe de Bézier"
+
+msgid "Theme"
+msgstr ""
 
 msgid "Save All Preferences"
 msgstr "Enregistrer toutes les préférences"
@@ -1307,32 +1022,11 @@ msgstr "(Tcl) CARACTÈRE MANQUANT ']' : "
 msgid "Tcl:"
 msgstr "Tcl:"
 
-msgid "Pd"
-msgstr "Pd"
-
 msgid "DSP"
 msgstr "DSP"
 
-msgid "Audio I/O error"
-msgstr "Erreur entrée/sortie audio"
-
 msgid "Log:"
 msgstr "Log:"
-
-msgid "fatal"
-msgstr "fatal"
-
-msgid "error"
-msgstr "erreur"
-
-msgid "normal"
-msgstr "normal"
-
-msgid "debug"
-msgstr "debug"
-
-msgid "all"
-msgstr "tout"
 
 msgid "New..."
 msgstr "Nouveau..."
@@ -1350,6 +1044,338 @@ msgstr "ignorer '%s' : n'existe pas"
 #, tcl-format
 msgid "ignoring '%s': doesn't look like a Pd file"
 msgstr "ignorer '%s' : ne semble pas être un fichier Pd"
+
+#, fuzzy
+#~ msgid "deken-plugin.tcl (Pd externals search) loaded from %s"
+#~ msgstr ""
+#~ "[deken] deken-plugin.tcl (recherche d'externals Pd) chargé depuis %s"
+
+#, fuzzy
+#~ msgid "platform detected: %s"
+#~ msgstr "Plateforme re-détectée : %s"
+
+#~ msgid "Array Properties"
+#~ msgstr "Propriétés du tableau"
+
+#~ msgid "Name:"
+#~ msgstr "Nom :"
+
+#~ msgid "Size:"
+#~ msgstr "Taille :"
+
+#~ msgid "Save contents"
+#~ msgstr "Enregistrer le contenu"
+
+#~ msgid "Draw as:"
+#~ msgstr "Dessiner en :"
+
+#~ msgid "Polygon"
+#~ msgstr "Polygone"
+
+#~ msgid "Points"
+#~ msgstr "Points"
+
+#~ msgid "Bezier curve"
+#~ msgstr "Courbe de Bézier"
+
+#~ msgid "Put array into:"
+#~ msgstr "Placer le tableau dans :"
+
+#~ msgid "New graph"
+#~ msgstr "Nouveau graphique"
+
+#~ msgid "Last graph"
+#~ msgstr "Graphique précédent"
+
+#~ msgid "Options"
+#~ msgstr "Options"
+
+#~ msgid "Open List View..."
+#~ msgstr "Ouvrir en liste..."
+
+#~ msgid "Delete array"
+#~ msgstr "Supprimer le tableau"
+
+#~ msgid "Audio Settings"
+#~ msgstr "Paramètres audio"
+
+#~ msgid "Settings"
+#~ msgstr "Paramètres"
+
+#~ msgid "Sample rate:"
+#~ msgstr "Fréquence d'échantillonnage :"
+
+#~ msgid "Delay (msec):"
+#~ msgstr "Délai(ms) :"
+
+#~ msgid "48k"
+#~ msgstr "48k"
+
+#~ msgid "44.1k"
+#~ msgstr "44,1k"
+
+#~ msgid "96k"
+#~ msgstr "96k"
+
+#~ msgid "Block size:"
+#~ msgstr "Échantillons par bloc :"
+
+#~ msgid "Use callbacks"
+#~ msgstr "Utiliser des callbacks"
+
+#~ msgid "Input Devices"
+#~ msgstr "Périphériques d'entrée"
+
+#~ msgid "Channels:"
+#~ msgstr "Nombre de canaux :"
+
+#~ msgid "Output Devices"
+#~ msgstr "Périphériques de sortie"
+
+#~ msgid "(same as input device)..."
+#~ msgstr "(même que le périphérique d'entrée)..."
+
+#~ msgid "Use Multiple Devices"
+#~ msgstr "Utiliser plusieurs périphériques"
+
+#~ msgid "Canvas Properties"
+#~ msgstr "Propriétés du Canvas"
+
+#~ msgid "Scale"
+#~ msgstr "Échelle"
+
+#~ msgid "X units per pixel:"
+#~ msgstr "Unités par pixel en X :"
+
+#~ msgid "Y units per pixel:"
+#~ msgstr "Unités par pixel en Y :"
+
+#~ msgid "Appearance on parent patch"
+#~ msgstr "Aspect dans le patch parent"
+
+#~ msgid "Graph-On-Parent"
+#~ msgstr "Graph-On-Parent (dessiner dans le patch parent)"
+
+#~ msgid "Hide object name and arguments"
+#~ msgstr "Cacher le nom et les arguments de l'objet"
+
+#~ msgid "Range and size"
+#~ msgstr "Intervalle et taille"
+
+#~ msgid "X range: from"
+#~ msgstr "Intervalle X : de"
+
+#~ msgid "to"
+#~ msgstr "à"
+
+#~ msgid "Margin:"
+#~ msgstr "Marges :"
+
+#~ msgid "Y range: from"
+#~ msgstr "Intervalle Y : de"
+
+#~ msgid "Data Properties"
+#~ msgstr "Propriétés de la donnée"
+
+#~ msgid "Atom Box Properties"
+#~ msgstr "Propriétés de la boîte Nombre/Symbole"
+
+#~ msgid "Width:"
+#~ msgstr "Largeur :"
+
+#~ msgid "Limits"
+#~ msgstr "Limites"
+
+#~ msgid "Lower:"
+#~ msgstr "Inférieur :"
+
+#~ msgid "Upper:"
+#~ msgstr "Supérieur :"
+
+#~ msgid "Label"
+#~ msgstr "Label"
+
+#~ msgid "Left"
+#~ msgstr "Gauche"
+
+#~ msgid "Right"
+#~ msgstr "Droite"
+
+#~ msgid "Top"
+#~ msgstr "Haut"
+
+#~ msgid "Bottom"
+#~ msgstr "Bas"
+
+#~ msgid "Messages"
+#~ msgstr "Messages"
+
+#~ msgid "Send symbol:"
+#~ msgstr "Envoyer au symbole :"
+
+#~ msgid "Receive symbol:"
+#~ msgstr "Recevoir du symbole :"
+
+#~ msgid "Background color"
+#~ msgstr "Couleur de l'arrière plan"
+
+#~ msgid "Foreground color"
+#~ msgstr "Couleur du premier plan"
+
+#~ msgid "Init"
+#~ msgstr "Initialisation"
+
+#~ msgid "No init"
+#~ msgstr "Pas d'init."
+
+#~ msgid "Jump on click"
+#~ msgstr "Instantané"
+
+#~ msgid "Steady on click"
+#~ msgstr "Glissant"
+
+#~ msgid "Flash Time (msec)"
+#~ msgstr "Durée du flash (ms)"
+
+#~ msgid "Intrrpt:"
+#~ msgstr "Intrrpt :"
+
+#~ msgid "Hold:"
+#~ msgstr "Maintient :"
+
+#~ msgid "Non Zero Value"
+#~ msgstr "Valeur si coché"
+
+#~ msgid "Value:"
+#~ msgstr "Valeur :"
+
+#~ msgid "Width (digits):"
+#~ msgstr "Largeur (chiffres) :"
+
+#~ msgid "Height:"
+#~ msgstr "Hauteur :"
+
+#~ msgid "Output Range"
+#~ msgstr "Plage de valeurs"
+
+#~ msgid "Log height:"
+#~ msgstr "Hauteur du log :"
+
+#~ msgid "Num cells:"
+#~ msgstr "Nombre de cases :"
+
+#~ msgid "Visible Rectangle (pix)"
+#~ msgstr "Rectangle visible (pix)"
+
+#~ msgid "Parameters"
+#~ msgstr "Paramètres"
+
+#~ msgid "X offset:"
+#~ msgstr "Offset en X :"
+
+#~ msgid "Y offset:"
+#~ msgstr "Offset en Y :"
+
+#~ msgid "Colors"
+#~ msgstr "Couleurs"
+
+#~ msgid "Background"
+#~ msgstr "Arrière plan"
+
+#~ msgid "Front"
+#~ msgstr "Premier plan"
+
+#~ msgid "Compose color"
+#~ msgstr "Créer la couleur"
+
+#~ msgid "Test label"
+#~ msgstr "Label de test"
+
+#~ msgid "Send a Pd message"
+#~ msgstr "Envoyer un message à Pd"
+
+#~ msgid "(use arrow keys for history)"
+#~ msgstr "(Utiliser les flèches pour accéder à l'historique)"
+
+#~ msgid "MIDI Settings"
+#~ msgstr "Paramètres MIDI"
+
+#~ msgid "Use standard paths"
+#~ msgstr "Utiliser les chemins standards"
+
+#~ msgid "Verbose"
+#~ msgstr "Verbeux"
+
+#~ msgid "Pd Documents Directory"
+#~ msgstr "Dossier des Documents"
+
+#~ msgid "Externals Install Directory"
+#~ msgstr "Dossier d'installation des Externals"
+
+#~ msgid "Pd libraries to load on startup"
+#~ msgstr "Bibliothèques à charger au démarrage"
+
+#~ msgid "Installation options:"
+#~ msgstr "Options d'installation :"
+
+#~ msgid "Platform settings:"
+#~ msgstr "Réglages de plateforme :"
+
+#~ msgid "Deken %s Preferences"
+#~ msgstr "Préférences de Deken %s"
+
+#~ msgid "Search for: "
+#~ msgstr "Rechercher des :"
+
+#~ msgid "libraries"
+#~ msgstr "bibliothèques"
+
+#~ msgid "objects"
+#~ msgstr "objets"
+
+#~ msgid "both"
+#~ msgstr "les deux"
+
+#~ msgid "translations"
+#~ msgstr "traductions"
+
+#~ msgid "Only install externals uploaded by people you trust."
+#~ msgstr ""
+#~ "N'installez que des objets ou bibliothèques provenant de sources de "
+#~ "confiance."
+
+#~ msgid "Preferences..."
+#~ msgstr "Préférences..."
+
+#~ msgid "Install DEK file..."
+#~ msgstr "Installer un fichier DEK..."
+
+#~ msgid "More..."
+#~ msgstr "Plus..."
+
+#~ msgid "Message..."
+#~ msgstr "Message..."
+
+#~ msgid "Pd"
+#~ msgstr "Pd"
+
+#~ msgid "Audio I/O error"
+#~ msgstr "Erreur entrée/sortie audio"
+
+#~ msgid "fatal"
+#~ msgstr "fatal"
+
+#~ msgid "error"
+#~ msgstr "erreur"
+
+#~ msgid "normal"
+#~ msgstr "normal"
+
+#~ msgid "debug"
+#~ msgstr "debug"
+
+#~ msgid "all"
+#~ msgstr "tout"
 
 #~ msgid "Are you online?"
 #~ msgstr "Êtes-vous connecté(e) ?"

@@ -205,156 +205,7 @@ msgstr "ਨਕਲ"
 msgid "Paste"
 msgstr "ਮਿਤੀ"
 
-msgid "Array Properties"
-msgstr ""
-
-#, fuzzy
-msgid "Array"
-msgstr "ਅਡੂਰਾ"
-
-#, fuzzy
-msgid "Name:"
-msgstr "ਨਾਂ"
-
-msgid "Size:"
-msgstr "ਅਕਾਰ:"
-
-#, fuzzy
-msgid "Save contents"
-msgstr "ਭਾਗ(_C)"
-
-msgid "Draw as:"
-msgstr ""
-
-#, fuzzy
-msgid "Polygon"
-msgstr "ਪੋਲੈਂਡ"
-
-#, fuzzy
-msgid "Points"
-msgstr "ਪੋਰਟ"
-
-msgid "Bezier curve"
-msgstr ""
-
-msgid "Put array into:"
-msgstr ""
-
-msgid "New graph"
-msgstr ""
-
-#, fuzzy
-msgid "Last graph"
-msgstr "ਆਖਰੀ ਸੁਨੇਹਾ:"
-
-msgid "Options"
-msgstr ""
-
-#, fuzzy
-msgid "Open List View..."
-msgstr "ਪਾਬੰਦੀ ਸੂਚੀ..."
-
-#, fuzzy
-msgid "Delete array"
-msgstr "ਹਟਾਓ"
-
-msgid "Cancel"
-msgstr "ਰੱਦ"
-
-msgid "Apply"
-msgstr "ਲਾਗੂ"
-
-msgid "OK"
-msgstr ""
-
-msgid "Audio Settings"
-msgstr ""
-
-msgid "Settings"
-msgstr ""
-
-msgid "Sample rate:"
-msgstr ""
-
-msgid "Delay (msec):"
-msgstr ""
-
-msgid "48k"
-msgstr ""
-
-msgid "44.1k"
-msgstr ""
-
-msgid "96k"
-msgstr ""
-
-msgid "Block size:"
-msgstr ""
-
-msgid "Use callbacks"
-msgstr ""
-
-msgid "Input Devices"
-msgstr ""
-
-#, fuzzy
-msgid "Channels:"
-msgstr "ਰੱਦ"
-
-msgid "Output Devices"
-msgstr ""
-
-msgid "(same as input device)..."
-msgstr ""
-
-msgid "Use Multiple Devices"
-msgstr ""
-
-msgid "Save All Settings"
-msgstr ""
-
 msgid "WARNING: unknown graphme flags received in pdtk_canvas_dialog"
-msgstr ""
-
-msgid "Canvas Properties"
-msgstr ""
-
-#, fuzzy
-msgid "Scale"
-msgstr "ਸੰਭਾਲੋ"
-
-msgid "X units per pixel:"
-msgstr ""
-
-msgid "Y units per pixel:"
-msgstr ""
-
-msgid "Appearance on parent patch"
-msgstr ""
-
-msgid "Graph-On-Parent"
-msgstr ""
-
-msgid "Hide object name and arguments"
-msgstr ""
-
-msgid "Range and size"
-msgstr ""
-
-msgid "X range: from"
-msgstr ""
-
-msgid "to"
-msgstr ""
-
-#, fuzzy
-msgid "Margin:"
-msgstr "ਨਿਸ਼ਾਨ ਰੇਖਾ:"
-
-msgid "Y range: from"
-msgstr ""
-
-msgid "Data Properties"
 msgstr ""
 
 #, tcl-format
@@ -384,6 +235,9 @@ msgstr "ਭੇਜਣ ਝਰੋਖਾ"
 msgid "Match whole word only"
 msgstr ""
 
+msgid "Cancel"
+msgstr "ਰੱਦ"
+
 msgid "Close"
 msgstr "ਬੰਦ ਕਰੋ"
 
@@ -412,181 +266,15 @@ msgstr ""
 msgid "Y only"
 msgstr ""
 
-msgid "Atom Box Properties"
-msgstr ""
-
-msgid "Width:"
-msgstr ""
-
-#, fuzzy
-msgid "Limits"
-msgstr "ਉਪਭੋਗੀ ਸੀਮਾ"
-
-msgid "Lower:"
-msgstr ""
-
-#, fuzzy
-msgid "Upper:"
-msgstr "ਉਪਭੋਗੀ:"
-
-msgid "Label"
-msgstr ""
-
-#, fuzzy
-msgid "Left"
-msgstr "ਖੱਬਾ"
-
-msgid "Right"
-msgstr "ਸੱਜਾ"
-
-msgid "Top"
-msgstr "ਉੱਪਰ"
-
-msgid "Bottom"
-msgstr "ਹੇਠਾਂ"
-
-#, fuzzy
-msgid "Messages"
-msgstr "ਸੁਨੇਹਾ"
-
-msgid "Send symbol:"
-msgstr ""
-
-#, fuzzy
-msgid "Receive symbol:"
-msgstr "ਪ੍ਰਾਪਤੀ ਝਰੋਖਾ"
-
-#, fuzzy
-msgid "Background color"
-msgstr "ਪਿੱਠਭੂਮੀ:"
-
-#, fuzzy
-msgid "Foreground color"
-msgstr "ਮੁੱਖ-ਭੂਮੀ:"
+msgid "Apply"
+msgstr "ਲਾਗੂ"
 
 #, fuzzy
 msgid "Label color"
 msgstr "ਚੋਣ ਰੰਗ"
 
-#, fuzzy
-msgid "Init"
-msgstr "ਸੱਦਾ"
-
-msgid "No init"
-msgstr ""
-
-msgid "Jump on click"
-msgstr ""
-
-msgid "Steady on click"
-msgstr ""
-
-#, fuzzy
-msgid "Bang"
-msgstr "ਪਾਬੰਦੀ"
-
-msgid "Flash Time (msec)"
-msgstr ""
-
-msgid "Intrrpt:"
-msgstr ""
-
-msgid "Hold:"
-msgstr ""
-
-#, fuzzy
-msgid "Toggle"
-msgstr "ਟੂਗੂ"
-
-msgid "Non Zero Value"
-msgstr ""
-
-msgid "Value:"
-msgstr ""
-
-#, fuzzy
-msgid "Number2"
-msgstr "$ ਅੰਕ"
-
-msgid "Width (digits):"
-msgstr ""
-
-#, fuzzy
-msgid "Height:"
-msgstr "ਸੱਜਾ"
-
-msgid "Output Range"
-msgstr ""
-
-msgid "Log height:"
-msgstr ""
-
-msgid "Vslider"
-msgstr ""
-
-#, fuzzy
-msgid "Hslider"
-msgstr "ਓਹਲੇ"
-
-#, fuzzy
-msgid "Vradio"
-msgstr "ਵਰਜਨ"
-
-msgid "Num cells:"
-msgstr ""
-
-msgid "Hradio"
-msgstr ""
-
-msgid "VU Meter"
-msgstr ""
-
-#, fuzzy
-msgid "Canvas"
-msgstr "ਕੈਨੇਡਾ"
-
-msgid "Visible Rectangle (pix)"
-msgstr ""
-
 #, tcl-format
 msgid "%s Properties"
-msgstr ""
-
-msgid "Parameters"
-msgstr ""
-
-msgid "X offset:"
-msgstr ""
-
-msgid "Y offset:"
-msgstr ""
-
-msgid "Colors"
-msgstr "ਰੰਗ"
-
-#, fuzzy
-msgid "Background"
-msgstr "ਪਿੱਠਭੂਮੀ:"
-
-#, fuzzy
-msgid "Front"
-msgstr "ਫੋਂਟ:"
-
-msgid "Compose color"
-msgstr ""
-
-#, fuzzy
-msgid "Test label"
-msgstr "ਸਭ ਦੀ ਜਾਂਚ"
-
-#, fuzzy
-msgid "Send a Pd message"
-msgstr "ਸੁਨੇਹਾ"
-
-msgid "(use arrow keys for history)"
-msgstr ""
-
-msgid "MIDI Settings"
 msgstr ""
 
 msgid "ALSA MIDI Settings"
@@ -598,16 +286,13 @@ msgstr ""
 msgid "Out Ports:"
 msgstr ""
 
-msgid "Pd search path for objects, help, fonts, and other files"
+msgid "Save All Settings"
 msgstr ""
 
-msgid "Use standard paths"
+msgid "OK"
 msgstr ""
 
-msgid "Verbose"
-msgstr ""
-
-msgid "Pd Documents Directory"
+msgid "Search paths for objects, help, audio, text and other files"
 msgstr ""
 
 msgid "Browse"
@@ -617,9 +302,6 @@ msgid "Reset"
 msgstr ""
 
 msgid "Disable"
-msgstr ""
-
-msgid "Externals Install Directory"
 msgstr ""
 
 #, fuzzy
@@ -641,10 +323,7 @@ msgstr ""
 msgid "Edit library"
 msgstr ""
 
-msgid "Pd libraries to load on startup"
-msgstr ""
-
-msgid "Startup flags:"
+msgid "Startup Libraries"
 msgstr ""
 
 msgid "Defeat real-time scheduling"
@@ -664,88 +343,116 @@ msgid "(Tcl) UNHANDLED ERROR: "
 msgstr ""
 
 #, tcl-format
-msgid "installed version [%1$s] > %2$s...skipping!"
+msgid "[deken] installed version [%1$s] > %2$s...skipping!"
 msgstr ""
 
 #, tcl-format
-msgid "installed version [%1$s] < %2$s...overwriting!"
+msgid "[deken] installed version [%1$s] < %2$s...overwriting!"
 msgstr ""
 
 #, tcl-format
-msgid "installed version [%1$s] == %2$s...skipping!"
+msgid "[deken] installed version [%1$s] == %2$s...skipping!"
 msgstr ""
 
 #, tcl-format
-msgid "successfully unzipped %1$s into %2$s"
-msgstr ""
-
-msgid "unable to extract package automatically"
-msgstr ""
-
-msgid "please perform the following steps manually:"
+msgid "installing deken package '%s'"
 msgstr ""
 
 #, tcl-format
-msgid "1. unzip %s"
+msgid "ignoring '%s': doesn't look like a deken package"
 msgstr ""
 
 #, tcl-format
-msgid "2. copy the contents into %s"
+msgid "Installing %s"
 msgstr ""
 
 #, tcl-format
-msgid "uninstalling '%s'"
+msgid "[deken] Successfully unzipped %1$s into %2$s."
+msgstr ""
+
+msgid "[deken] Unable to extract package automatically."
+msgstr ""
+
+msgid "Please perform the following steps manually:"
 msgstr ""
 
 #, tcl-format
-msgid "uninstalling %1$s from %2$s failed!"
+msgid "1. Unzip %s."
+msgstr ""
+
+msgid "You might need to change the file-extension from .dek to .zip"
 msgstr ""
 
 #, tcl-format
-msgid "deken-plugin.tcl (Pd externals search) loaded from %s"
+msgid "2. Copy the contents into %s."
 msgstr ""
 
 #, tcl-format
-msgid "platform detected: %s"
+msgid "3. Remove %s. (optional)"
 msgstr ""
 
 #, tcl-format
-msgid "platform re-detected: %s"
+msgid "[deken] uninstalling '%s'"
 msgstr ""
 
-msgid "Show all"
+#, tcl-format
+msgid "Uninstalling %1$s from %2$s failed!"
 msgstr ""
 
-#, fuzzy
-msgid "Search"
-msgstr "ਪਾਠ ਖੋਜ..."
-
-msgid "To get a list of all available externals, try an empty search."
+#, tcl-format
+msgid "skipping SHA256 verification of %s."
 msgstr ""
 
-msgid "Find externals"
+#, tcl-format
+msgid "SHA256 verification of %s"
 msgstr ""
 
-msgid "Only install externals uploaded by people you trust."
+#, tcl-format
+msgid "unable to fetch reference SHA256 for %s."
 msgstr ""
 
-#, fuzzy
-msgid "Preferences"
-msgstr "ਮੇਰੀ ਪਸੰਦ..."
-
-msgid "Installation options:"
+#, tcl-format
+msgid "unable to perform SHA256 verification for %s."
 msgstr ""
 
-msgid "Try to remove libraries before (re)installing them?"
+#, tcl-format
+msgid "[deken] Unable to download from %1$s [%2$s]"
 msgstr ""
 
-msgid "Show README of newly installed libraries (if present)?"
+#, tcl-format
+msgid "Unable to download from '%s'!"
 msgstr ""
 
-msgid "Should newly installed libraries be added to Pd's search path?"
+msgid "Download failed"
 msgstr ""
 
-msgid "Platform settings:"
+#, tcl-format
+msgid "[deken] Unable to remove stray file %s"
+msgstr ""
+
+#, tcl-format
+msgid "[deken] Unable to rename downloaded file to %s"
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "Check"
+msgstr ""
+
+msgid "Try to verify the libraries' checksum before (re)installing them"
+msgstr ""
+
+msgid "Try to remove libraries before (re)installing them"
+msgstr ""
+
+msgid "Show README of newly installed libraries (if present)"
+msgstr ""
+
+msgid "Keep package files after installation"
+msgstr ""
+
+msgid "Add newly installed libraries to Pd's search path"
 msgstr ""
 
 #, tcl-format
@@ -755,31 +462,148 @@ msgstr ""
 msgid "User-defined platform:"
 msgstr ""
 
-msgid "Hide foreign architectures?"
+msgid "Hide foreign architectures"
 msgstr ""
 
-#, fuzzy, tcl-format
-msgid "Deken %s Preferences"
-msgstr "ਮੇਰੀ ਪਸੰਦ..."
+msgid ""
+"Only show the newest version of a library\n"
+"(treats other versions like foreign architectures)"
+msgstr ""
+
+#, tcl-format
+msgid "Platform re-detected: %s"
+msgstr ""
+
+msgid "Deken Packages"
+msgstr ""
 
 #, fuzzy
-msgid "start searching for externals..."
+msgid "ZIP Files"
+msgstr "ਫਾਇਲ"
+
+#, fuzzy
+msgid "TAR Files"
+msgstr "ਫਾਇਲ"
+
+#, fuzzy
+msgid "All Files"
+msgstr "ਫਾਇਲ"
+
+#, tcl-format
+msgid "Checksum mismatch for '%s'"
+msgstr ""
+
+#, tcl-format
+msgid "SHA256 verification of %s failed!"
+msgstr ""
+
+msgid "SHA256 verification failed"
+msgstr ""
+
+#, tcl-format
+msgid "Removing %s"
+msgstr ""
+
+#, tcl-format
+msgid "[deken] temporarily moving %1$s into %2$s failed."
+msgstr ""
+
+#, tcl-format
+msgid "Installing package %s"
+msgstr ""
+
+msgid "Installation completed!"
+msgstr ""
+
+#, tcl-format
+msgid "Successfully installed %s!"
+msgstr ""
+
+msgid "Installation failed!"
+msgstr ""
+
+#, tcl-format
+msgid "Failed to install %s!"
+msgstr ""
+
+msgid "Package installation failed"
+msgstr ""
+
+#, tcl-format
+msgid ""
+"Failed to completely remove %1$s.\n"
+"Please manually remove the directory %2$s after quitting Pd."
+msgstr ""
+
+#, tcl-format
+msgid "[deken] Unable to add %s to search paths"
+msgstr ""
+
+#, tcl-format
+msgid "Add %s to the Pd search paths?"
+msgstr ""
+
+#, tcl-format
+msgid "[deken] Added %s to search paths"
+msgstr ""
+
+msgid "No packages selected for installation."
+msgstr ""
+
+#, tcl-format
+msgid "Processed %d packages selected for installation."
+msgstr ""
+
+msgid "Show all"
+msgstr ""
+
+#, fuzzy
+msgid "Search"
 msgstr "ਪਾਠ ਖੋਜ..."
 
 #, tcl-format
-msgid "online? %s"
+msgid "%s%% of download completed"
 msgstr ""
 
-msgid "Are you online?"
+msgid "Enter an exact library or object name."
 msgstr ""
 
-msgid "Unable to perform search."
+msgid "e.g. 'freeverb~'"
 msgstr ""
 
-msgid "no matching externals found"
+msgid "Use the '*' wildcard to match any number of characters."
 msgstr ""
 
-msgid "try using the full name e.g. 'freeverb'"
+msgid "e.g. '*-plugin' will match 'deken-plugin' (and more)."
+msgstr ""
+
+msgid "You can restrict the search to only-libraries or only-objects."
+msgstr ""
+
+msgid "To get a list of all available externals, try an empty search."
+msgstr ""
+
+msgid "Right-clicking a search result will give you more options..."
+msgstr ""
+
+msgid "Deken - A Package Manager for Pure Data Externals"
+msgstr ""
+
+#, fuzzy, tcl-format
+msgid "[deken] Start searching for externals... %s"
+msgstr "ਪਾਠ ਖੋਜ..."
+
+#, tcl-format
+msgid "[deken] online? %s"
+msgstr ""
+
+msgid "Unable to perform search. Are you online?"
+msgstr ""
+
+msgid "[deken] No matching externals found."
+msgstr ""
+
+msgid "Try using the full name e.g. 'freeverb~'."
 msgstr ""
 
 msgid "No matching externals found."
@@ -793,57 +617,88 @@ msgid "Install %1$s to %2$s?"
 msgstr ""
 
 #, tcl-format
+msgid "Cancelling download of %s: No installation directory given."
+msgstr ""
+
+msgid "Installing to non-existant directory failed"
+msgstr ""
+
+#, tcl-format
 msgid ""
-"commencing downloading of:\n"
+"Commencing downloading of:\n"
 "%1$s\n"
-"into %2$s..."
-msgstr ""
-
-msgid "... aborting"
+"Into %2$s..."
 msgstr ""
 
 #, tcl-format
-msgid "unable to add %s to search paths"
+msgid "Downloading '%s'"
+msgstr ""
+
+msgid "aborting."
 msgstr ""
 
 #, tcl-format
-msgid "Add %s to the Pd search paths?"
+msgid "Downloading '%s' failed"
 msgstr ""
 
-#, tcl-format
-msgid "added %s to search paths"
+msgid "Download failed!"
 msgstr ""
 
-#, tcl-format
-msgid "unable to download from %1$s [%2$s]"
-msgstr ""
-
-#, tcl-format
-msgid "unable to remove stray file %s"
-msgstr ""
-
-#, tcl-format
-msgid "unable to rename downloaded file to %s"
+msgid "Download completed! Verifying..."
 msgstr ""
 
 #, fuzzy, tcl-format
 msgid "searching for '%s'"
 msgstr "ਪਾਠ ਖੋਜ..."
 
-msgid "unable to perform search"
+#, tcl-format
+msgid "[deken] deken-plugin.tcl (Pd externals search) loaded from %s."
+msgstr ""
+
+#, tcl-format
+msgid "[deken] Platform detected: %s"
+msgstr ""
+
+msgid "Find externals"
+msgstr ""
+
+#, fuzzy, tcl-format
+msgid "Searching for '%s' failed!"
+msgstr "ਪਾਠ ਖੋਜ..."
+
+#, fuzzy
+msgid "Search failed"
+msgstr "ਪਾਠ ਖੋਜ..."
+
+msgid "[deken] Unable to perform search."
 msgstr ""
 
 #, tcl-format
 msgid "Uploaded by %1$s @ %2$s"
 msgstr ""
 
+msgid "Deselect package"
+msgstr ""
+
+msgid "Select package for installation"
+msgstr ""
+
+msgid "Install selected packages"
+msgstr ""
+
 msgid "Install package"
 msgstr ""
 
-msgid "Open webpage"
+msgid "Open package webpage"
 msgstr ""
 
-msgid "_"
+msgid "Copy package URL"
+msgstr ""
+
+msgid "Copy SHA256 checksum URL"
+msgstr ""
+
+msgid "Copy OpenGPG signature URL"
 msgstr ""
 
 #, tcl-format
@@ -947,10 +802,6 @@ msgstr "ਨਵਾਂ(_N)"
 msgid "Open"
 msgstr "ਖੋਲੋ"
 
-#, fuzzy
-msgid "Message..."
-msgstr "ਸੁਨੇਹਾ"
-
 msgid "Cut"
 msgstr ""
 
@@ -972,6 +823,9 @@ msgstr "ਸੁਨੇਹਾ"
 msgid "Number"
 msgstr "$ ਅੰਕ"
 
+msgid "List"
+msgstr ""
+
 msgid "Symbol"
 msgstr ""
 
@@ -979,8 +833,45 @@ msgstr ""
 msgid "Comment"
 msgstr "ਕਮਾਂਡ"
 
+#, fuzzy
+msgid "Bang"
+msgstr "ਪਾਬੰਦੀ"
+
+#, fuzzy
+msgid "Toggle"
+msgstr "ਟੂਗੂ"
+
+#, fuzzy
+msgid "Number2"
+msgstr "$ ਅੰਕ"
+
+msgid "Vslider"
+msgstr ""
+
+#, fuzzy
+msgid "Hslider"
+msgstr "ਓਹਲੇ"
+
+#, fuzzy
+msgid "Vradio"
+msgstr "ਵਰਜਨ"
+
+msgid "Hradio"
+msgstr ""
+
+msgid "VU Meter"
+msgstr ""
+
+#, fuzzy
+msgid "Canvas"
+msgstr "ਕੈਨੇਡਾ"
+
 msgid "Graph"
 msgstr "ਗਰਾਫ਼"
+
+#, fuzzy
+msgid "Array"
+msgstr "ਅਡੂਰਾ"
 
 #, fuzzy
 msgid "Find..."
@@ -1046,6 +937,9 @@ msgstr ""
 msgid "puredata.info"
 msgstr ""
 
+msgid "Check for updates"
+msgstr ""
+
 msgid "Report a bug"
 msgstr ""
 
@@ -1083,6 +977,9 @@ msgstr "ਭੇਜਣ ਝਰੋਖਾ"
 msgid "Bezier Cables"
 msgstr ""
 
+msgid "Theme"
+msgstr ""
+
 #, fuzzy
 msgid "Save All Preferences"
 msgstr "ਮੇਰੀ ਪਸੰਦ..."
@@ -1097,6 +994,10 @@ msgstr ""
 msgid "Forget All..."
 msgstr ""
 
+#, fuzzy
+msgid "Preferences"
+msgstr "ਮੇਰੀ ਪਸੰਦ..."
+
 msgid "Open Recent"
 msgstr ""
 
@@ -1105,6 +1006,14 @@ msgid "Quit"
 msgstr "ਬਾਹਰ(_Q)"
 
 msgid "Properties"
+msgstr ""
+
+#, tcl-format
+msgid "dropped %d lines from the Pd window"
+msgstr ""
+
+#, tcl-format
+msgid "the Pd window filtered %d lines"
 msgstr ""
 
 msgid "Audio on"
@@ -1119,32 +1028,11 @@ msgstr ""
 msgid "Tcl:"
 msgstr ""
 
-msgid "Pd"
-msgstr ""
-
 #, fuzzy
 msgid "DSP"
 msgstr "ਬੰਦ"
 
-msgid "Audio I/O error"
-msgstr ""
-
 msgid "Log:"
-msgstr ""
-
-msgid "fatal"
-msgstr ""
-
-msgid "error"
-msgstr ""
-
-msgid "normal"
-msgstr ""
-
-msgid "debug"
-msgstr ""
-
-msgid "all"
 msgstr ""
 
 msgid "New..."
@@ -1167,6 +1055,121 @@ msgid "ignoring '%s': doesn't look like a Pd file"
 msgstr ""
 
 #, fuzzy
+#~ msgid "Name:"
+#~ msgstr "ਨਾਂ"
+
+#~ msgid "Size:"
+#~ msgstr "ਅਕਾਰ:"
+
+#, fuzzy
+#~ msgid "Save contents"
+#~ msgstr "ਭਾਗ(_C)"
+
+#, fuzzy
+#~ msgid "Polygon"
+#~ msgstr "ਪੋਲੈਂਡ"
+
+#, fuzzy
+#~ msgid "Points"
+#~ msgstr "ਪੋਰਟ"
+
+#, fuzzy
+#~ msgid "Last graph"
+#~ msgstr "ਆਖਰੀ ਸੁਨੇਹਾ:"
+
+#, fuzzy
+#~ msgid "Open List View..."
+#~ msgstr "ਪਾਬੰਦੀ ਸੂਚੀ..."
+
+#, fuzzy
+#~ msgid "Delete array"
+#~ msgstr "ਹਟਾਓ"
+
+#, fuzzy
+#~ msgid "Channels:"
+#~ msgstr "ਰੱਦ"
+
+#, fuzzy
+#~ msgid "Scale"
+#~ msgstr "ਸੰਭਾਲੋ"
+
+#, fuzzy
+#~ msgid "Margin:"
+#~ msgstr "ਨਿਸ਼ਾਨ ਰੇਖਾ:"
+
+#, fuzzy
+#~ msgid "Limits"
+#~ msgstr "ਉਪਭੋਗੀ ਸੀਮਾ"
+
+#, fuzzy
+#~ msgid "Upper:"
+#~ msgstr "ਉਪਭੋਗੀ:"
+
+#, fuzzy
+#~ msgid "Left"
+#~ msgstr "ਖੱਬਾ"
+
+#~ msgid "Right"
+#~ msgstr "ਸੱਜਾ"
+
+#~ msgid "Top"
+#~ msgstr "ਉੱਪਰ"
+
+#~ msgid "Bottom"
+#~ msgstr "ਹੇਠਾਂ"
+
+#, fuzzy
+#~ msgid "Messages"
+#~ msgstr "ਸੁਨੇਹਾ"
+
+#, fuzzy
+#~ msgid "Receive symbol:"
+#~ msgstr "ਪ੍ਰਾਪਤੀ ਝਰੋਖਾ"
+
+#, fuzzy
+#~ msgid "Background color"
+#~ msgstr "ਪਿੱਠਭੂਮੀ:"
+
+#, fuzzy
+#~ msgid "Foreground color"
+#~ msgstr "ਮੁੱਖ-ਭੂਮੀ:"
+
+#, fuzzy
+#~ msgid "Init"
+#~ msgstr "ਸੱਦਾ"
+
+#, fuzzy
+#~ msgid "Height:"
+#~ msgstr "ਸੱਜਾ"
+
+#~ msgid "Colors"
+#~ msgstr "ਰੰਗ"
+
+#, fuzzy
+#~ msgid "Background"
+#~ msgstr "ਪਿੱਠਭੂਮੀ:"
+
+#, fuzzy
+#~ msgid "Front"
+#~ msgstr "ਫੋਂਟ:"
+
+#, fuzzy
+#~ msgid "Test label"
+#~ msgstr "ਸਭ ਦੀ ਜਾਂਚ"
+
+#, fuzzy
+#~ msgid "Send a Pd message"
+#~ msgstr "ਸੁਨੇਹਾ"
+
+#, fuzzy
+#~ msgid "Deken %s Preferences"
+#~ msgstr "ਮੇਰੀ ਪਸੰਦ..."
+
+#, fuzzy
+#~ msgid "Message..."
+#~ msgstr "ਸੁਨੇਹਾ"
+
+#, fuzzy
 #~ msgid "for:"
 #~ msgstr "ਪੋਰਟ:"
 
@@ -1176,10 +1179,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Close this window??"
 #~ msgstr "ਝਰੋਖਾ ਬੰਦ(_C)"
-
-#, fuzzy
-#~ msgid "Pd Files"
-#~ msgstr "ਫਾਇਲ"
 
 #, fuzzy
 #~ msgid "Filters"
