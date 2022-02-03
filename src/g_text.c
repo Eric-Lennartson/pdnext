@@ -23,7 +23,7 @@
 #define ATOM_RMARGIN 2 /* 2 pixels smaller than object LMARGIN + RMARGIN */
 #define ATOM_BMARGIN 4 /* 1 pixel smaller than object TMARGIN+BMARGIN */
 
-#define MESSAGE_CLICK_WIDTH 5
+#define MESSAGE_CLICK_WIDTH 2
 
 /* Widths of a different atom types*/
 #define A_FLOAT_WIDTH 8
@@ -438,16 +438,27 @@ static void message_adddollsym(t_message *x, t_symbol *s)
     glist_retext(x->m_glist, &x->m_text);
 }
 
-static void message_click(t_message *x,
-    t_floatarg xpos, t_floatarg ypos, t_floatarg shift,
-        t_floatarg ctrl, t_floatarg alt)
+static void message_click(t_message *x, t_floatarg xpos,
+                                        t_floatarg ypos,
+                                        t_floatarg shift,
+                                        t_floatarg ctrl,
+                                        t_floatarg alt)
 {
     if (glist_isvisible(x->m_glist))
     {
         /* not zooming click width for now as it gets too fat */
         t_rtext *y = glist_findrtext(x->m_glist, &x->m_text);
         sys_vgui(".x%lx.c itemconfigure %sR -width %d\n",
-            glist_getcanvas(x->m_glist), rtext_gettag(y), MESSAGE_CLICK_WIDTH);
+            glist_getcanvas(x->m_glist),
+            rtext_gettag(y),
+            MESSAGE_CLICK_WIDTH);
+
+		sys_vgui(".x%lx.c itemconfigure %sR -outline "
+                "[::pdtk_canvas::get_color %s .x%lx]\n",
+                glist_getcanvas(x->m_glist),
+                rtext_gettag(y), "selected",
+                glist_getcanvas(x->m_glist));
+
         clock_delay(x->m_clock, 120);
     }
     message_float(x, 0);
@@ -461,6 +472,12 @@ static void message_tick(t_message *x)
         sys_vgui(".x%lx.c itemconfigure %sR -width %d\n",
             glist_getcanvas(x->m_glist), rtext_gettag(y),
             glist_getzoom(x->m_glist));
+
+        sys_vgui(".x%lx.c itemconfigure %sR -outline "
+                "[::pdtk_canvas::get_color %s .x%lx]\n",
+                glist_getcanvas(x->m_glist),
+                rtext_gettag(y), "msg_box_outline",
+                glist_getcanvas(x->m_glist));
     }
 }
 
