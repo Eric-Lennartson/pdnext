@@ -1304,14 +1304,16 @@ static void text_select(t_gobj *z, t_glist *glist, int state)
     t_text *x = (t_text *)z;
     t_rtext *y = glist_findrtext(glist, x);
     rtext_select(y, state);
-    if (glist_isvisible(glist) && gobj_shouldvis(&x->te_g, glist)) {
+    if (glist_isvisible(glist) && gobj_shouldvis(&x->te_g, glist))
+    {
     	char *outline;
     	if (x->te_type == T_TEXT)
     		sys_vgui(".x%lx.c itemconfigure %sR -fill "
 				"[::pdtk_canvas::get_color %s .x%lx]\n",
 				glist, rtext_gettag(y),
 				(state? "selected" : "comment"), glist);
-		else {
+		else
+        {
 			if (pd_class(&x->te_pd) == text_class)
 					outline = "obj_box_outline_broken";
 			else
@@ -1493,15 +1495,19 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     const char *tag, int x1, int y1, int x2, int y2)
 {
     int n = obj_noutlets(ob), nplus = (n == 1 ? 1 : n-1), i;
-    int width = x2 - x1;
+
+    int r = (14 / 2) - 2; // rounded corner
+
+    int width = (x2-r) - (x1+r);
     int iow = IOWIDTH * glist->gl_zoom;
-    int ih = IHEIGHT * glist->gl_zoom, oh = OHEIGHT * glist->gl_zoom;
+    int ih = IHEIGHT * glist->gl_zoom;
+    int oh = OHEIGHT * glist->gl_zoom;
     int issignal;
     t_canvas *c = glist_getcanvas(glist);
     /* draw over border, so assume border width = 1 pixel * glist->gl_zoom */
     for (i = 0; i < n; i++)
     {
-        int onset = x1 + (width - iow) * i / nplus;
+        int onset = (x1 + (width - iow) * i / nplus)+r;
         if (firsttime) {
         	issignal = obj_issignaloutlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1524,7 +1530,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     nplus = (n == 1 ? 1 : n-1);
     for (i = 0; i < n; i++)
     {
-        int onset = x1 + (width - iow) * i / nplus;
+        int onset = (x1 + (width - iow) * i / nplus)+r;
         if (firsttime) {
         	issignal = obj_issignalinlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1545,8 +1551,6 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     }
 }
 
-// check this func to maybe get the highlight to happen when editing things?
-// I don't want it now, but I may in the future
 void text_drawborder(t_text *x, t_glist *glist,
     const char *tag, int width2, int height2, int firsttime)
 {
@@ -1556,33 +1560,59 @@ void text_drawborder(t_text *x, t_glist *glist,
     text_getrect(&x->te_g, glist, &x1, &y1, &x2, &y2);
     width = x2 - x1;
     height = y2 - y1;
+
+    // rounded corner stuff
+    int r = 14;
+
     if (x->te_type == T_OBJECT)
     {
-        char *pattern; char *outline;
-        if (pd_class(&x->te_pd) == text_class)
-        {
+        char *pattern, *outline;
+        if (pd_class(&x->te_pd) == text_class) {
             pattern = "-";
             outline = "obj_box_outline_broken";
         }
-        else
-        {
+        else {
             pattern = "\"\"";
             outline = "obj_box_outline";
         }
         if (firsttime)
-           sys_vgui(".x%lx.c create polygon %d %d %d %d %d %d %d %d %d %d "
+           sys_vgui(".x%lx.c create polygon %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d "
            		"-dash %s -outline [::pdtk_canvas::get_color %s .x%lx] "
            		"-fill [::pdtk_canvas::get_color obj_box_fill .x%lx] "
-           		"-width %d -tags [list %sR obj]\n",
-               c,
-                x1, y1,  x2, y1,  x2, y2,  x1, y2,  x1, y1,
+           		"-width %d -tags [list %sR obj] -smooth true -splinesteps %d\n",
+                c,
+                x1, y1,
+                x1+r, y1,
+                x2-r, y1,
+                x2, y1,
+                x2, y1+r,
+                x2, y2-r,
+                x2, y2,
+                x2-r, y2,
+                x1+r, y2,
+                x1, y2,
+                x1, y2-r,
+                x1, y1+r,
+                x1, y1,
                 pattern, outline, c,
-                c, glist->gl_zoom, tag);
+                c, glist->gl_zoom, tag, 36);
         else
         {
-            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d\n",
+            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
                 c, tag,
-                x1, y1,  x2, y1,  x2, y2,  x1, y2,  x1, y1);
+                x1, y1,
+                x1+r, y1,
+                x2-r, y1,
+                x2, y1,
+                x2, y1+r,
+                x2, y2-r,
+                x2, y2,
+                x2-r, y2,
+                x1+r, y2,
+                x1, y2,
+                x1, y2-r,
+                x1, y1+r,
+                x1, y1);
         }
     }
     else if (x->te_type == T_MESSAGE)
@@ -1615,8 +1645,8 @@ void text_drawborder(t_text *x, t_glist *glist,
         int x1p = x1 + grabbed, y1p = y1 + grabbed;
         corner = ((y2-y1)/4);
         if (firsttime)
-           sys_vgui(".x%lx.c create polygon "
-            	"%d %d %d %d %d %d %d %d %d %d %d %d "
+            sys_vgui(".x%lx.c create polygon "
+                "%d %d %d %d %d %d %d %d %d %d %d %d "
                 "-outline [::pdtk_canvas::get_color atom_box%s_outline .x%lx] "
                 "-fill [::pdtk_canvas::get_color atom_box_fill .x%lx] "
                 "-width %d -tags [list %sR atom]\n",
@@ -1624,7 +1654,7 @@ void text_drawborder(t_text *x, t_glist *glist,
                 x2, y2, x1p, y2, x1p, y1p,
                 ((t_gatom *)x)->a_grabbed ? "_focus" : "",
                 c, c, glist->gl_zoom+grabbed, tag);
-       else
+        else
         {
             sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d\n",
                 c, tag,

@@ -1,4 +1,7 @@
 ==== Todo =================================================================
+- finish up the rounded corner business
+- add sebshader's theme changing tcl file.
+  - (remove my change to the source that I thought I needed to map the canvas)
 - replace iemguis with guis of my own making
 ==== BUGS =================================================================
 - It's really bad to have to update the file path for the tcl plugin to load the themes.
