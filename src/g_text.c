@@ -1499,7 +1499,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
 
     /* making sure that inlets don't apear outside the rounded edges
        we only need to calculate it when we're an object */
-    int corner_inset = (ob->te_type == T_OBJECT) ? (CORNER_RADIUS / 2) - 2 : 0;
+    int corner_inset = (CORNER_RADIUS / 2) - 2;
 
     int width = (x2-corner_inset) - (x1+corner_inset);
     int iow = IOWIDTH * glist->gl_zoom;
@@ -1622,20 +1622,38 @@ void text_drawborder(t_text *x, t_glist *glist,
             corner = 10*glist->gl_zoom; /* looks bad if too big */
         if (firsttime)
            sys_vgui(".x%lx.c create polygon "
-           		"%d %d %d %d %d %d %d %d %d %d %d %d %d %d "
+           		"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d "
            		"-outline [::pdtk_canvas::get_color msg_box_outline .x%lx] "
            		"-fill [::pdtk_canvas::get_color msg_box_fill .x%lx] "
-           		"-width %d -tags [list %sR msg]\n",
+           		"-width %d -tags [list %sR msg] -smooth true -splinesteps %d\n",
                 c,
-                x1, y1,  x2+corner, y1,  x2, y1+corner,
-                x2, y2-corner,  x2+corner, y2,
-                x1, y2,  x1, y1, c, c,
-                glist->gl_zoom, tag);
+                x1, y1,
+                x1+CORNER_RADIUS, y1,
+                x2+corner, y1,
+                x2+corner, y1,
+                x2, y1+corner,
+                x2, y1+corner,
+                x2, y2-corner,
+                x2, y2-corner,
+                x2+corner, y2,
+                x2+corner, y2,
+                x1+CORNER_RADIUS, y2,
+                x1, y2,
+                x1, y2-CORNER_RADIUS,
+                x1, y1+CORNER_RADIUS,
+                x1, y1,
+                c, c, glist->gl_zoom, tag, 36);
         else
             sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d "
-            	"%d %d %d %d %d %d %d\n",
-                 c, tag, x1, y1, x2+corner, y1, x2, y1+corner, x2, y2-corner,
-                 x2+corner, y2, x1, y2, x1, y1);
+                    "%d %d %d %d %d %d %d\n",
+                    c, tag,
+                    x1, y1,
+                    x2+corner, y1,
+                    x2, y1+corner,
+                    x2, y2-corner,
+                    x2+corner, y2,
+                    x1, y2,
+                    x1, y1);
     }
     else if (x->te_type == T_ATOM && (((t_gatom *)x)->a_flavor == A_FLOAT ||
            ((t_gatom *)x)->a_flavor == A_SYMBOL))
@@ -1646,20 +1664,43 @@ void text_drawborder(t_text *x, t_glist *glist,
         corner = ((y2-y1)/4);
         if (firsttime)
             sys_vgui(".x%lx.c create polygon "
-                "%d %d %d %d %d %d %d %d %d %d %d %d "
+                "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d "
                 "-outline [::pdtk_canvas::get_color atom_box%s_outline .x%lx] "
                 "-fill [::pdtk_canvas::get_color atom_box_fill .x%lx] "
-                "-width %d -tags [list %sR atom]\n",
-                c, x1p, y1p, x2-corner, y1p, x2, y1p+corner,
-                x2, y2, x1p, y2, x1p, y1p,
+                "-width %d -tags [list %sR atom] -smooth true -splinesteps %d\n",
+                c,
+                x1p, y1p,
+                x1p+CORNER_RADIUS, y1p,
+                x2-corner, y1p,
+                x2-corner, y1p,
+                x2, y1p+corner,
+                x2, y1p+corner,
+                x2, y2,
+                x2, y2,
+                x1p+CORNER_RADIUS, y2,
+                x1p, y2,
+                x1p, y2-CORNER_RADIUS,
+                x1p, y1+CORNER_RADIUS,
+                x1p, y1p,
                 ((t_gatom *)x)->a_grabbed ? "_focus" : "",
-                c, c, glist->gl_zoom+grabbed, tag);
+                c, c, glist->gl_zoom+grabbed, tag, 36);
         else
         {
-            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d\n",
+            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d \n",
                 c, tag,
-                x1p, y1p, x2-corner, y1p, x2, y1p+corner, x2, y2,
-                x1p, y2, x1p, y1p);
+                x1p, y1p,
+                x1p+CORNER_RADIUS, y1p,
+                x2-corner, y1p,
+                x2-corner, y1p,
+                x2, y1p+corner,
+                x2, y1p+corner,
+                x2, y2,
+                x2, y2,
+                x1p+CORNER_RADIUS, y2,
+                x1p, y2,
+                x1p, y2-CORNER_RADIUS,
+                x1p, y1+CORNER_RADIUS,
+                x1p, y1p);
             sys_vgui(".x%lx.c itemconfigure %sR -width %d\n",
                 glist_getcanvas(glist), tag, glist->gl_zoom+grabbed);
         }
