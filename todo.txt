@@ -1,5 +1,6 @@
 ==== Todo =================================================================
-- finish up the rounded corner business
+- should rounded corners be used for things other than objects?
+  - i.e. messages, number boxes, and lists boxes?
 - add sebshader's theme changing tcl file.
   - (remove my change to the source that I thought I needed to map the canvas)
 - replace iemguis with guis of my own making

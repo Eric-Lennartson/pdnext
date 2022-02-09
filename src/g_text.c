@@ -24,6 +24,7 @@
 #define ATOM_BMARGIN 4 /* 1 pixel smaller than object TMARGIN+BMARGIN */
 
 #define MESSAGE_CLICK_WIDTH 2
+#define CORNER_RADIUS 14
 
 /* Widths of a different atom types*/
 #define A_FLOAT_WIDTH 8
@@ -1496,9 +1497,11 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
 {
     int n = obj_noutlets(ob), nplus = (n == 1 ? 1 : n-1), i;
 
-    int r = (14 / 2) - 2; // rounded corner
+    /* making sure that inlets don't apear outside the rounded edges
+       we only need to calculate it when we're an object */
+    int corner_inset = (ob->te_type == T_OBJECT) ? (CORNER_RADIUS / 2) - 2 : 0;
 
-    int width = (x2-r) - (x1+r);
+    int width = (x2-corner_inset) - (x1+corner_inset);
     int iow = IOWIDTH * glist->gl_zoom;
     int ih = IHEIGHT * glist->gl_zoom;
     int oh = OHEIGHT * glist->gl_zoom;
@@ -1507,7 +1510,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     /* draw over border, so assume border width = 1 pixel * glist->gl_zoom */
     for (i = 0; i < n; i++)
     {
-        int onset = (x1 + (width - iow) * i / nplus)+r;
+        int onset = (x1 + (width - iow) * i / nplus)+corner_inset;
         if (firsttime) {
         	issignal = obj_issignaloutlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1530,7 +1533,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     nplus = (n == 1 ? 1 : n-1);
     for (i = 0; i < n; i++)
     {
-        int onset = (x1 + (width - iow) * i / nplus)+r;
+        int onset = (x1 + (width - iow) * i / nplus)+corner_inset;
         if (firsttime) {
         	issignal = obj_issignalinlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1561,9 +1564,6 @@ void text_drawborder(t_text *x, t_glist *glist,
     width = x2 - x1;
     height = y2 - y1;
 
-    // rounded corner stuff
-    int r = 14;
-
     if (x->te_type == T_OBJECT)
     {
         char *pattern, *outline;
@@ -1582,17 +1582,17 @@ void text_drawborder(t_text *x, t_glist *glist,
            		"-width %d -tags [list %sR obj] -smooth true -splinesteps %d\n",
                 c,
                 x1, y1,
-                x1+r, y1,
-                x2-r, y1,
+                x1+CORNER_RADIUS, y1,
+                x2-CORNER_RADIUS, y1,
                 x2, y1,
-                x2, y1+r,
-                x2, y2-r,
+                x2, y1+CORNER_RADIUS,
+                x2, y2-CORNER_RADIUS,
                 x2, y2,
-                x2-r, y2,
-                x1+r, y2,
+                x2-CORNER_RADIUS, y2,
+                x1+CORNER_RADIUS, y2,
                 x1, y2,
-                x1, y2-r,
-                x1, y1+r,
+                x1, y2-CORNER_RADIUS,
+                x1, y1+CORNER_RADIUS,
                 x1, y1,
                 pattern, outline, c,
                 c, glist->gl_zoom, tag, 36);
@@ -1601,17 +1601,17 @@ void text_drawborder(t_text *x, t_glist *glist,
             sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
                 c, tag,
                 x1, y1,
-                x1+r, y1,
-                x2-r, y1,
+                x1+CORNER_RADIUS, y1,
+                x2-CORNER_RADIUS, y1,
                 x2, y1,
-                x2, y1+r,
-                x2, y2-r,
+                x2, y1+CORNER_RADIUS,
+                x2, y2-CORNER_RADIUS,
                 x2, y2,
-                x2-r, y2,
-                x1+r, y2,
+                x2-CORNER_RADIUS, y2,
+                x1+CORNER_RADIUS, y2,
                 x1, y2,
-                x1, y2-r,
-                x1, y1+r,
+                x1, y2-CORNER_RADIUS,
+                x1, y1+CORNER_RADIUS,
                 x1, y1);
         }
     }
@@ -1626,7 +1626,7 @@ void text_drawborder(t_text *x, t_glist *glist,
            		"-outline [::pdtk_canvas::get_color msg_box_outline .x%lx] "
            		"-fill [::pdtk_canvas::get_color msg_box_fill .x%lx] "
            		"-width %d -tags [list %sR msg]\n",
-               c,
+                c,
                 x1, y1,  x2+corner, y1,  x2, y1+corner,
                 x2, y2-corner,  x2+corner, y2,
                 x1, y2,  x1, y1, c, c,
@@ -1634,8 +1634,8 @@ void text_drawborder(t_text *x, t_glist *glist,
         else
             sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d "
             	"%d %d %d %d %d %d %d\n",
-                c, tag, x1, y1, x2+corner, y1, x2, y1+corner, x2, y2-corner,
-                x2+corner, y2, x1, y2, x1, y1);
+                 c, tag, x1, y1, x2+corner, y1, x2, y1+corner, x2, y2-corner,
+                 x2+corner, y2, x1, y2, x1, y1);
     }
     else if (x->te_type == T_ATOM && (((t_gatom *)x)->a_flavor == A_FLOAT ||
            ((t_gatom *)x)->a_flavor == A_SYMBOL))
