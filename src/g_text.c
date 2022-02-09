@@ -1644,15 +1644,22 @@ void text_drawborder(t_text *x, t_glist *glist,
                 x1, y1,
                 c, c, glist->gl_zoom, tag, 36);
         else
-            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d "
-                    "%d %d %d %d %d %d %d\n",
+            sys_vgui(".x%lx.c coords %sR %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
                     c, tag,
                     x1, y1,
+                    x1+CORNER_RADIUS, y1,
+                    x2+corner, y1,
                     x2+corner, y1,
                     x2, y1+corner,
+                    x2, y1+corner,
+                    x2, y2-corner,
                     x2, y2-corner,
                     x2+corner, y2,
+                    x2+corner, y2,
+                    x1+CORNER_RADIUS, y2,
                     x1, y2,
+                    x1, y2-CORNER_RADIUS,
+                    x1, y1+CORNER_RADIUS,
                     x1, y1);
     }
     else if (x->te_type == T_ATOM && (((t_gatom *)x)->a_flavor == A_FLOAT ||
