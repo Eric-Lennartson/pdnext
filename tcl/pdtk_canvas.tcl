@@ -518,6 +518,7 @@ proc ::pdtk_canvas::updateTheme {mytoplevel} {
     }
 }
 
+
 proc ::pdtk_canvas::pdtk_connect {x1 y1 x2 y2 width tags wind col} {
 # from pd-l2ork
 	if {$::curve_cords} {
@@ -552,6 +553,9 @@ proc ::pdtk_canvas::pdtk_connect {x1 y1 x2 y2 width tags wind col} {
 			-smooth 1 -fill [get_color $col $wind]
 	}
 }
+
+# doesn't this function basically duplicate
+# the majority of the above code???
 
 proc ::pdtk_canvas::pdtk_coords {x1 y1 x2 y2 tag canv} {
 	# from pd-l2ork

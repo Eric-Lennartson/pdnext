@@ -48,6 +48,8 @@ extern "C" {
 #define IHEIGHT 3       /* height of an inlet in pixels */
 #define OHEIGHT 3       /* height of an outlet in pixels */
 #define IOMIDDLE ((IOWIDTH-1)/2)
+#define CORNER_RADIUS 14 /* amount to inset the corners for rounding them */
+#define CORNER_INSET ((CORNER_RADIUS / 2) - 2) /* corner locations after rounding */
 #define GLIST_DEFGRAPHWIDTH 200
 #define GLIST_DEFGRAPHHEIGHT 140
 

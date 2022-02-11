@@ -387,8 +387,7 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
         rval = obj_starttraverseoutlet(t->tr_ob, &t->tr_outlet, outno);
         t->tr_outno = outno;
     }
-    t->tr_nextoc = obj_nexttraverseoutlet(rval, &t->tr_ob2,
-        &t->tr_inlet, &t->tr_inno);
+    t->tr_nextoc = obj_nexttraverseoutlet(rval, &t->tr_ob2, &t->tr_inlet, &t->tr_inno);
     t->tr_nin = obj_ninlets(t->tr_ob2);
     if (!t->tr_nin) bug("drawline");
     if (glist_isvisible(t->tr_x))
@@ -397,15 +396,14 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
         int outplus = (t->tr_nout == 1 ? 1 : t->tr_nout - 1);
         int iow = IOWIDTH * t->tr_x->gl_zoom;
         int iom = IOMIDDLE * t->tr_x->gl_zoom;
-        gobj_getrect(&t->tr_ob2->ob_g, t->tr_x,
-            &t->tr_x21, &t->tr_y21, &t->tr_x22, &t->tr_y22);
-        t->tr_lx1 = t->tr_x11 +
-            ((t->tr_x12 - t->tr_x11 - iow) * t->tr_outno) /
-                outplus + iom;
+        gobj_getrect(&t->tr_ob2->ob_g, t->tr_x, &t->tr_x21, &t->tr_y21, &t->tr_x22, &t->tr_y22);
+
+        int width1 = (t->tr_x12-CORNER_INSET) - (t->tr_x11+CORNER_INSET);
+        int width2 = (t->tr_x22-CORNER_INSET) - (t->tr_x21+CORNER_INSET);
+
+        t->tr_lx1 = t->tr_x11 + ((width1 - iow) * t->tr_outno) / outplus + iom + CORNER_INSET;
         t->tr_ly1 = t->tr_y12;
-        t->tr_lx2 = t->tr_x21 +
-            ((t->tr_x22 - t->tr_x21 - iow) * t->tr_inno)/inplus +
-                iom;
+        t->tr_lx2 = t->tr_x21 + ((width2 - iow) * t->tr_inno) / inplus + iom + CORNER_INSET;
         t->tr_ly2 = t->tr_y21;
     }
     else
@@ -958,13 +956,12 @@ static void canvas_drawlines(t_canvas *x)
 		linetraverser_start(&t, x);
     	while ((oc = linetraverser_next(&t))) {
 			issignal = (outlet_getsymbol(t.tr_outlet) == &s_signal);
-			sys_vgui(
-        		"::pdtk_canvas::pdtk_connect %d %d %d %d %d [list l%lx cord] "
-        		".x%lx %s\n",
-                t.tr_lx1, t.tr_ly1, t.tr_lx2, t.tr_ly2,
-                (issignal ? 2:1) * x->gl_zoom,
-                oc, glist_getcanvas(x),
-				(issignal ? "signal_cord" : "msg_cord"));
+			sys_vgui("::pdtk_canvas::pdtk_connect %d %d %d %d %d [list l%lx cord] "
+                    ".x%lx %s\n",
+                    t.tr_lx1, t.tr_ly1, t.tr_lx2, t.tr_ly2,
+                    (issignal ? 2:1) * x->gl_zoom,
+                    oc, glist_getcanvas(x),
+                    (issignal ? "signal_cord" : "msg_cord"));
 		}
     }
 }
@@ -973,7 +970,7 @@ void canvas_fixlinesfor(t_canvas *x, t_text *text)
 {
     t_linetraverser t;
     t_outconnect *oc;
-    
+
     linetraverser_start(&t, x);
     while ((oc = linetraverser_next(&t)))
     {

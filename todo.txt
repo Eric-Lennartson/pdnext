@@ -1,8 +1,5 @@
 ==== Todo =================================================================
-- should rounded corners be used for things other than objects?
-  - i.e. messages, number boxes, and lists boxes?
-  - I'll need to duplicate all the points that I don't want to be rounded
-    in order to combat the smoothing option
+- min width of box needs to change if inlets are overlapping?
 - add sebshader's theme changing tcl file.
   - (remove my change to the source that I thought I needed to map the canvas)
 - replace iemguis with guis of my own making

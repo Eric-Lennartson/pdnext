@@ -2202,16 +2202,15 @@ static void canvas_done_popup(t_canvas *x, t_float which,
 #define DCLICKINTERVAL 0.25
 
     /* mouse click */
-static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
-    int mod, int doit)
+// CHECK THIS METHOD
+static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which, int mod, int doit)
 {
     t_gobj *hitbox;
     int shiftmod, runmode, altmod, doublemod = 0, rightclick;
     int x1=0, y1=0, x2=0, y2=0, clickreturned = 0;
     t_text *hitobj;
 
-    if (!x->gl_editor)
-    {
+    if (!x->gl_editor) {
         bug("editor");
         return;
     }
@@ -2224,8 +2223,7 @@ static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
     EDITOR->canvas_undo_already_set_move = 0;
 
         /* if keyboard was grabbed, notify grabber and cancel the grab */
-    if (doit && x->gl_editor->e_grab && x->gl_editor->e_keyfn)
-    {
+    if (doit && x->gl_editor->e_grab && x->gl_editor->e_keyfn) {
         (* x->gl_editor->e_keyfn) (x->gl_editor->e_grab, &s_, 0);
         glist_grab(x, 0, 0, 0, 0, 0);
     }
@@ -2358,12 +2356,13 @@ static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
             else if (hitobj && (noutlet = obj_noutlets(hitobj)) &&
                 ypos >= y2 - (OHEIGHT*x->gl_zoom) + x->gl_zoom)
             {
-                int width = x2 - x1;
+                int corner_inset = (CORNER_RADIUS / 2) - 2;
+                int width = (x2-corner_inset) - (x1+corner_inset);
                 int iow = IOWIDTH * x->gl_zoom;
                 int nout1 = (noutlet > 1 ? noutlet - 1 : 1);
                 int closest = ((xpos-x1) * (nout1) + width/2)/width;
-                int hotspot = x1 +
-                    (width - iow) * closest / (nout1);
+                int hotspot = (x1 + (width - iow) * closest / nout1)+corner_inset;
+
                 if (closest < noutlet &&
                     xpos >= (hotspot - x->gl_zoom) &&
                     xpos <= hotspot + (iow + x->gl_zoom))
@@ -2375,12 +2374,11 @@ static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
                         x->gl_editor->e_ywas = ypos;
 
                         sys_vgui("::pdtk_canvas::cords_to_foreground .x%lx.c 0\n", x);
-                        sys_vgui(
-                           "::pdtk_canvas::pdtk_connect %d %d %d %d %d "
-                            "x .x%lx selected\n",
-                            xpos, ypos, xpos, ypos,
-                            (obj_issignaloutlet(hitobj, closest) ? 2 : 1)
-							* x->gl_zoom, x);
+                        sys_vgui("::pdtk_canvas::pdtk_connect %d %d %d %d %d "
+                                "x .x%lx selected\n",
+                                xpos, ypos, xpos, ypos,
+                                (obj_issignaloutlet(hitobj, closest) ? 2 : 1)
+                                * x->gl_zoom, x);
                     }
                     else canvas_setcursor(x, CURSOR_EDITMODE_CONNECT);
                 }
@@ -2442,9 +2440,8 @@ static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
         {
             int outindex, inindex;
             t_float lx1 = t.tr_lx1, ly1 = t.tr_ly1,
-                lx2 = t.tr_lx2, ly2 = t.tr_ly2;
-            t_float area = (lx2 - lx1) * (fy - ly1) -
-                (ly2 - ly1) * (fx - lx1);
+                    lx2 = t.tr_lx2, ly2 = t.tr_ly2;
+            t_float area = (lx2 - lx1) * (fy - ly1) - (ly2 - ly1) * (fx - lx1);
             t_float dsquare = (lx2-lx1) * (lx2-lx1) + (ly2-ly1) * (ly2-ly1);
             if (area * area >= 50 * dsquare) continue;
             if ((lx2-lx1) * (fx-lx1) + (ly2-ly1) * (fy-ly1) < 0) continue;
@@ -2532,14 +2529,11 @@ static void canvas_doclick(t_canvas *x, int xpos, int ypos, int which,
     }
 }
 
-void canvas_mouse(t_canvas *x, t_floatarg xpos, t_floatarg ypos,
-    t_floatarg which, t_floatarg mod)
-{
+void canvas_mouse(t_canvas *x, t_floatarg xpos, t_floatarg ypos, t_floatarg which, t_floatarg mod) {
     canvas_doclick(x, xpos, ypos, which, mod, 1);
 }
 
-int canvas_isconnected (t_canvas *x, t_text *ob1, int n1,
-    t_text *ob2, int n2)
+int canvas_isconnected (t_canvas *x, t_text *ob1, int n1, t_text *ob2, int n2)
 {
     t_linetraverser t;
     t_outconnect *oc;
@@ -2563,39 +2557,41 @@ static int canconnect(t_canvas*x, t_object*src, int nout, t_object*sink, int nin
             obj_issignalinlet(sink, nin));
 }
 
+// CHECK THIS
 static int tryconnect(t_canvas*x, t_object*src, int nout, t_object*sink, int nin)
 {
-    if(canconnect(x, src, nout, sink, nin))
+    if( canconnect(x, src, nout, sink, nin) )
     {
         t_outconnect *oc = obj_connect(src, nout, sink, nin);
         if(oc)
         {
             int iow = IOWIDTH * x->gl_zoom;
             int iom = IOMIDDLE * x->gl_zoom;
+            int corner_inset = (CORNER_RADIUS / 2) - 2;
             int x11=0, x12=0, x21=0, x22=0;
             int y11=0, y12=0, y21=0, y22=0;
             int issignal = obj_issignaloutlet(src, nout);
-            int noutlets1, ninlets, lx1, ly1, lx2, ly2;
-            gobj_getrect(&src->ob_g, x, &x11, &y11, &x12, &y12);
+            int noutlets, ninlets, out_x, out_y, in_x, in_y;
+            gobj_getrect(&src->ob_g, x, &x11, &y11, &x12, &y12); // set x and y coords of the two gobjs we're connecting
             gobj_getrect(&sink->ob_g, x, &x21, &y21, &x22, &y22);
 
-            noutlets1 = obj_noutlets(src);
+            noutlets = obj_noutlets(src);
             ninlets = obj_ninlets(sink);
 
-            lx1 = x11 + (noutlets1 > 1 ?
-                             ((x12-x11-iow) * nout)/(noutlets1-1) : 0)
-                + iom;
-            ly1 = y12;
-            lx2 = x21 + (ninlets > 1 ?
-                             ((x22-x21-iow) * nin)/(ninlets-1) : 0)
-                + iom;
-            ly2 = y21;
-           sys_vgui(
-                "::pdtk_canvas::pdtk_connect %d %d %d %d %d [list l%lx cord] "
-        		".x%lx %s\n",
-                lx1, ly1, lx2, ly2,
-                (issignal ? 2 : 1) * x->gl_zoom, oc, glist_getcanvas(x),
-				(issignal ? "signal_cord" : "msg_cord"));
+            int src_width = (x12-corner_inset) - (x11+corner_inset);
+            int sink_width = (x22-corner_inset) - (x21+corner_inset);
+
+            // we need to calculate the left edge of the outlet and the inlet.
+            // then we can add the offset from the corner_inset and the middle of iolet
+            out_x = x11 + (noutlets > 1 ? ((src_width-iow) * nout)/(noutlets-1) : 0) + iom + corner_inset;
+            out_y = y12;
+            in_x = x21 + (ninlets > 1 ? ((sink_width-iow) * nin)/(ninlets-1) : 0) + iom + corner_inset;
+            in_y = y21;
+            sys_vgui("::pdtk_canvas::pdtk_connect %d %d %d %d %d [list l%lx cord] "
+                    ".x%lx %s\n",
+                    out_x, out_y, in_x, in_y,
+                    (issignal ? 2 : 1) * x->gl_zoom, oc, glist_getcanvas(x),
+                    (issignal ? "signal_cord" : "msg_cord"));
             canvas_undo_add(x, UNDO_CONNECT, "connect", canvas_undo_set_connect(x,
                     canvas_getindex(x, &src->ob_g), nout,
                     canvas_getindex(x, &sink->ob_g), nin));
@@ -2606,11 +2602,12 @@ static int tryconnect(t_canvas*x, t_object*src, int nout, t_object*sink, int nin
     return 0;
 }
 
+//CHECK THIS TOO
 static void canvas_doconnect(t_canvas *x, int xpos, int ypos, int mod, int doit)
 {
     int x11=0, y11=0, x12=0, y12=0;
-    t_gobj *y1;
     int x21=0, y21=0, x22=0, y22=0;
+    t_gobj *y1;
     t_gobj *y2;
     int xwas = x->gl_editor->e_xwas,
         ywas = x->gl_editor->e_ywas;
@@ -2620,11 +2617,14 @@ static void canvas_doconnect(t_canvas *x, int xpos, int ypos, int mod, int doit)
     if (doit) {
         sys_vgui("::pdtk_canvas::cords_to_foreground .x%lx.c 1\n", x);
         sys_vgui(".x%lx.c delete x\n", x);
+    } else {
+        sys_vgui("::pdtk_canvas::pdtk_coords "
+                "%d %d %d %d x .x%lx.c\n",
+                x->gl_editor->e_xwas,
+                x->gl_editor->e_ywas,
+                xpos, ypos,
+                x);
     }
-    else sys_vgui("::pdtk_canvas::pdtk_coords "
-            "%d %d %d %d x .x%lx.c\n",
-            x->gl_editor->e_xwas, x->gl_editor->e_ywas,
-            xpos, ypos, x);
 
     if ((y1 = canvas_findhitbox(x, xwas, ywas, &x11, &y11, &x12, &y12))
         && (y2 = canvas_findhitbox(x, xpos, ypos, &x21, &y21, &x22, &y22)))
@@ -2851,8 +2851,8 @@ static void canvas_doregion(t_canvas *x, int xpos, int ypos, int doit)
 }
 
 void canvas_mouseup(t_canvas *x,
-    t_floatarg fxpos, t_floatarg fypos, t_floatarg fwhich,
-    t_floatarg fmod)
+                    t_floatarg fxpos, t_floatarg fypos,
+                    t_floatarg fwhich, t_floatarg fmod)
 {
     int xpos = fxpos, ypos = fypos, which = fwhich;
     int mod = fmod;
@@ -4143,10 +4143,8 @@ static void canvas_selectall(t_canvas *x)
          }
 }
 
-static void canvas_deselectall(t_canvas *x)
-{
-    if(x)glist_noselect(x);
-}
+static void canvas_deselectall(t_canvas *x) { if(x) glist_noselect(x); }
+
 static void canvas_cycleselect(t_canvas*x, t_float foffset)
 {
         /* select (currentselection+offset)%objectcount */
@@ -4305,6 +4303,7 @@ static void canvas_reselect(t_canvas *x)
 
 extern t_class *text_class;
 
+// CHECK THIS THIRD
 void canvas_connect(t_canvas *x, t_floatarg fwhoout, t_floatarg foutno,
     t_floatarg fwhoin, t_floatarg finno)
 {
@@ -4353,12 +4352,11 @@ void canvas_connect(t_canvas *x, t_floatarg fwhoout, t_floatarg foutno,
     if (!(oc = obj_connect(objsrc, outno, objsink, inno))) goto bad;
     if (glist_isvisible(x) && x->gl_havewindow)
     {
-        sys_vgui(
-           "::pdtk_canvas::pdtk_connect 0 0 0 0 %d [list l%lx cord] "
-        	".x%lx %s\n",
-            (obj_issignaloutlet(objsrc, outno) ? 2 : 1) * x->gl_zoom,
-            oc, glist_getcanvas(x),
-			(obj_issignaloutlet(objsrc, outno) ? "signal_cord" : "msg_cord"));
+        sys_vgui("::pdtk_canvas::pdtk_connect 0 0 0 0 %d [list l%lx cord] "
+                ".x%lx %s\n",
+                (obj_issignaloutlet(objsrc, outno) ? 2 : 1) * x->gl_zoom,
+                oc, glist_getcanvas(x),
+                (obj_issignaloutlet(objsrc, outno) ? "signal_cord" : "msg_cord"));
         canvas_fixlinesfor(x, objsrc);
     }
     return;
