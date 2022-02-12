@@ -51,7 +51,7 @@ void glist_text(t_glist *gl, t_symbol *s, int argc, t_atom *argv)
 {
     t_text *x = (t_text *)pd_new(text_class);
     t_atom at;
-    x->te_width = 0;                            /* don't know it yet. */
+    x->te_width = 0; /* don't know it yet. */
     x->te_type = T_TEXT;
     x->te_binbuf = binbuf_new();
     if (argc > 1)
@@ -96,8 +96,7 @@ void glist_text(t_glist *gl, t_symbol *s, int argc, t_atom *argv)
 
 void canvas_getargs(int *argcp, t_atom **argvp);
 
-static void canvas_objtext(t_glist *gl, int xpix, int ypix, int width,
-    int selected, t_binbuf *b)
+static void canvas_objtext(t_glist *gl, int xpix, int ypix, int width, int selected, t_binbuf *b)
 {
     t_text *x;
     int argc;
@@ -1234,6 +1233,7 @@ static void gatom_properties(t_gobj *z, t_glist *owner)
 static void text_getrect(t_gobj *z, t_glist *glist,
     int *xp1, int *yp1, int *xp2, int *yp2)
 {
+    //post("calling text_getrect");
     t_text *x = (t_text *)z;
     int width, height, iscomment = (x->te_type == T_TEXT);
     t_float x1, y1, x2, y2;
@@ -1263,15 +1263,16 @@ static void text_getrect(t_gobj *z, t_glist *glist,
             height += ATOM_BMARGIN;
         }
     }
-        /* if we're invisible we don't know our size so we just lie about
-        it.  This is called on invisible boxes to establish order of inlets
-        and possibly other reasons.
-           To find out if the box is visible we can't just check the "vis"
-        flag because we might be within the vis() routine and not have set
-        that yet.  So we check directly whether the "rtext" list has been
-        built.  LATER reconsider when "vis" flag should be on and off? */
-
-    else width = height = 10;
+    /* if we're invisible we don't know our size so we just lie about
+    it.  This is called on invisible boxes to establish order of inlets
+    and possibly other reasons.
+        To find out if the box is visible we can't just check the "vis"
+    flag because we might be within the vis() routine and not have set
+    that yet.  So we check directly whether the "rtext" list has been
+    built.  LATER reconsider when "vis" flag should be on and off? */
+    else {
+        width = height = 10;
+    }
     x1 = text_xpix(x, glist);
     y1 = text_ypix(x, glist);
     x2 = x1 + width;
@@ -1496,11 +1497,16 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
 {
     int n = obj_noutlets(ob), nplus = (n == 1 ? 1 : n-1), i;
 
-    /* making sure that inlets don't appear outside the rounded edges
-       we only need to calculate it when we're an object */
-    int corner_inset = (CORNER_RADIUS / 2) - 2;
+    int width = (x2-CORNER_INSET) - (x1+CORNER_INSET);
 
-    int width = (x2-corner_inset) - (x1+corner_inset);
+    if(ob->te_type == T_OBJECT) {
+        int nout = obj_noutlets(ob);
+        int nin = obj_ninlets(ob);
+        int iow = IOWIDTH * glist->gl_zoom;
+        int min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2;
+        if (width < min_width) width = min_width;
+    }
+
     int iow = IOWIDTH * glist->gl_zoom;
     int ih = IHEIGHT * glist->gl_zoom;
     int oh = OHEIGHT * glist->gl_zoom;
@@ -1509,7 +1515,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     /* draw over border, so assume border width = 1 pixel * glist->gl_zoom */
     for (i = 0; i < n; i++)
     {
-        int onset = (x1 + (width - iow) * i / nplus)+corner_inset;
+        int onset = (x1 + (width - iow) * i / nplus)+CORNER_INSET;
         if (firsttime) {
         	issignal = obj_issignaloutlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1532,7 +1538,7 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     nplus = (n == 1 ? 1 : n-1);
     for (i = 0; i < n; i++)
     {
-        int onset = (x1 + (width - iow) * i / nplus)+corner_inset;
+        int onset = (x1 + (width - iow) * i / nplus)+CORNER_INSET;
         if (firsttime) {
         	issignal = obj_issignalinlet(ob,i);
             sys_vgui(".x%lx.c create rectangle %d %d %d %d "
@@ -1557,9 +1563,18 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
 {
     t_object *ob;
     t_canvas *c = glist_getcanvas(glist);
-    int x1, y1, x2, y2, width, height, corner;
+    int x1, y1, x2, y2, width, height, corner, min_width, x2_off;
     text_getrect(&x->te_g, glist, &x1, &y1, &x2, &y2);
-    width = x2 - x1;
+
+    if ((ob = pd_checkobject(&x->te_pd))) {
+        int nout = obj_noutlets(ob);
+        int nin = obj_ninlets(ob);
+        int iow = IOWIDTH * glist->gl_zoom;
+        min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2;
+        width = x2-x1;
+        x2_off = (width < min_width) ? min_width-width : 0;
+    }
+
     height = y2 - y1;
 
     if (x->te_type == T_OBJECT)
@@ -1581,12 +1596,12 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
                 c,
                 x1, y1,
                 x1+CORNER_RADIUS, y1,
-                x2-CORNER_RADIUS, y1,
-                x2, y1,
-                x2, y1+CORNER_RADIUS,
-                x2, y2-CORNER_RADIUS,
-                x2, y2,
-                x2-CORNER_RADIUS, y2,
+                x2-CORNER_RADIUS+x2_off, y1,
+                x2+x2_off, y1,
+                x2+x2_off, y1+CORNER_RADIUS,
+                x2+x2_off, y2-CORNER_RADIUS,
+                x2+x2_off, y2,
+                x2-CORNER_RADIUS+x2_off, y2,
                 x1+CORNER_RADIUS, y2,
                 x1, y2,
                 x1, y2-CORNER_RADIUS,
@@ -1600,12 +1615,12 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
                 c, tag,
                 x1, y1,
                 x1+CORNER_RADIUS, y1,
-                x2-CORNER_RADIUS, y1,
-                x2, y1,
-                x2, y1+CORNER_RADIUS,
-                x2, y2-CORNER_RADIUS,
-                x2, y2,
-                x2-CORNER_RADIUS, y2,
+                x2-CORNER_RADIUS+x2_off, y1,
+                x2+x2_off, y1,
+                x2+x2_off, y1+CORNER_RADIUS,
+                x2+x2_off, y2-CORNER_RADIUS,
+                x2+x2_off, y2,
+                x2-CORNER_RADIUS+x2_off, y2,
                 x1+CORNER_RADIUS, y2,
                 x1, y2,
                 x1, y2-CORNER_RADIUS,
@@ -1781,7 +1796,7 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
     }
         /* draw inlets/outlets */
 
-    if ((ob = pd_checkobject(&x->te_pd)))
+    if ( (ob = pd_checkobject(&x->te_pd)) )
         glist_drawiofor(glist, ob, firsttime, tag, x1, y1, x2, y2);
     if (firsttime) /* raise cords over everything else */
         sys_vgui(".x%lx.c raise cord\n", c);
