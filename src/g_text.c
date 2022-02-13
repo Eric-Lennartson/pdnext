@@ -1563,19 +1563,18 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
 {
     t_object *ob;
     t_canvas *c = glist_getcanvas(glist);
-    int x1, y1, x2, y2, width, height, corner, min_width, x2_off;
+    int x1, y1, x2, y2, corner, x2_off;
     text_getrect(&x->te_g, glist, &x1, &y1, &x2, &y2);
 
     if ((ob = pd_checkobject(&x->te_pd))) {
         int nout = obj_noutlets(ob);
         int nin = obj_ninlets(ob);
         int iow = IOWIDTH * glist->gl_zoom;
-        min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2;
-        width = x2-x1;
-        x2_off = (width < min_width) ? min_width-width : 0;
+        int min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2 + CORNER_INSET;
+        int width = x2-x1;
+        // this is a bit hacky, but I think it comes down to float vs. int?
+        x2_off = (width < min_width) ? min_width-width+CORNER_INSET : CORNER_INSET-2;
     }
-
-    height = y2 - y1;
 
     if (x->te_type == T_OBJECT)
     {

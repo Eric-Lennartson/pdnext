@@ -379,9 +379,9 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
             t->tr_nout = obj_noutlets(ob);
             outno = 0;
             if (glist_isvisible(t->tr_x))
-                gobj_getrect(y, t->tr_x,
-                    &t->tr_x11, &t->tr_y11, &t->tr_x12, &t->tr_y12);
-            else t->tr_x11 = t->tr_y11 = t->tr_x12 = t->tr_y12 = 0;
+                gobj_getrect(y, t->tr_x, &t->tr_x11, &t->tr_y11, &t->tr_x12, &t->tr_y12);
+            else
+                t->tr_x11 = t->tr_y11 = t->tr_x12 = t->tr_y12 = 0;
         }
         t->tr_nextoutno = outno + 1;
         rval = obj_starttraverseoutlet(t->tr_ob, &t->tr_outlet, outno);
@@ -397,6 +397,8 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
         int iow = IOWIDTH * t->tr_x->gl_zoom;
         int iom = IOMIDDLE * t->tr_x->gl_zoom;
         gobj_getrect(&t->tr_ob2->ob_g, t->tr_x, &t->tr_x21, &t->tr_y21, &t->tr_x22, &t->tr_y22);
+
+        // FIXME: the widths are slightly off, so the hovering is a little jank with rounded corners
 
         int width1 = (t->tr_x12-CORNER_INSET) - (t->tr_x11+CORNER_INSET);
         int width2 = (t->tr_x22-CORNER_INSET) - (t->tr_x21+CORNER_INSET);

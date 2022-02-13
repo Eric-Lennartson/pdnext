@@ -1,5 +1,7 @@
 ==== Todo =================================================================
-- min width of box needs to change if inlets are overlapping?
+- widths are good for all objects now, (it's slightly off but you have to look for it)
+  - hovering is a bit funky because of if though, might be worth removing?
+  - that or fixing the hover...
 - add sebshader's theme changing tcl file.
   - (remove my change to the source that I thought I needed to map the canvas)
 - replace iemguis with guis of my own making
