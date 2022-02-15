@@ -1499,14 +1499,6 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
 
     int width = (x2-CORNER_INSET) - (x1+CORNER_INSET);
 
-    if(ob->te_type == T_OBJECT) {
-        int nout = obj_noutlets(ob);
-        int nin = obj_ninlets(ob);
-        int iow = IOWIDTH * glist->gl_zoom;
-        int min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2;
-        if (width < min_width) width = min_width;
-    }
-
     int iow = IOWIDTH * glist->gl_zoom;
     int ih = IHEIGHT * glist->gl_zoom;
     int oh = OHEIGHT * glist->gl_zoom;
@@ -1563,18 +1555,8 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
 {
     t_object *ob;
     t_canvas *c = glist_getcanvas(glist);
-    int x1, y1, x2, y2, corner, x2_off;
+    int x1, y1, x2, y2, corner;
     text_getrect(&x->te_g, glist, &x1, &y1, &x2, &y2);
-
-    if ((ob = pd_checkobject(&x->te_pd))) {
-        int nout = obj_noutlets(ob);
-        int nin = obj_ninlets(ob);
-        int iow = IOWIDTH * glist->gl_zoom;
-        int min_width = iow * (nin > nout ? nin : nout) + (nin > nout ? nin : nout)*2 + CORNER_INSET;
-        int width = x2-x1;
-        // this is a bit hacky, but I think it comes down to float vs. int?
-        x2_off = (width < min_width) ? min_width-width+CORNER_INSET : CORNER_INSET-2;
-    }
 
     if (x->te_type == T_OBJECT)
     {
@@ -1595,12 +1577,12 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
                 c,
                 x1, y1,
                 x1+CORNER_RADIUS, y1,
-                x2-CORNER_RADIUS+x2_off, y1,
-                x2+x2_off, y1,
-                x2+x2_off, y1+CORNER_RADIUS,
-                x2+x2_off, y2-CORNER_RADIUS,
-                x2+x2_off, y2,
-                x2-CORNER_RADIUS+x2_off, y2,
+                x2-CORNER_RADIUS, y1,
+                x2, y1,
+                x2, y1+CORNER_RADIUS,
+                x2, y2-CORNER_RADIUS,
+                x2, y2,
+                x2-CORNER_RADIUS, y2,
                 x1+CORNER_RADIUS, y2,
                 x1, y2,
                 x1, y2-CORNER_RADIUS,
@@ -1614,12 +1596,12 @@ void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int
                 c, tag,
                 x1, y1,
                 x1+CORNER_RADIUS, y1,
-                x2-CORNER_RADIUS+x2_off, y1,
-                x2+x2_off, y1,
-                x2+x2_off, y1+CORNER_RADIUS,
-                x2+x2_off, y2-CORNER_RADIUS,
-                x2+x2_off, y2,
-                x2-CORNER_RADIUS+x2_off, y2,
+                x2-CORNER_RADIUS, y1,
+                x2, y1,
+                x2, y1+CORNER_RADIUS,
+                x2, y2-CORNER_RADIUS,
+                x2, y2,
+                x2-CORNER_RADIUS, y2,
                 x1+CORNER_RADIUS, y2,
                 x1, y2,
                 x1, y2-CORNER_RADIUS,
