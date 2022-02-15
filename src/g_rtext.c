@@ -39,7 +39,7 @@ struct _rtext
 t_rtext *rtext_new(t_glist *glist, t_text *who)
 {
     t_rtext *x = (t_rtext *)getbytes(sizeof *x);
-    int w = 0, h = 0, indx;
+    // int w = 0, h = 0, indx; these variables aren't used?
     x->x_text = who;
     x->x_glist = glist;
     x->x_next = glist->gl_editor->e_rtext;
@@ -161,6 +161,7 @@ static int lastone(char *s, int c, int n)
     character lengths or offsets.
     The UTF8 handling was contributed by Bryan Jurish, who says "moo." */
 
+// this isn't the default width, it's the max width...
 #define DEFAULTBOXWIDTH 60
 
 static void rtext_formattext(t_rtext *x, int *widthp, int *heightp,
@@ -263,7 +264,6 @@ static void rtext_formattext(t_rtext *x, int *widthp, int *heightp,
         *widthp += LMARGIN + RMARGIN;
         *heightp += TMARGIN + BMARGIN;
     }
-
 }
 
     /* same as above, but for atom boxes, which are always on one line. */
@@ -387,9 +387,11 @@ static void rtext_senditup(t_rtext *x, int action, int *widthp, int *heightp,
         from the inside to preserve the spacing */
 
     text_getfont(x->x_text, x->x_glist, &fontwidth, &fontheight, &guifontsize);
+
     if (x->x_bufsize >= 100)
-         tempbuf = (char *)t_getbytes(2 * x->x_bufsize + 1);
-    else tempbuf = smallbuf;
+        tempbuf = (char *)t_getbytes(2 * x->x_bufsize + 1);
+    else
+        tempbuf = smallbuf;
     tempbuf[0] = 0;
 
     if (x->x_text->te_type == T_ATOM)
