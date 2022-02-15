@@ -1,5 +1,8 @@
 ==== Todo =================================================================
 - min width of box needs to change if inlets are overlapping?
+  - this is annoying and causes strange issues with hitbox, and t_linetraverser
+  - it would be better if objects knew what their width was inherently instead of
+    having to calculate it all the time.
 - add sebshader's theme changing tcl file.
   - (remove my change to the source that I thought I needed to map the canvas)
 - replace iemguis with guis of my own making

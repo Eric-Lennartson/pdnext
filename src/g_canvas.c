@@ -363,40 +363,56 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
 {
     t_outconnect *rval = t->tr_nextoc;
     int outno;
-    while (!rval)
+
+    while(!rval)
     {
         outno = t->tr_nextoutno;
-        while (outno == t->tr_nout)
+        while(outno == t->tr_nout)
         {
-            t_gobj *y;
-            t_object *ob = 0;
-            if (!t->tr_ob) y = t->tr_x->gl_list;
-            else y = t->tr_ob->ob_g.g_next;
+            t_gobj *y; // this is the object with the inlets
+            t_object *ob = 0; // this is the object that y is connecting to
+            if (!t->tr_ob)
+                y = t->tr_x->gl_list;
+            else
+                y = t->tr_ob->ob_g.g_next;
             for (; y; y = y->g_next)
-                if ((ob = pd_checkobject(&y->g_pd))) break;
-            if (!ob) return (0);
+                if ((ob = pd_checkobject(&y->g_pd)))
+                    break;
+            if (!ob)
+                return (0);
+
             t->tr_ob = ob;
             t->tr_nout = obj_noutlets(ob);
             outno = 0;
-            if (glist_isvisible(t->tr_x))
-                gobj_getrect(y, t->tr_x,
-                    &t->tr_x11, &t->tr_y11, &t->tr_x12, &t->tr_y12);
-            else t->tr_x11 = t->tr_y11 = t->tr_x12 = t->tr_y12 = 0;
+
+            if (glist_isvisible(t->tr_x)) {
+                gobj_getrect(y, t->tr_x, &t->tr_x11, &t->tr_y11, &t->tr_x12, &t->tr_y12);
+            }
+            else
+                t->tr_x11 = t->tr_y11 = t->tr_x12 = t->tr_y12 = 0;
         }
+
         t->tr_nextoutno = outno + 1;
         rval = obj_starttraverseoutlet(t->tr_ob, &t->tr_outlet, outno);
         t->tr_outno = outno;
     }
+
     t->tr_nextoc = obj_nexttraverseoutlet(rval, &t->tr_ob2, &t->tr_inlet, &t->tr_inno);
     t->tr_nin = obj_ninlets(t->tr_ob2);
-    if (!t->tr_nin) bug("drawline");
+    if (!t->tr_nin)
+        bug("drawline");
+
     if (glist_isvisible(t->tr_x))
     {
+
         int inplus = (t->tr_nin == 1 ? 1 : t->tr_nin - 1);
         int outplus = (t->tr_nout == 1 ? 1 : t->tr_nout - 1);
         int iow = IOWIDTH * t->tr_x->gl_zoom;
         int iom = IOMIDDLE * t->tr_x->gl_zoom;
+
         gobj_getrect(&t->tr_ob2->ob_g, t->tr_x, &t->tr_x21, &t->tr_y21, &t->tr_x22, &t->tr_y22);
+
+        // FIXME: the widths are slightly off, so the hovering is a little jank with rounded corners
 
         int width1 = (t->tr_x12-CORNER_INSET) - (t->tr_x11+CORNER_INSET);
         int width2 = (t->tr_x22-CORNER_INSET) - (t->tr_x21+CORNER_INSET);
@@ -405,9 +421,7 @@ t_outconnect *linetraverser_next(t_linetraverser *t)
         t->tr_ly1 = t->tr_y12;
         t->tr_lx2 = t->tr_x21 + ((width2 - iow) * t->tr_inno) / inplus + iom + CORNER_INSET;
         t->tr_ly2 = t->tr_y21;
-    }
-    else
-    {
+    } else {
         t->tr_x21 = t->tr_y21 = t->tr_x22 = t->tr_y22 = 0;
         t->tr_lx1 = t->tr_ly1 = t->tr_lx2 = t->tr_ly2 = 0;
     }
@@ -703,26 +717,14 @@ t_symbol *canvas_makebindsym(t_symbol *s)
     abstractions.  (Claude Heiland et al. Aug 9 2013) */
 static void canvas_bind(t_canvas *x)
 {
-    // this doesn't seem to break anything, but be warned
-    // check here if canvases are doing weird things
-    char buf[MAXPDSTRING];
-    snprintf(buf, MAXPDSTRING, ".x%lx.c", (long unsigned int)x);
-    t_symbol s;
-    s.s_name = buf;
-
     if (strcmp(x->gl_name->s_name, "Pd"))
-        pd_bind(&x->gl_pd, canvas_makebindsym(&s));
+        pd_bind(&x->gl_pd, canvas_makebindsym(x->gl_name));
 }
 
 static void canvas_unbind(t_canvas *x)
 {
-    char buf[MAXPDSTRING];
-    snprintf(buf, MAXPDSTRING, ".x%lx.c", (long unsigned int)x);
-    t_symbol s;
-    s.s_name = buf;
-
     if (strcmp(x->gl_name->s_name, "Pd"))
-        pd_unbind(&x->gl_pd, canvas_makebindsym(&s));
+        pd_unbind(&x->gl_pd, canvas_makebindsym(x->gl_name));
 }
 
 void canvas_reflecttitle(t_canvas *x)
