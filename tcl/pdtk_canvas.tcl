@@ -489,11 +489,7 @@ proc ::pdtk_canvas::cords_to_foreground {mytoplevel {state 1}} {
 
 # get color value for pd
 proc ::pdtk_canvas::get_color {type {window 0}} {
-    if {$::themeState} {
-        return $::lightTheme($type)
-    } else {
-        return $::darkTheme($type)
-    }
+    return $::pd_colors($type)
 }
 
 proc ::pdtk_canvas::updateTheme {mytoplevel} {

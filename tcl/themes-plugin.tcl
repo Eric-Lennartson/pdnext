@@ -1,5 +1,4 @@
 namespace eval color-themes {
-    variable this_path
     variable current_name
     variable current_theme
     variable hover_theme
@@ -71,11 +70,11 @@ proc ::color-themes::reset_defaults {} {
 }
 
 proc ::color-themes::set_theme {name} {
-    variable this_path
+    ::pdwindow::post "attempting to set theme to $name\n"
     variable current_name
     variable current_theme
     # check for theme
-    if { ![file exists $this_path/themes/$name-plugin.tcl] } {
+    if { ![file exists $::sys_guidir/themes/$name-plugin.tcl] } {
         ::pdwindow::error "no theme '$name-plugin.tcl'\n"
         return
     }
@@ -84,10 +83,11 @@ proc ::color-themes::set_theme {name} {
     #reset defaults
     ::color-themes::reset_defaults
     #load theme
-    source $this_path/themes/${name}-plugin.tcl
+    source $::sys_guidir/themes/${name}-plugin.tcl
     # redraw everything
     foreach wind [wm stackorder .] {
         if {[winfo class $wind] eq "PatchWindow"} {
+            ::pdwindow::post "we are a PatchWindow\n"
             pdsend "$wind map 0"
             pdsend "$wind map 1"
             set tmpcol [::pdtk_canvas::get_color txt_highlight $wind]
@@ -96,6 +96,7 @@ proc ::color-themes::set_theme {name} {
             }
             set tmpcol [::pdtk_canvas::get_color canvas_fill $wind]
             if {$tmpcol ne ""} {
+                ::pdwindow::post "canvas_fill color is $tmpcol\n"
                 ${wind}.c configure -background $tmpcol
             }
             set tmpcol [::pdtk_canvas::get_color canvas_text_cursor $wind]
@@ -144,8 +145,7 @@ proc ::color-themes::set_theme {name} {
 
 proc ::color-themes::make_default {} {
     variable current_name
-    variable this_path
-    if {[catch {set fp [open $this_path/current-theme.txt w]}]} {
+    if {[catch {set fp [open $::sys_guidir/current-theme.txt w]}]} {
         ::pdwindow::error "couldn't open file for writing\n"
         return
     }
@@ -155,10 +155,8 @@ proc ::color-themes::make_default {} {
 }
 
 proc ::color-themes::print {} {
-    variable this_path
-    ::pdwindow::post "color themes in $this_path/themes:\n"
-    foreach theme [lsort [glob -path $this_path/themes/ *-plugin.tcl]] {
-
+    ::pdwindow::post "color themes in $::sys_guidir/themes:\n"
+    foreach theme [lsort [glob -path $::sys_guidir/themes/ *-plugin.tcl]] {
         ::pdwindow::post "[{::color-themes::trimsubstringright} [file tail $theme] -plugin.tcl]\n"
     }
 }
@@ -220,16 +218,17 @@ proc ::color-themes::scroll {box coord units boxincr} {
 
 proc ::color-themes::apply {names} {
     variable selected_theme
-    if {$selected_theme eq ""} {return}
-    {::color-themes::set_theme} [lindex $names $selected_theme]
+    if {$selected_theme eq ""} {
+        return
+    }
+    ::color-themes::set_theme [lindex $names $selected_theme]
 }
 
 proc ::color-themes::save_dark {names} {
-    variable this_path
     variable selected_theme
     if {$selected_theme eq ""} {return}
     set name [lindex $names $selected_theme]
-    if {[catch {set fp [open $this_path/dark-theme.txt w]}]} {
+    if {[catch {set fp [open $::sys_guidir/dark-theme.txt w]}]} {
         ::pdwindow::error "couldn't open file for writing\n"
         return
     }
@@ -239,8 +238,7 @@ proc ::color-themes::save_dark {names} {
 }
 
 proc ::color-themes::delete_dark {} {
-    variable this_path
-    if {[catch [file delete $this_path/dark-theme.txt]]} {
+    if {[catch [file delete $::sys_guidir/dark-theme.txt]]} {
         ::pdwindow::error "couldn't delete dark theme file\n"
         return
     }
@@ -248,7 +246,6 @@ proc ::color-themes::delete_dark {} {
 }
 
 proc ::color-themes::opendialog {} {
-    variable this_path
     variable current_name
     variable hover_theme
     variable selected_theme
@@ -273,7 +270,7 @@ proc ::color-themes::opendialog {} {
     if {$::windowingsystem eq "aqua"} {
         .colortheme_dialog configure -menu $::dialog_menubar
     }
-    set themes [lsort [glob -path $this_path/themes/ *-plugin.tcl]]
+    set themes [lsort [glob -path $::sys_guidir/themes/ *-plugin.tcl]]
     frame .colortheme_dialog.theme_list
     scrollbar .colortheme_dialog.theme_list.sy -command \
         ".colortheme_dialog.theme_list.c yview"

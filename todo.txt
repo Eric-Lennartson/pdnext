@@ -1,6 +1,7 @@
 ==== Todo =================================================================
-- add sebshader's theme changing tcl file.
-  - make it a part of the source, so that it just comes with my version of pd.
+- graph on parent and abstractions need rounded corners
+- pdwindow needs some help
+- it's ugly to have two theme tabs in preferences
 - min width of box needs to change if inlets are overlapping?
   - this is annoying and causes strange issues with hitbox, and t_linetraverser
   - it would be better if objects knew what their width was inherently instead of
