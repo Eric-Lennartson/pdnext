@@ -174,24 +174,23 @@ proc ::color-themes::print {} {
 }
 
 proc ::color-themes::motion {box} {
-
     #::pdwindow::post "box: $box\n"
     if {$box ne ${::color-themes::hover_theme}} {
         if {${::color-themes::hover_theme} ne "" && \
         ${::color-themes::hover_theme} ne \
         ${::color-themes::selected_theme} } {
-            .colortheme_dialog.theme_list.c.f${::color-themes::hover_theme}.c \
+            $::ctdf.theme_list.c.f${::color-themes::hover_theme}.c \
                 itemconfigure box${::color-themes::hover_theme} -outline \
                 black -width 1
-            .colortheme_dialog.theme_list.c \
+            $::ctdf.theme_list.c \
                 itemconfigure box${::color-themes::hover_theme} -outline \
                 black -width 1
         }
         if {$box ne ${::color-themes::selected_theme}} {
-            .colortheme_dialog.theme_list.c.f$box.c itemconfigure \
-                box$box -outline blue -width 7
-            .colortheme_dialog.theme_list.c itemconfigure \
-                box$box -outline blue -width 7
+            $::ctdf.theme_list.c.f$box.c itemconfigure \
+                box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
+            $::ctdf.theme_list.c itemconfigure \
+                box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
         }
         set {::color-themes::hover_theme} $box
     }
@@ -200,31 +199,31 @@ proc ::color-themes::motion {box} {
 proc ::color-themes::click {box} {
     if {${::color-themes::selected_theme} ne "" && \
     ${::color-themes::selected_theme} ne $box} {
-        .colortheme_dialog.theme_list.c.f${::color-themes::selected_theme}.c \
+        $::ctdf.theme_list.c.f${::color-themes::selected_theme}.c \
             itemconfigure box${::color-themes::selected_theme} -outline \
             black -width 1
-        .colortheme_dialog.theme_list.c \
+        $::ctdf.theme_list.c \
             itemconfigure box${::color-themes::selected_theme} -outline \
             black -width 1
     }
     set {::color-themes::hover_theme} $box
     set {::color-themes::selected_theme} $box
 
-    .colortheme_dialog.theme_list.c.f$box.c itemconfigure \
+    $::ctdf.theme_list.c.f$box.c itemconfigure \
         box${::color-themes::hover_theme} -outline \
-        green -width 7
-    .colortheme_dialog.theme_list.c itemconfigure \
+        [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
+    $::ctdf.theme_list.c itemconfigure \
         box${::color-themes::hover_theme} -outline \
-        green -width 7
+        [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
 }
 
 proc ::color-themes::scroll {box coord units boxincr} {
     variable num_themes
     # not sure of a better way to simulate hovering..
-    set ocanvy [.colortheme_dialog.theme_list.c canvasy 0]
-    .colortheme_dialog.theme_list.c yview scroll [expr {- ($units)}] units
+    set ocanvy [$::ctdf.theme_list.c canvasy 0]
+    $::ctdf.theme_list.c yview scroll [expr {- ($units)}] units
     {::color-themes::motion} [expr max(0, min($box + int($coord + \
-        [.colortheme_dialog.theme_list.c canvasy 0] - $ocanvy)/$boxincr, \
+        [$::ctdf.theme_list.c canvasy 0] - $ocanvy)/$boxincr, \
         $num_themes-1))]
 }
 
@@ -274,33 +273,33 @@ proc ::color-themes::opendialog {} {
         return
     }
 
-    # change this to mytoplevel
     toplevel .colortheme_dialog -class ColorThemeDialog
-    wm title .colortheme_dialog [_ "Color Themes"]
+    wm title .colortheme_dialog [_ "Themes"]
     wm group .colortheme_dialog .
     wm resizable .colortheme_dialog 0 1
     wm transient .colortheme_dialog
-    wm minsize .colortheme_dialog 400 380
+    wm minsize .colortheme_dialog 400 300
     if {$::windowingsystem eq "aqua"} {
         .colortheme_dialog configure -menu $::dialog_menubar
     }
     set themes [lsort [glob -path $::sys_guidir/themes/ *-plugin.tcl]]
 
-    ttk::frame     $mytoplevel.frame -padding 5
+    ttk::frame .colortheme_dialog.frame -padding 5
+    set ::ctdf .colortheme_dialog.frame
 
-    ttk::frame     .colortheme_dialog.theme_list
-    ttk::scrollbar .colortheme_dialog.theme_list.sy -command \
-        ".colortheme_dialog.theme_list.c yview"
-    canvas .colortheme_dialog.theme_list.c -yscrollcommand \
-        ".colortheme_dialog.theme_list.sy set" -width 400
+    ttk::frame     $::ctdf.theme_list -padding 5
+    ttk::scrollbar $::ctdf.theme_list.sy -command "$::ctdf.theme_list.c yview"
+    canvas         $::ctdf.theme_list.c -yscrollcommand \
+                   "$::ctdf.theme_list.sy set" -width 400
 
-    grid .colortheme_dialog.theme_list -sticky nwes -row 0 -column 0 \
-        -padx 5 -pady 5 -columnspan 3
-    grid .colortheme_dialog.theme_list.c -sticky ns -row 0 -column 0
-    grid .colortheme_dialog.theme_list.sy -sticky ns -row 0 -column 1
-    grid columnconfigure .colortheme_dialog.theme_list 0 -weight 1
-    grid rowconfigure    .colortheme_dialog.theme_list 0 -weight 1
-    grid rowconfigure    .colortheme_dialog 0 -weight 1
+    grid $::ctdf -row 0 -column 0 -sticky nwes
+    grid $::ctdf.theme_list -row 0 -column 0 -sticky nwes
+    grid $::ctdf.theme_list.c -sticky ns -row 0 -column 0
+    grid $::ctdf.theme_list.sy -sticky ns -row 0 -column 1
+    grid rowconfigure .colortheme_dialog 0 -weight 1 ;#makes sure that $::ctdf expands to fill window
+    grid rowconfigure $::ctdf 0 -weight 1
+    grid rowconfigure $::ctdf 1 -weight 1
+    grid rowconfigure $::ctdf.theme_list 0 -weight 1
 
     set height 5
     set fontinfo [list $::font_family -14 $::font_weight]
@@ -311,167 +310,176 @@ proc ::color-themes::opendialog {} {
     set corner [expr {$mheight/4}]
     set counter 0
     set names ""
+
     foreach i $themes {
         ::color-themes::reset_defaults
         source ${i}
         set name [{::color-themes::trimsubstringright} [file tail ${i}] -plugin.tcl]
         lappend names $name
         # canvas for txt_highlight
-        frame .colortheme_dialog.theme_list.c.f$counter
-        .colortheme_dialog.theme_list.c create rectangle  0 $height 400 \
+        ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " -padding 3
+
+        $::ctdf.theme_list.c create rectangle  0 $height 400 \
             [expr {$height + $boxheight}] -outline black -width 1 -tags \
             box$counter
-        .colortheme_dialog.theme_list.c create window  0 $height -window \
-            .colortheme_dialog.theme_list.c.f$counter -anchor nw -width \
+
+        $::ctdf.theme_list.c create window  0 $height -window \
+            $::ctdf.theme_list.c.f$counter -anchor nw -width \
             400 -height $boxheight
-        canvas .colortheme_dialog.theme_list.c.f$counter.c -width 400 -height \
+
+        canvas $::ctdf.theme_list.c.f$counter.c -width 400 -height \
             $boxheight -background $::pd_colors(canvas_fill) \
             -highlightthickness 0
-        grid .colortheme_dialog.theme_list.c.f$counter.c
-        bind .colortheme_dialog.theme_list.c.f$counter.c <MouseWheel> \
+
+        grid $::ctdf.theme_list.c.f$counter.c -padx 2 -pady 2
+        bind $::ctdf.theme_list.c.f$counter.c <MouseWheel> \
             [list {::color-themes::scroll} $counter %y %D $boxincr]
-        bind .colortheme_dialog.theme_list.c.f$counter.c <Motion> \
+        bind $::ctdf.theme_list.c.f$counter.c <Motion> \
             [list {::color-themes::motion} $counter]
-        bind .colortheme_dialog.theme_list.c.f$counter.c <ButtonPress> \
+        bind $::ctdf.theme_list.c.f$counter.c <ButtonPress> \
             [list {::color-themes::click} $counter]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle 0 0 \
-            400 $boxheight -outline black -width 1 -tags box$counter
+
+        # theme demo outline
+        # $::ctdf.theme_list.c.f$counter.c create rectangle 0 0 \
+        #     400 $boxheight -outline black -width 1 -tags box$counter
+
         # name
-        set twidth [expr {$mwidth * [string length $name] + 4}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle 2 0 \
-            [expr {2 + $twidth}] [expr {$mheight}] -fill black
-        .colortheme_dialog.theme_list.c.f$counter.c create text 4 3 \
-            -text ${name} -anchor nw -font $fontinfo -fill white
+        # set twidth [expr {$mwidth * [string length $name] + 4}]
+        # $::ctdf.theme_list.c.f$counter.c create rectangle 2 0 \
+        #     [expr {2 + $twidth}] [expr {$mheight}] -fill black
+        # $::ctdf.theme_list.c.f$counter.c create text 4 3 \
+        #     -text ${name} -anchor nw -font $fontinfo -fill white
+
         # (signal) object box
         set twidth [expr {$mwidth * 13 + 4}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle 5 \
+        $::ctdf.theme_list.c.f$counter.c create rectangle 5 \
             [expr {$mheight + 4}] [expr {$twidth + 5}] \
             [expr {$mheight*2 + 4}] -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(obj_box_outline)
-        .colortheme_dialog.theme_list.c.f$counter.c create text 7 \
+        $::ctdf.theme_list.c.f$counter.c create text 7 \
             [expr {$mheight + 7}] -text signal_object -anchor nw \
             -font $fontinfo -fill $::pd_colors(obj_box_text)
         # signal outlet + cable
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle 5 \
+        $::ctdf.theme_list.c.f$counter.c create rectangle 5 \
         [expr {$mheight*2 + 1}] 16 [expr {$mheight*2 + 4}] \
             -fill $::pd_colors(signal_iolet) -outline \
             $::pd_colors(signal_iolet_border)
-        .colortheme_dialog.theme_list.c.f$counter.c create line 11 \
+        $::ctdf.theme_list.c.f$counter.c create line 11 \
             [expr {$mheight*2 + 4}] 11 $boxheight \
             -fill $::pd_colors(signal_cord) -width 3
         # broken object
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             [expr {$twidth + 15}] \
             [expr {$mheight + 5}] [expr {$twidth*2 + 15}] \
             [expr {$mheight*2 + 5}] -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(obj_box_outline_broken) -dash -
-        .colortheme_dialog.theme_list.c.f$counter.c create text [expr {$twidth + 17}] \
+        $::ctdf.theme_list.c.f$counter.c create text [expr {$twidth + 17}] \
             [expr {$mheight + 8}] -text broken_object -anchor nw \
             -font $fontinfo -fill $::pd_colors(obj_box_text)
         # message box
         set twidth [expr {$mwidth * 11 + 4}]
         set tempy [expr {$mheight*2 + 8}]
         set tempx [expr {$twidth + 20}]
-        .colortheme_dialog.theme_list.c.f$counter.c create polygon 20 \
+        $::ctdf.theme_list.c.f$counter.c create polygon 20 \
             $tempy [expr {$tempx + $corner}] $tempy \
             $tempx [expr {$tempy + $corner}] $tempx \
             [expr {$tempy + $mheight - $corner}] \
             [expr {$tempx + $corner}] [expr {$tempy + $mheight}] \
             20 [expr {$tempy + $mheight}] -fill $::pd_colors(msg_box_fill) \
             -outline $::pd_colors(msg_box_outline)
-        .colortheme_dialog.theme_list.c.f$counter.c create text 22 \
+        $::ctdf.theme_list.c.f$counter.c create text 22 \
             [expr {$mheight*2 + 11}] -text message_box -anchor nw \
             -font $fontinfo -fill $::pd_colors(msg_box_text)
          # message outlet + cable
          set tempy [expr {$tempy + $mheight}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle 20 \
+        $::ctdf.theme_list.c.f$counter.c create rectangle 20 \
             [expr {$tempy - 3}] 31 $tempy -fill $::pd_colors(msg_iolet) \
             -outline $::pd_colors(msg_iolet_border)
-        .colortheme_dialog.theme_list.c.f$counter.c create line 26 \
+        $::ctdf.theme_list.c.f$counter.c create line 26 \
             $tempy 26 [expr {$boxheight + $height}] -fill \
             $::pd_colors(msg_cord) -width 2
         # atom box
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 15}] [expr {$mheight*2 + 14}] -text label \
             -anchor nw -font $fontinfo -fill $::pd_colors(atom_box_label)
         set twidth [expr {$mwidth * 5 + 4}]
         set tempx [expr {$tempx + $twidth + 14}]
         set tempy [expr {$mheight*2 + 12}]
-        .colortheme_dialog.theme_list.c.f$counter.c create polygon $tempx \
+        $::ctdf.theme_list.c.f$counter.c create polygon $tempx \
             $tempy [expr {$tempx + $twidth - $corner}] $tempy \
             [expr {$tempx + $twidth}] [expr {$tempy + $corner}] \
             [expr {$tempx + $twidth}] [expr {$tempy + $mheight}] \
             $tempx [expr {$tempy + $mheight}] -fill \
             $::pd_colors(atom_box_fill) -outline $::pd_colors(atom_box_outline)
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] [expr {$tempy + 3}] -text gatom -anchor nw \
             -font $fontinfo -fill $::pd_colors(atom_box_text)
         incr tempx [expr {$twidth + 15}]
         set twidth [expr {$mwidth * 8 + 4}]
         # selected box/text
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx $tempy [expr {$tempx + $twidth}] \
             [expr {$tempy + $mheight}] -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(selected)
         # can't figure out how to do text_highlight after all
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] [expr {$tempy + 3}] -text selected -anchor nw \
             -font $fontinfo -fill $::pd_colors(selected)
         # selection "lasso"
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             [expr {$tempx + 6}] [expr {$tempy - 7}] \
             [expr {$tempx + $twidth*0.98}] [expr {$tempy + $mheight*0.4}] \
             -outline $::pd_colors(selection_rectangle)
         # comment
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$mwidth * 26 + 31}] [expr {$mheight + 8}] -text comment \
             -anchor nw -font $fontinfo -fill $::pd_colors(comment)
         # array
         incr tempx [expr {$twidth + 6}]
         set tempy [expr {$mheight*3 + 12}]
         set twidth [expr {$mwidth * 5 + 4}]
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             $tempx 9 -text array \
             -anchor nw -font $fontinfo -fill $::pd_colors(array_name)
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx [expr {$mheight + 5}] [expr {$tempx + $twidth}] \
             $tempy -outline $::pd_colors(graph_outline)
         set tempy [expr {2*$mheight + 9}]
-        .colortheme_dialog.theme_list.c.f$counter.c create line \
+        $::ctdf.theme_list.c.f$counter.c create line \
             $tempx $tempy [expr {$tempx + $twidth}] \
             $tempy -fill $::pd_colors(array_values) -width 2
         # pd window/console
         incr tempx [expr {$twidth + 5}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx 0 [expr {$tempx + $twidth}] \
             $boxheight -fill $::pd_colors(pdwindow_fill)
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] 3 -text debug \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_debug_text)
         set tempy [expr {$mheight - 1}]
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text post \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_post_text)
         incr tempy [expr {$mheight - 4}]
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text error \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_error_text)
         incr tempy [expr {$mheight - 4}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             [expr {$tempx + 1}] $tempy [expr {$tempx + $twidth - 1}] \
             [expr {$tempy + $mheight - 4}] -fill \
             $::pd_colors(pdwindow_fatal_highlight) -outline \
             $::pd_colors(pdwindow_fatal_highlight)
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text fatal \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_fatal_text)
         # go back and make GOP
         set tempx [expr {$mwidth * 26 + 44}]
         set tempy [expr {4+$mheight}]
-        .colortheme_dialog.theme_list.c.f$counter.c create rectangle \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx 4 [expr {$tempx + $twidth}] \
             $tempy -outline $::pd_colors(graph_outline)
-        .colortheme_dialog.theme_list.c.f$counter.c create text \
+        $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] 7 -text GOP \
             -anchor nw -font $fontinfo -fill $::pd_colors(graph_text)
         incr height $boxincr
@@ -480,44 +488,50 @@ proc ::color-themes::opendialog {} {
 
     set canvas_height $height
     set num_themes $counter
-    .colortheme_dialog.theme_list.c configure -scrollregion \
-        [list 0 0 400 $height]
-    ttk::button .colortheme_dialog.apply -text [_ "Apply"] \
-         -command [list {::color-themes::apply} $names]
-    ttk::button .colortheme_dialog.close -text [_ "Close"] \
-         -command "destroy .colortheme_dialog"
-    ttk::button .colortheme_dialog.save -text [_ "Save Current"] \
-        -command {::color-themes::make_default}
-    grid .colortheme_dialog.apply -row 1 -column 0
-    grid .colortheme_dialog.close -row 1 -column 1
-    grid .colortheme_dialog.save -row 1 -column 2
-    grid columnconfigure .colortheme_dialog 0 -weight 1 -uniform a
-    grid columnconfigure .colortheme_dialog 1 -weight 1 -uniform a
-    grid columnconfigure .colortheme_dialog 2 -weight 1 -uniform a
+
+    $::ctdf.theme_list.c configure -scrollregion [list 0 0 400 $height]
+
+    # create and grid the buttons
+    ttk::frame $::ctdf.button_frame
+    ttk::button $::ctdf.button_frame.apply -text [_ "Apply"] \
+         -command [list {::color-themes::apply} $names] -width 5
+    ttk::button $::ctdf.button_frame.close -text [_ "Close"] \
+         -command "destroy $::ctdf" -width 5
+    ttk::button $::ctdf.button_frame.save -text [_ "Save Current"] \
+        -command {::color-themes::make_default} -width 12
+
+    grid $::ctdf.button_frame -row 1 -column 0 -padx 8 -sticky ws
+    grid $::ctdf.button_frame.apply -row 0 -column 0
+    grid $::ctdf.button_frame.close -row 0 -column 1
+    grid $::ctdf.button_frame.save -row 0 -column 2
+    grid rowconfigure $::ctdf.button_frame 0 -weight 1
+    grid rowconfigure $::ctdf.button_frame 1 -weight 1
+
     if {$::windowingsystem eq "aqua"} {
-        ttk::button .colortheme_dialog.dark -text [_ "Save as Dark Theme"] \
-            -command [list {::color-themes::save_dark} $names]
-        ttk::button .colortheme_dialog.undark -text [_ "Delete Dark Theme"] \
-            -command {::color-themes::delete_dark}
-        grid .colortheme_dialog.dark -row 2 -column 0 -pady 5
-        grid .colortheme_dialog.undark -row 2 -column 1 -pady 5
-        grid configure .colortheme_dialog.apply -pady 1
+        ttk::frame $::ctdf.button_frame.darkmode_buttons
+        ttk::button $::ctdf.button_frame.darkmode_buttons.dark -text [_ "Save as Dark Theme"] \
+            -command [list {::color-themes::save_dark} $names] -width 14
+        ttk::button $::ctdf.button_frame.darkmode_buttons.undark -text [_ "Delete Dark Theme"] \
+            -command {::color-themes::delete_dark} -width 13
+        grid $::ctdf.button_frame.darkmode_buttons -row 1 -column 0 -columnspan 3 -sticky ws -pady 2
+        grid $::ctdf.button_frame.darkmode_buttons.dark -row 0 -column 0
+        grid $::ctdf.button_frame.darkmode_buttons.undark -row 0 -column 1
     } else {
-        grid configure .colortheme_dialog.apply -pady 5
-        grid configure .colortheme_dialog.close -pady 5
-        grid configure .colortheme_dialog.save -pady 5
+        grid configure $::ctdf.button_frame.apply -pady 5
+        grid configure $::ctdf.button_frame.close -pady 5
+        grid configure $::ctdf.button_frame.save -pady 5
     }
-    bind .colortheme_dialog.theme_list.c <MouseWheel> {
-        .colortheme_dialog.theme_list.c yview scroll [expr {- (%D)}] units
+    bind $::ctdf.theme_list.c <MouseWheel> {
+        $::ctdf.theme_list.c yview scroll [expr {- (%D)}] units
     }
 
-    bind .colortheme_dialog.theme_list.c <Leave> {
+    bind $::ctdf.theme_list.c <Leave> {
         if {${::color-themes::hover_theme} ne "" && \
         ${::color-themes::selected_theme} ne ${::color-themes::hover_theme}} {
-            .colortheme_dialog.theme_list.c.f${::color-themes::hover_theme}.c \
+            $::ctdf.theme_list.c.f${::color-themes::hover_theme}.c \
                 itemconfigure box${::color-themes::hover_theme} -outline \
                 black -width 1
-            .colortheme_dialog.theme_list.c \
+            $::ctdf.theme_list.c \
                 itemconfigure box${::color-themes::hover_theme} -outline \
                 black -width 1
         }
