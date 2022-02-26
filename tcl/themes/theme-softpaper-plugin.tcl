@@ -6,7 +6,7 @@
 # msg_box_text - text in a message box
 # comment
 # selected - selection
-# obj_box_outline_broken - outline of "broken" object 
+# obj_box_outline_broken - outline of "broken" object
 #                          (that failed to create)
 # obj_box_outline
 # msg_box_outline
@@ -55,13 +55,13 @@ array set ::pd_colors {
     obj_box_fill 		     "#DCD6C5"
     atom_box_fill 		     "#DCD6C5"
 
-    obj_box_text 		     "#5F5F5E" 
+    obj_box_text 		     "#5F5F5E"
     msg_box_text 		     "#5F5F5E"
     atom_box_text 		     "#5F5F5E"
     pdwindow_post_text 	     "#5F5F5E"
     helpbrowser_text 	     "#5F5F5E"
     text_window_text 	     "#5F5F5E"
-    
+
     signal_cord 		     "#869438"
     signal_iolet 		     "#869438"
     signal_iolet_border      "#869438"

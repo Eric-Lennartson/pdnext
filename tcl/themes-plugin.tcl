@@ -20,52 +20,64 @@ proc ::color-themes::trimsubstringright {str substr} {
 
 proc ::color-themes::reset_defaults {} {
     array set ::pd_colors {
-        selected "#00f"
-        selection_rectangle "#000"
-        txt_highlight ""
-        txt_highlight_front ""
-        msg_iolet "#000"
-        msg_iolet_border "#000"
-        signal_iolet "#000"
-        signal_iolet_border "#000"
-        obj_box_outline "#000"
-        obj_box_fill ""
-        obj_box_text "#000"
-        msg_box_outline "#000"
-        msg_box_fill ""
-        msg_box_text "#000"
-        atom_box_outline "#000"
-        atom_box_focus_outline "#000"
-        atom_box_fill ""
-        atom_box_text "#000"
-        atom_box_label "#000"
-        msg_cord "#000"
-        signal_cord "#000"
-        obj_box_outline_broken "#000"
-        canvas_fill "#FFFFFF"
-        canvas_text_cursor ""
-        comment "#000"
-        graph_outline "#000"
-        graph_text "#000"
-        array_name "#000"
-        array_values "#000"
-        gop_box "#FF8080"
-        text_window_fill "#FFFFFF"
-        text_window_text "#000"
-        text_window_hl_text ""
-        text_window_highlight ""
-        text_window_cursor "#000"
-        pdwindow_fill "#FFFFFF"
-        pdwindow_fatal_text "#D00"
-        pdwindow_fatal_highlight "#FFE0E8"
-        pdwindow_error_text "#D00"
-        pdwindow_post_text "#000"
-        pdwindow_debug_text "#484848"
-        pdwindow_hl_text ""
-        helpbrowser_fill "#FFFFFF"
-        helpbrowser_text ""
-        helpbrowser_highlight ""
-        helpbrowser_hl_text ""
+        gop_box 		         "#AB6526"
+
+        atom_box_label 	 	     "#939e53"
+        comment 		         "#AAAAAA"
+
+        obj_box_outline 	     "#DCD6C5"
+        msg_box_outline 	     "#DCD6C5"
+        atom_box_outline 	     "#DCD6C5"
+        atom_box_focus_outline   "#AE7CCB"
+        msg_box_fill 		     "#DCD6C5"
+        obj_box_fill 		     "#DCD6C5"
+        atom_box_fill 		     "#DCD6C5"
+
+        obj_box_text 		     "#5F5F5E"
+        msg_box_text 		     "#5F5F5E"
+        atom_box_text 		     "#5F5F5E"
+        pdwindow_post_text 	     "#5F5F5E"
+        helpbrowser_text 	     "#5F5F5E"
+        text_window_text 	     "#5F5F5E"
+
+        signal_cord 		     "#869438"
+        signal_iolet 		     "#869438"
+        signal_iolet_border      "#869438"
+        msg_cord 		         "#AAAAAA"
+        msg_iolet 		         "#AAAAAA"
+        msg_iolet_border         "#AAAAAA"
+
+        graph_outline 		     "#5F5F5E"
+        graph_text 		         "#5F5F5E"
+        array_name 		         "#5F5F5E"
+        array_values 		     "#9C5FBF"
+
+        canvas_fill 		     "#F3F1EB"
+        pdwindow_fill 		     "#F3F1EB"
+        text_window_fill 	     "#F3F1EB"
+        helpbrowser_fill 	     "#F3F1EB"
+
+        obj_box_outline_broken   "#FF4747"
+        pdwindow_fatal_text 	 "#FF4747"
+        pdwindow_error_text 	 "#FF4747"
+        pdwindow_fatal_highlight "#F3F1EB"
+        pdwindow_debug_text 	 "#205988"
+
+        helpbrowser_highlight 	 "#c2baa1"
+        helpbrowser_hl_text      "#AE7CCB"
+        selection_rectangle      "#9C5FBF"
+        selected 		         "#AE7CCB"
+        txt_highlight_front      "#AE7CCB"
+        text_window_highlight    "#AAAAAA"
+        text_window_hl_text      "#AE7CCB"
+        txt_highlight 		     "#AAAAAA"
+
+        text_window_cursor 	     "#2B2B2B"
+        canvas_text_cursor 	     "#2B2B2B"
+        cursor                   "#2B2B2B"
+
+        scrollbox_fill           "#DCD6C5"
+        text                     "#5F5F5E"
     }
 }
 
@@ -261,6 +273,8 @@ proc ::color-themes::opendialog {} {
         focus .colortheme_dialog
         return
     }
+
+    # change this to mytoplevel
     toplevel .colortheme_dialog -class ColorThemeDialog
     wm title .colortheme_dialog [_ "Color Themes"]
     wm group .colortheme_dialog .
@@ -271,8 +285,11 @@ proc ::color-themes::opendialog {} {
         .colortheme_dialog configure -menu $::dialog_menubar
     }
     set themes [lsort [glob -path $::sys_guidir/themes/ *-plugin.tcl]]
-    frame .colortheme_dialog.theme_list
-    scrollbar .colortheme_dialog.theme_list.sy -command \
+
+    ttk::frame     $mytoplevel.frame -padding 5
+
+    ttk::frame     .colortheme_dialog.theme_list
+    ttk::scrollbar .colortheme_dialog.theme_list.sy -command \
         ".colortheme_dialog.theme_list.c yview"
     canvas .colortheme_dialog.theme_list.c -yscrollcommand \
         ".colortheme_dialog.theme_list.sy set" -width 400
@@ -282,9 +299,8 @@ proc ::color-themes::opendialog {} {
     grid .colortheme_dialog.theme_list.c -sticky ns -row 0 -column 0
     grid .colortheme_dialog.theme_list.sy -sticky ns -row 0 -column 1
     grid columnconfigure .colortheme_dialog.theme_list 0 -weight 1
-    grid rowconfigure .colortheme_dialog.theme_list 0 -weight 1
-
-    grid rowconfigure .colortheme_dialog 0 -weight 1
+    grid rowconfigure    .colortheme_dialog.theme_list 0 -weight 1
+    grid rowconfigure    .colortheme_dialog 0 -weight 1
 
     set height 5
     set fontinfo [list $::font_family -14 $::font_weight]
@@ -460,17 +476,17 @@ proc ::color-themes::opendialog {} {
             -anchor nw -font $fontinfo -fill $::pd_colors(graph_text)
         incr height $boxincr
         incr counter
-
     }
+
     set canvas_height $height
     set num_themes $counter
     .colortheme_dialog.theme_list.c configure -scrollregion \
         [list 0 0 400 $height]
-    button .colortheme_dialog.apply -text [_ "Apply"] \
+    ttk::button .colortheme_dialog.apply -text [_ "Apply"] \
          -command [list {::color-themes::apply} $names]
-    button .colortheme_dialog.close -text [_ "Close"] \
+    ttk::button .colortheme_dialog.close -text [_ "Close"] \
          -command "destroy .colortheme_dialog"
-    button .colortheme_dialog.save -text [_ "Save Current"] \
+    ttk::button .colortheme_dialog.save -text [_ "Save Current"] \
         -command {::color-themes::make_default}
     grid .colortheme_dialog.apply -row 1 -column 0
     grid .colortheme_dialog.close -row 1 -column 1
@@ -479,9 +495,9 @@ proc ::color-themes::opendialog {} {
     grid columnconfigure .colortheme_dialog 1 -weight 1 -uniform a
     grid columnconfigure .colortheme_dialog 2 -weight 1 -uniform a
     if {$::windowingsystem eq "aqua"} {
-        button .colortheme_dialog.dark -text [_ "Save as Dark Theme"] \
+        ttk::button .colortheme_dialog.dark -text [_ "Save as Dark Theme"] \
             -command [list {::color-themes::save_dark} $names]
-        button .colortheme_dialog.undark -text [_ "Delete Dark Theme"] \
+        ttk::button .colortheme_dialog.undark -text [_ "Delete Dark Theme"] \
             -command {::color-themes::delete_dark}
         grid .colortheme_dialog.dark -row 2 -column 0 -pady 5
         grid .colortheme_dialog.undark -row 2 -column 1 -pady 5

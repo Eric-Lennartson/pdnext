@@ -1,4 +1,5 @@
 ==== Todo =================================================================
+- make themes dialog look better
 - graph on parent and abstractions need rounded corners
 - pdwindow needs some help
 - it's ugly to have two theme tabs in preferences
