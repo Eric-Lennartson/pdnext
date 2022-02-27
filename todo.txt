@@ -1,8 +1,11 @@
 ==== Todo =================================================================
 - make themes dialog look better
   - change hover highlight to alter labelframe color instead
+  - labelframe padding is a fucking bitch, maybe it's easier to dynamically change the canvas background color?
+  - maybe have labelframes match up with the themes they're drawing...
   - figure out a way to make the containing canvas look less weird
-  - reposition the membders of the theme demo at some point
+  - reposition the members of the theme demo at some point
+  - labelframe needs to be bound to scrolling as well
 - decide what to do about pd dialog theming vs. pd patch theming
 - graph on parent and abstractions need rounded corners
 - pdwindow needs some help

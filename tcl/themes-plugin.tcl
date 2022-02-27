@@ -294,7 +294,7 @@ proc ::color-themes::opendialog {} {
 
     grid $::ctdf -row 0 -column 0 -sticky nwes
     grid $::ctdf.theme_list -row 0 -column 0 -sticky nwes
-    grid $::ctdf.theme_list.c -sticky ns -row 0 -column 0
+    grid $::ctdf.theme_list.c -sticky ns -row 0 -column 0 -padx 5 -pady 2 -ipady 20;#ipadx 20
     grid $::ctdf.theme_list.sy -sticky ns -row 0 -column 1
     grid rowconfigure .colortheme_dialog 0 -weight 1 ;#makes sure that $::ctdf expands to fill window
     grid rowconfigure $::ctdf 0 -weight 1
@@ -317,21 +317,25 @@ proc ::color-themes::opendialog {} {
         set name [{::color-themes::trimsubstringright} [file tail ${i}] -plugin.tcl]
         lappend names $name
         # canvas for txt_highlight
-        ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " -padding 3
+        ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " -padding "2 1"
+        $::ctdf.theme_list.c.f$counter configure -style s.TLabelframe
 
-        $::ctdf.theme_list.c create rectangle  0 $height 400 \
-            [expr {$height + $boxheight}] -outline black -width 1 -tags \
-            box$counter
+        # $::ctdf.theme_list.c create rectangle  0 $height 400 \
+        #     [expr {$height + $boxheight}] -outline black -width 1 -tags \
+        #     box$counter
 
-        $::ctdf.theme_list.c create window  0 $height -window \
+        # this puts the labelframe in the canvas
+        $::ctdf.theme_list.c create window 0 $height -window \
             $::ctdf.theme_list.c.f$counter -anchor nw -width \
             400 -height $boxheight
 
-        canvas $::ctdf.theme_list.c.f$counter.c -width 400 -height \
-            $boxheight -background $::pd_colors(canvas_fill) \
+        # then we put a canvas in that window
+        # this canvas draws the example theme
+        canvas $::ctdf.theme_list.c.f$counter.c -width 392 -height \
+            [expr $boxheight-20] -background $::pd_colors(canvas_fill) \
             -highlightthickness 0
 
-        grid $::ctdf.theme_list.c.f$counter.c -padx 2 -pady 2
+        grid $::ctdf.theme_list.c.f$counter.c
         bind $::ctdf.theme_list.c.f$counter.c <MouseWheel> \
             [list {::color-themes::scroll} $counter %y %D $boxincr]
         bind $::ctdf.theme_list.c.f$counter.c <Motion> \
@@ -352,12 +356,12 @@ proc ::color-themes::opendialog {} {
 
         # (signal) object box
         set twidth [expr {$mwidth * 13 + 4}]
-        $::ctdf.theme_list.c.f$counter.c create rectangle 5 \
-            [expr {$mheight + 4}] [expr {$twidth + 5}] \
-            [expr {$mheight*2 + 4}] -fill $::pd_colors(obj_box_fill) \
-            -outline $::pd_colors(obj_box_outline)
-        $::ctdf.theme_list.c.f$counter.c create text 7 \
-            [expr {$mheight + 7}] -text signal_object -anchor nw \
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
+            5 5 \
+            [expr {$twidth + 5}] [expr {$mheight+5}] \
+            -fill $::pd_colors(obj_box_fill) -outline $::pd_colors(obj_box_outline)
+        $::ctdf.theme_list.c.f$counter.c create text 7 8\
+            -text signal_object -anchor nw \
             -font $fontinfo -fill $::pd_colors(obj_box_text)
         # signal outlet + cable
         $::ctdf.theme_list.c.f$counter.c create rectangle 5 \
