@@ -357,64 +357,82 @@ proc ::color-themes::opendialog {} {
         # (signal) object box
         set twidth [expr {$mwidth * 13 + 4}]
         $::ctdf.theme_list.c.f$counter.c create rectangle \
-            5 5 \
+            3 5 \
             [expr {$twidth + 5}] [expr {$mheight+5}] \
             -fill $::pd_colors(obj_box_fill) -outline $::pd_colors(obj_box_outline)
-        $::ctdf.theme_list.c.f$counter.c create text 7 8\
+        # (signal) object text
+        $::ctdf.theme_list.c.f$counter.c create text 5 8\
             -text signal_object -anchor nw \
             -font $fontinfo -fill $::pd_colors(obj_box_text)
-        # signal outlet + cable
-        $::ctdf.theme_list.c.f$counter.c create rectangle 5 \
-        [expr {$mheight*2 + 1}] 16 [expr {$mheight*2 + 4}] \
+        # signal outlet
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
+            3 [expr {$mheight+1}] \
+            16 [expr {$mheight+5}] \
             -fill $::pd_colors(signal_iolet) -outline \
             $::pd_colors(signal_iolet_border)
-        $::ctdf.theme_list.c.f$counter.c create line 11 \
-            [expr {$mheight*2 + 4}] 11 $boxheight \
+        # signal cable
+        $::ctdf.theme_list.c.f$counter.c create line \
+            8 [expr {$mheight+5}] \
+            8 $boxheight \
             -fill $::pd_colors(signal_cord) -width 3
         # broken object
         $::ctdf.theme_list.c.f$counter.c create rectangle \
-            [expr {$twidth + 15}] \
-            [expr {$mheight + 5}] [expr {$twidth*2 + 15}] \
-            [expr {$mheight*2 + 5}] -fill $::pd_colors(obj_box_fill) \
+            [expr {$twidth + 9}] 5 \
+            [expr {$twidth*2 + 11}] [expr {$mheight+5}] \
+            -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(obj_box_outline_broken) -dash -
-        $::ctdf.theme_list.c.f$counter.c create text [expr {$twidth + 17}] \
-            [expr {$mheight + 8}] -text broken_object -anchor nw \
+        # broken object text
+        $::ctdf.theme_list.c.f$counter.c create text \
+            [expr {$twidth + 11}] 9 \
+            -text broken_object -anchor nw \
             -font $fontinfo -fill $::pd_colors(obj_box_text)
         # message box
         set twidth [expr {$mwidth * 11 + 4}]
-        set tempy [expr {$mheight*2 + 8}]
-        set tempx [expr {$twidth + 20}]
-        $::ctdf.theme_list.c.f$counter.c create polygon 20 \
-            $tempy [expr {$tempx + $corner}] $tempy \
-            $tempx [expr {$tempy + $corner}] $tempx \
-            [expr {$tempy + $mheight - $corner}] \
+        set tempy [expr {$mheight+10}]
+        set tempx [expr {$twidth + 16}]
+        $::ctdf.theme_list.c.f$counter.c create polygon \
+            14 $tempy \
+            [expr {$tempx + $corner}] $tempy \
+            $tempx [expr {$tempy + $corner}] \
+            $tempx [expr {$tempy + $mheight - $corner}] \
             [expr {$tempx + $corner}] [expr {$tempy + $mheight}] \
-            20 [expr {$tempy + $mheight}] -fill $::pd_colors(msg_box_fill) \
-            -outline $::pd_colors(msg_box_outline)
-        $::ctdf.theme_list.c.f$counter.c create text 22 \
-            [expr {$mheight*2 + 11}] -text message_box -anchor nw \
-            -font $fontinfo -fill $::pd_colors(msg_box_text)
-         # message outlet + cable
-         set tempy [expr {$tempy + $mheight}]
-        $::ctdf.theme_list.c.f$counter.c create rectangle 20 \
-            [expr {$tempy - 3}] 31 $tempy -fill $::pd_colors(msg_iolet) \
-            -outline $::pd_colors(msg_iolet_border)
-        $::ctdf.theme_list.c.f$counter.c create line 26 \
-            $tempy 26 [expr {$boxheight + $height}] -fill \
-            $::pd_colors(msg_cord) -width 2
-        # atom box
+            14 [expr {$tempy + $mheight}] \
+            -fill $::pd_colors(msg_box_fill) -outline $::pd_colors(msg_box_outline)
+        # message box text
         $::ctdf.theme_list.c.f$counter.c create text \
-            [expr {$tempx + 15}] [expr {$mheight*2 + 14}] -text label \
-            -anchor nw -font $fontinfo -fill $::pd_colors(atom_box_label)
+            17 [expr {$mheight+13}] \
+            -text message_box -anchor nw \
+            -font $fontinfo -fill $::pd_colors(msg_box_text)
+        # message outlet
+        set tempy [expr {$tempy + $mheight}]
+        $::ctdf.theme_list.c.f$counter.c create rectangle \
+            14 [expr {$tempy - 3}] \
+            25 $tempy \
+            -fill $::pd_colors(msg_iolet) \
+            -outline $::pd_colors(msg_iolet_border)
+        # message cable
+        $::ctdf.theme_list.c.f$counter.c create line \
+            20 $tempy \
+            20 [expr {$boxheight + $height}] \
+            -fill $::pd_colors(msg_cord) -width 2
+        # atom box label
+        $::ctdf.theme_list.c.f$counter.c create text \
+            [expr {$tempx + 8}] [expr {$mheight+13}] \
+            -text label -anchor nw -font $fontinfo \
+            -fill $::pd_colors(atom_box_label)
+        # atom box
         set twidth [expr {$mwidth * 5 + 4}]
-        set tempx [expr {$tempx + $twidth + 14}]
-        set tempy [expr {$mheight*2 + 12}]
-        $::ctdf.theme_list.c.f$counter.c create polygon $tempx \
-            $tempy [expr {$tempx + $twidth - $corner}] $tempy \
+        set tempx [expr {$tempx + $twidth + 7}]
+        set tempy [expr {$mheight+10}]
+        $::ctdf.theme_list.c.f$counter.c create polygon \
+            $tempx $tempy \
+            [expr {$tempx + $twidth - $corner}] $tempy \
             [expr {$tempx + $twidth}] [expr {$tempy + $corner}] \
             [expr {$tempx + $twidth}] [expr {$tempy + $mheight}] \
-            $tempx [expr {$tempy + $mheight}] -fill \
-            $::pd_colors(atom_box_fill) -outline $::pd_colors(atom_box_outline)
+            $tempx [expr {$tempy + $mheight}] \
+            -fill $::pd_colors(atom_box_fill) \
+            -outline $::pd_colors(atom_box_outline)
+        # atom box text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] [expr {$tempy + 3}] -text gatom -anchor nw \
             -font $fontinfo -fill $::pd_colors(atom_box_text)
@@ -425,7 +443,7 @@ proc ::color-themes::opendialog {} {
             $tempx $tempy [expr {$tempx + $twidth}] \
             [expr {$tempy + $mheight}] -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(selected)
-        # can't figure out how to do text_highlight after all
+        # selected text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] [expr {$tempy + 3}] -text selected -anchor nw \
             -font $fontinfo -fill $::pd_colors(selected)
