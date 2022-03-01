@@ -305,7 +305,7 @@ proc ::color-themes::opendialog {} {
     set fontinfo [list $::font_family -14 $::font_weight]
     set mwidth [font measure $fontinfo M]
     set mheight [expr {[font metrics $fontinfo -linespace] + 5}]
-    set boxheight [expr {$mheight * 3 + 18}]
+    set boxheight [expr {$mheight * 4 + 12}] ;# height of theme demo
     set boxincr [expr {$boxheight + 5}]
     set corner [expr {$mheight/4}]
     set counter 0
@@ -318,7 +318,6 @@ proc ::color-themes::opendialog {} {
         lappend names $name
         # canvas for txt_highlight
         ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " -padding "2 1"
-        $::ctdf.theme_list.c.f$counter configure -style s.TLabelframe
 
         # $::ctdf.theme_list.c create rectangle  0 $height 400 \
         #     [expr {$height + $boxheight}] -outline black -width 1 -tags \
@@ -438,23 +437,23 @@ proc ::color-themes::opendialog {} {
             -font $fontinfo -fill $::pd_colors(atom_box_text)
         incr tempx [expr {$twidth + 15}]
         set twidth [expr {$mwidth * 8 + 4}]
-        # selected box/text
+        # selected box
         $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx $tempy [expr {$tempx + $twidth}] \
             [expr {$tempy + $mheight}] -fill $::pd_colors(obj_box_fill) \
             -outline $::pd_colors(selected)
-        # selected text
+        # selected box text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] [expr {$tempy + 3}] -text selected -anchor nw \
             -font $fontinfo -fill $::pd_colors(selected)
         # selection "lasso"
         $::ctdf.theme_list.c.f$counter.c create rectangle \
-            [expr {$tempx + 6}] [expr {$tempy - 7}] \
-            [expr {$tempx + $twidth*0.98}] [expr {$tempy + $mheight*0.4}] \
+            [expr {$tempx - 6}] [expr {$tempy + 10}] \
+            [expr {$tempx + $twidth*0.8}] [expr {$tempy + $mheight + 6}] \
             -outline $::pd_colors(selection_rectangle)
         # comment
         $::ctdf.theme_list.c.f$counter.c create text \
-            [expr {$mwidth * 26 + 31}] [expr {$mheight + 8}] -text comment \
+            [expr {$mwidth * 15}] [expr {$mheight + 35}] -text comment \
             -anchor nw -font $fontinfo -fill $::pd_colors(comment)
         # array
         incr tempx [expr {$twidth + 6}]
@@ -472,37 +471,45 @@ proc ::color-themes::opendialog {} {
             $tempy -fill $::pd_colors(array_values) -width 2
         # pd window/console
         incr tempx [expr {$twidth + 5}]
+        # console fill
         $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx 0 [expr {$tempx + $twidth}] \
             $boxheight -fill $::pd_colors(pdwindow_fill)
+        # debug text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] 3 -text debug \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_debug_text)
         set tempy [expr {$mheight - 1}]
+        # post text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text post \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_post_text)
         incr tempy [expr {$mheight - 4}]
+        # error text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text error \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_error_text)
         incr tempy [expr {$mheight - 4}]
+        # fatal text highlight
         $::ctdf.theme_list.c.f$counter.c create rectangle \
             [expr {$tempx + 1}] $tempy [expr {$tempx + $twidth - 1}] \
             [expr {$tempy + $mheight - 4}] -fill \
             $::pd_colors(pdwindow_fatal_highlight) -outline \
             $::pd_colors(pdwindow_fatal_highlight)
+        # fatal text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] $tempy -text fatal \
             -anchor nw -font $fontinfo -fill $::pd_colors(pdwindow_fatal_text)
         # go back and make GOP
-        set tempx [expr {$mwidth * 26 + 44}]
-        set tempy [expr {4+$mheight}]
+        set tempx [expr {$mwidth * 26 + 30}]
+        set tempy [expr {3+$mheight}]
+        # gop box
         $::ctdf.theme_list.c.f$counter.c create rectangle \
-            $tempx 4 [expr {$tempx + $twidth}] \
+            $tempx 5 [expr {$tempx + $twidth}] \
             $tempy -outline $::pd_colors(graph_outline)
+        # gop text
         $::ctdf.theme_list.c.f$counter.c create text \
-            [expr {$tempx + 2}] 7 -text GOP \
+            [expr {$tempx + 2}] 8 -text GOP \
             -anchor nw -font $fontinfo -fill $::pd_colors(graph_text)
         incr height $boxincr
         incr counter
