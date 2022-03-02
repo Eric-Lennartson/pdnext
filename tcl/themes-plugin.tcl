@@ -291,14 +291,16 @@ proc ::color-themes::opendialog {} {
     ttk::frame     $::ctdf.theme_list -padding 5
     ttk::scrollbar $::ctdf.theme_list.sy -command "$::ctdf.theme_list.c yview"
     canvas         $::ctdf.theme_list.c -yscrollcommand \
-                   "$::ctdf.theme_list.sy set" -width 400
+                   "$::ctdf.theme_list.sy set" -width 400 \
+                   -bd 0 -highlightthickness 5 -highlightbackground "#DCD6C5" \
+                   -background "#DCD6C5"
 
     # 1 for light, 0 for dark, LATER REMOVE THIS
-    if { $::themeState == 0 } {
-        $::ctdf.theme_list.c configure -background "red" -highlightcolor "purple"
-    } else {
-        $::ctdf.theme_list.c configure -background "blue" -bd 0
-    }
+    # if { $::themeState == 0 } {
+    #     $::ctdf.theme_list.c configure -background "red" -highlightcolor "purple"
+    # } else {
+    #     $::ctdf.theme_list.c configure -background "blue" -bd 0
+    # }
 
     grid $::ctdf -row 0 -column 0 -sticky nwes
     grid $::ctdf.theme_list -row 0 -column 0 -sticky nwes
