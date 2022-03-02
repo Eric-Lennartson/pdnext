@@ -173,6 +173,7 @@ proc ::color-themes::print {} {
     }
 }
 
+# adjust hover color here
 proc ::color-themes::motion {box} {
     #::pdwindow::post "box: $box\n"
     if {$box ne ${::color-themes::hover_theme}} {
@@ -292,9 +293,16 @@ proc ::color-themes::opendialog {} {
     canvas         $::ctdf.theme_list.c -yscrollcommand \
                    "$::ctdf.theme_list.sy set" -width 400
 
+    # 1 for light, 0 for dark, LATER REMOVE THIS
+    if { $::themeState == 0 } {
+        $::ctdf.theme_list.c configure -background "red" -highlightcolor "purple"
+    } else {
+        $::ctdf.theme_list.c configure -background "blue" -bd 0
+    }
+
     grid $::ctdf -row 0 -column 0 -sticky nwes
     grid $::ctdf.theme_list -row 0 -column 0 -sticky nwes
-    grid $::ctdf.theme_list.c -sticky ns -row 0 -column 0 -padx 5 -pady 2 -ipady 20;#ipadx 20
+    grid $::ctdf.theme_list.c -sticky nwes -row 0 -column 0
     grid $::ctdf.theme_list.sy -sticky ns -row 0 -column 1
     grid rowconfigure .colortheme_dialog 0 -weight 1 ;#makes sure that $::ctdf expands to fill window
     grid rowconfigure $::ctdf 0 -weight 1
@@ -335,6 +343,8 @@ proc ::color-themes::opendialog {} {
             -highlightthickness 0
 
         grid $::ctdf.theme_list.c.f$counter.c
+        bind $::ctdf.theme_list.c.f$counter <MouseWheel> \
+            [list {::color-themes::scroll} $counter %y %D $boxincr]
         bind $::ctdf.theme_list.c.f$counter.c <MouseWheel> \
             [list {::color-themes::scroll} $counter %y %D $boxincr]
         bind $::ctdf.theme_list.c.f$counter.c <Motion> \
