@@ -175,23 +175,26 @@ proc ::color-themes::print {} {
 
 # adjust hover color here
 proc ::color-themes::motion {box} {
-    #::pdwindow::post "box: $box\n"
+    # ::pdwindow::post "box: $box\n"
     if {$box ne ${::color-themes::hover_theme}} {
         if {${::color-themes::hover_theme} ne "" && \
-        ${::color-themes::hover_theme} ne \
-        ${::color-themes::selected_theme} } {
-            $::ctdf.theme_list.c.f${::color-themes::hover_theme}.c \
-                itemconfigure box${::color-themes::hover_theme} -outline \
-                black -width 1
-            $::ctdf.theme_list.c \
-                itemconfigure box${::color-themes::hover_theme} -outline \
-                black -width 1
+            ${::color-themes::hover_theme} ne \
+            ${::color-themes::selected_theme} } {
+                # ::pdwindow::post "hovering over?\n"
+
+                $::ctdf.theme_list.c.f${::color-themes::hover_theme}.c \
+                    itemconfigure box${::color-themes::hover_theme} -outline \
+                    black -width 1
+                $::ctdf.theme_list.c \
+                    itemconfigure box${::color-themes::hover_theme} -outline \
+                    black -width 1
         }
         if {$box ne ${::color-themes::selected_theme}} {
-            $::ctdf.theme_list.c.f$box.c itemconfigure \
-                box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
-            $::ctdf.theme_list.c itemconfigure \
-                box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
+            ttk::style configure hover.TLabelframe \
+                -bordercolor "blue" -lightcolor "blue" -darkcolor "blue"
+            $::ctdf.theme_list.c.f$box configure -style hover.TLabelframe
+            # $::ctdf.theme_list.c.f$box.c itemconfigure \
+            #     box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
         }
         set {::color-themes::hover_theme} $box
     }
@@ -199,23 +202,27 @@ proc ::color-themes::motion {box} {
 
 proc ::color-themes::click {box} {
     if {${::color-themes::selected_theme} ne "" && \
-    ${::color-themes::selected_theme} ne $box} {
-        $::ctdf.theme_list.c.f${::color-themes::selected_theme}.c \
-            itemconfigure box${::color-themes::selected_theme} -outline \
-            black -width 1
-        $::ctdf.theme_list.c \
-            itemconfigure box${::color-themes::selected_theme} -outline \
-            black -width 1
+        ${::color-themes::selected_theme} ne $box} {
+            $::ctdf.theme_list.c.f${::color-themes::selected_theme}.c \
+                itemconfigure box${::color-themes::selected_theme} -outline \
+                black -width 1
+            $::ctdf.theme_list.c \
+                itemconfigure box${::color-themes::selected_theme} -outline \
+                black -width 1
     }
     set {::color-themes::hover_theme} $box
     set {::color-themes::selected_theme} $box
 
-    $::ctdf.theme_list.c.f$box.c itemconfigure \
-        box${::color-themes::hover_theme} -outline \
-        [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
-    $::ctdf.theme_list.c itemconfigure \
-        box${::color-themes::hover_theme} -outline \
-        [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
+    ttk::style configure selected.TLabelframe \
+        -bordercolor "red" -lightcolor "red" -darkcolor "red"
+    $::ctdf.theme_list.c.f$box configure -style selected.TLabelframe
+
+    # $::ctdf.theme_list.c.f$box.c itemconfigure \
+    #     box${::color-themes::hover_theme} -outline \
+    #     [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
+    # $::ctdf.theme_list.c itemconfigure \
+    #     box${::color-themes::hover_theme} -outline \
+    #     [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
 }
 
 proc ::color-themes::scroll {box coord units boxincr} {
@@ -292,8 +299,8 @@ proc ::color-themes::opendialog {} {
     ttk::scrollbar $::ctdf.theme_list.sy -command "$::ctdf.theme_list.c yview"
     canvas         $::ctdf.theme_list.c -yscrollcommand \
                    "$::ctdf.theme_list.sy set" -width 400 \
-                   -bd 0 -highlightthickness 5 -highlightbackground "#DCD6C5" \
-                   -background "#DCD6C5"
+                   -bd 0 -highlightthickness 5 -highlightbackground "#E8E4D9" \
+                   -background "#E8E4D9"
 
     # 1 for light, 0 for dark, LATER REMOVE THIS
     # if { $::themeState == 0 } {
@@ -326,12 +333,20 @@ proc ::color-themes::opendialog {} {
         source ${i}
         set name [{::color-themes::trimsubstringright} [file tail ${i}] -plugin.tcl]
         lappend names $name
-        # canvas for txt_highlight
-        ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " -padding "2 1"
 
-        # $::ctdf.theme_list.c create rectangle  0 $height 400 \
-        #     [expr {$height + $boxheight}] -outline black -width 1 -tags \
-        #     box$counter
+        ttk::style configure $name.TLabelframe \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -bordercolor [::pdtk_canvas::get_color gop_box .colortheme_dialog] \
+            -lightcolor [::pdtk_canvas::get_color gop_box .colortheme_dialog] \
+            -darkcolor [::pdtk_canvas::get_color gop_box .colortheme_dialog]
+        ttk::style configure $name.TLabelframe.Label \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+
+        # canvas for txt_highlight
+        ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " \
+            -padding "2 1" -style $name.TLabelframe
+
 
         # this puts the labelframe in the canvas
         $::ctdf.theme_list.c create window 0 $height -window \
@@ -353,17 +368,6 @@ proc ::color-themes::opendialog {} {
             [list {::color-themes::motion} $counter]
         bind $::ctdf.theme_list.c.f$counter.c <ButtonPress> \
             [list {::color-themes::click} $counter]
-
-        # theme demo outline
-        # $::ctdf.theme_list.c.f$counter.c create rectangle 0 0 \
-        #     400 $boxheight -outline black -width 1 -tags box$counter
-
-        # name
-        # set twidth [expr {$mwidth * [string length $name] + 4}]
-        # $::ctdf.theme_list.c.f$counter.c create rectangle 2 0 \
-        #     [expr {2 + $twidth}] [expr {$mheight}] -fill black
-        # $::ctdf.theme_list.c.f$counter.c create text 4 3 \
-        #     -text ${name} -anchor nw -font $fontinfo -fill white
 
         # (signal) object box
         set twidth [expr {$mwidth * 13 + 4}]
