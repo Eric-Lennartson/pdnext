@@ -190,17 +190,14 @@ proc ::color-themes::motion {box} {
                     black -width 1
         }
         if {$box ne ${::color-themes::selected_theme}} {
-            ttk::style configure hover.TLabelframe \
-                -bordercolor "blue" -lightcolor "blue" -darkcolor "blue"
-            $::ctdf.theme_list.c.f$box configure -style hover.TLabelframe
-            # $::ctdf.theme_list.c.f$box.c itemconfigure \
-            #     box$box -outline [::pdtk_canvas::get_color selected .colortheme_dialog] -width 7
+            $::ctdf.theme_list.c.f$box configure -style ${box}_hover.TLabelframe
         }
         set {::color-themes::hover_theme} $box
     }
 }
 
 proc ::color-themes::click {box} {
+    ::pdwindow::post "clicked on: ${::color-themes::selected_theme}\n"
     if {${::color-themes::selected_theme} ne "" && \
         ${::color-themes::selected_theme} ne $box} {
             $::ctdf.theme_list.c.f${::color-themes::selected_theme}.c \
@@ -213,16 +210,7 @@ proc ::color-themes::click {box} {
     set {::color-themes::hover_theme} $box
     set {::color-themes::selected_theme} $box
 
-    ttk::style configure selected.TLabelframe \
-        -bordercolor "red" -lightcolor "red" -darkcolor "red"
-    $::ctdf.theme_list.c.f$box configure -style selected.TLabelframe
-
-    # $::ctdf.theme_list.c.f$box.c itemconfigure \
-    #     box${::color-themes::hover_theme} -outline \
-    #     [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
-    # $::ctdf.theme_list.c itemconfigure \
-    #     box${::color-themes::hover_theme} -outline \
-    #     [::pdtk_canvas::get_color gop_box .colortheme_dialog] -width 7
+    $::ctdf.theme_list.c.f$box configure -style ${box}_selected.TLabelframe
 }
 
 proc ::color-themes::scroll {box coord units boxincr} {
@@ -284,9 +272,9 @@ proc ::color-themes::opendialog {} {
     toplevel .colortheme_dialog -class ColorThemeDialog
     wm title .colortheme_dialog [_ "Themes"]
     wm group .colortheme_dialog .
-    wm resizable .colortheme_dialog 0 1
+    wm resizable .colortheme_dialog 0 0
     wm transient .colortheme_dialog
-    wm minsize .colortheme_dialog 400 300
+    wm minsize .colortheme_dialog 400 410
     if {$::windowingsystem eq "aqua"} {
         .colortheme_dialog configure -menu $::dialog_menubar
     }
@@ -298,7 +286,7 @@ proc ::color-themes::opendialog {} {
     ttk::frame     $::ctdf.theme_list -padding 5
     ttk::scrollbar $::ctdf.theme_list.sy -command "$::ctdf.theme_list.c yview"
     canvas         $::ctdf.theme_list.c -yscrollcommand \
-                   "$::ctdf.theme_list.sy set" -width 400 \
+                   "$::ctdf.theme_list.sy set" -width 400 -height 330\
                    -bd 0 -highlightthickness 5 -highlightbackground "#E8E4D9" \
                    -background "#E8E4D9"
 
@@ -334,19 +322,35 @@ proc ::color-themes::opendialog {} {
         set name [{::color-themes::trimsubstringright} [file tail ${i}] -plugin.tcl]
         lappend names $name
 
-        ttk::style configure $name.TLabelframe \
+        # normal labelframe
+        ttk::style configure $counter.TLabelframe \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
             -bordercolor [::pdtk_canvas::get_color gop_box .colortheme_dialog] \
             -lightcolor [::pdtk_canvas::get_color gop_box .colortheme_dialog] \
             -darkcolor [::pdtk_canvas::get_color gop_box .colortheme_dialog]
-        ttk::style configure $name.TLabelframe.Label \
+        ttk::style configure $counter.TLabelframe.Label \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+
+        # hover styling
+        ttk::style configure ${counter}_hover.TLabelframe \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -bordercolor "blue" -lightcolor "blue" -darkcolor "blue"
+        ttk::style configure ${counter}_hover.TLabelframe.Label \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+
+        # selected styling
+        ttk::style configure ${counter}_selected.TLabelframe \
+            -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
+            -bordercolor "red" -lightcolor "red" -darkcolor "red"
+        ttk::style configure ${counter}_selected.TLabelframe.Label \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
             -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
 
         # canvas for txt_highlight
         ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " \
-            -padding "2 1" -style $name.TLabelframe
-
+            -padding "2 1" -style $counter.TLabelframe
 
         # this puts the labelframe in the canvas
         $::ctdf.theme_list.c create window 0 $height -window \
@@ -381,8 +385,8 @@ proc ::color-themes::opendialog {} {
             -font $fontinfo -fill $::pd_colors(obj_box_text)
         # signal outlet
         $::ctdf.theme_list.c.f$counter.c create rectangle \
-            3 [expr {$mheight+1}] \
-            16 [expr {$mheight+5}] \
+            3 [expr {$mheight+2}] \
+            14 [expr {$mheight+5}] \
             -fill $::pd_colors(signal_iolet) -outline \
             $::pd_colors(signal_iolet_border)
         # signal cable
@@ -522,11 +526,21 @@ proc ::color-themes::opendialog {} {
         # gop box
         $::ctdf.theme_list.c.f$counter.c create rectangle \
             $tempx 5 [expr {$tempx + $twidth}] \
-            $tempy -outline $::pd_colors(graph_outline)
+            $tempy -outline $::pd_colors(gop_box)
         # gop text
         $::ctdf.theme_list.c.f$counter.c create text \
             [expr {$tempx + 2}] 8 -text GOP \
             -anchor nw -font $fontinfo -fill $::pd_colors(graph_text)
+
+        bind $::ctdf.theme_list.c.f$counter <Leave> {
+            if {${::color-themes::hover_theme} ne "" && \
+                ${::color-themes::selected_theme} ne ${::color-themes::hover_theme}} {
+                    ::pdwindow::post "left theme: ${::color-themes::hover_theme}\n"
+                    $::ctdf.theme_list.c.f${::color-themes::hover_theme} configure -style ${::color-themes::hover_theme}.TLabelframe
+            }
+            set {::color-themes::hover_theme} ""
+        }
+
         incr height $boxincr
         incr counter
     }
@@ -570,18 +584,6 @@ proc ::color-themes::opendialog {} {
         $::ctdf.theme_list.c yview scroll [expr {- (%D)}] units
     }
 
-    bind $::ctdf.theme_list.c <Leave> {
-        if {${::color-themes::hover_theme} ne "" && \
-        ${::color-themes::selected_theme} ne ${::color-themes::hover_theme}} {
-            $::ctdf.theme_list.c.f${::color-themes::hover_theme}.c \
-                itemconfigure box${::color-themes::hover_theme} -outline \
-                black -width 1
-            $::ctdf.theme_list.c \
-                itemconfigure box${::color-themes::hover_theme} -outline \
-                black -width 1
-        }
-        set {::color-themes::hover_theme} ""
-    }
     array set ::pd_colors [array get temp_theme]
 }
 
