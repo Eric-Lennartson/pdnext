@@ -1,15 +1,11 @@
 ==== Todo =================================================================
-- make themes dialog look better
-  - change hover highlight to alter labelframe color instead
-  - labelframe padding is a fucking bitch, maybe it's easier to dynamically change the canvas background color?
-  - maybe have labelframes match up with the themes they're drawing...
-  - figure out a way to make the containing canvas look less weird
-  - reposition the members of the theme demo at some point
-  - labelframe needs to be bound to scrolling as well
-- decide what to do about pd dialog theming vs. pd patch theming
+- themes dialog
+  - later figure out what to do with the theme state toggle
+  - leaving dark mode buttons alone for now.
+  - decide what to do about pd dialog themeing vs. pd patch theming
 - graph on parent and abstractions need rounded corners
+  Try this command: grep "graph on parent" ./src/*.c
 - pdwindow needs some help
-- it's ugly to have two theme tabs in preferences
 - min width of box needs to change if inlets are overlapping?
   - this is annoying and causes strange issues with hitbox, and t_linetraverser
   - it would be better if objects knew what their width was inherently instead of
