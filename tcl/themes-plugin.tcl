@@ -99,7 +99,7 @@ proc ::color-themes::set_theme {name} {
     # redraw everything
     foreach wind [wm stackorder .] {
         if {[winfo class $wind] eq "PatchWindow"} {
-            ::pdwindow::post "we are a PatchWindow\n"
+            # ::pdwindow::post "we are a PatchWindow\n"
             pdsend "$wind map 0"
             pdsend "$wind map 1"
             set tmpcol [::pdtk_canvas::get_color txt_highlight $wind]
@@ -108,7 +108,7 @@ proc ::color-themes::set_theme {name} {
             }
             set tmpcol [::pdtk_canvas::get_color canvas_fill $wind]
             if {$tmpcol ne ""} {
-                ::pdwindow::post "canvas_fill color is $tmpcol\n"
+                # ::pdwindow::post "canvas_fill color is $tmpcol\n"
                 ${wind}.c configure -background $tmpcol
             }
             set tmpcol [::pdtk_canvas::get_color canvas_text_cursor $wind]
@@ -163,7 +163,7 @@ proc ::color-themes::make_default {} {
     }
     puts -nonewline $fp $current_name
     close $fp
-    ::pdwindow::post "saved $current_name as the theme\n"
+    ::pdwindow::post "saved $current_name as default theme\n"
 }
 
 proc ::color-themes::print {} {
@@ -197,7 +197,6 @@ proc ::color-themes::motion {box} {
 }
 
 proc ::color-themes::click {box} {
-    ::pdwindow::post "clicked on: ${::color-themes::selected_theme}\n"
     if {${::color-themes::selected_theme} ne "" && \
         ${::color-themes::selected_theme} ne $box} {
             $::ctdf.theme_list.c.f${::color-themes::selected_theme}.c \
@@ -330,23 +329,27 @@ proc ::color-themes::opendialog {} {
             -darkcolor [::pdtk_canvas::get_color gop_box .colortheme_dialog]
         ttk::style configure $counter.TLabelframe.Label \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
-            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+            -foreground [::pdtk_canvas::get_color pdwindow_post_text .colortheme_dialog]
 
         # hover styling
         ttk::style configure ${counter}_hover.TLabelframe \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
-            -bordercolor "blue" -lightcolor "blue" -darkcolor "blue"
+            -bordercolor [::pdtk_canvas::get_color pdwindow_error_text .colortheme_dialog] \
+            -lightcolor [::pdtk_canvas::get_color pdwindow_error_text .colortheme_dialog] \
+            -darkcolor [::pdtk_canvas::get_color pdwindow_error_text .colortheme_dialog]
         ttk::style configure ${counter}_hover.TLabelframe.Label \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
-            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+            -foreground [::pdtk_canvas::get_color pdwindow_error_text  .colortheme_dialog]
 
         # selected styling
         ttk::style configure ${counter}_selected.TLabelframe \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
-            -bordercolor "red" -lightcolor "red" -darkcolor "red"
+            -bordercolor [::pdtk_canvas::get_color selected .colortheme_dialog] \
+            -lightcolor [::pdtk_canvas::get_color selected .colortheme_dialog] \
+            -darkcolor [::pdtk_canvas::get_color selected .colortheme_dialog]
         ttk::style configure ${counter}_selected.TLabelframe.Label \
             -background [::pdtk_canvas::get_color canvas_fill .colortheme_dialog] \
-            -foreground [::pdtk_canvas::get_color comment .colortheme_dialog]
+            -foreground [::pdtk_canvas::get_color selected .colortheme_dialog]
 
         # canvas for txt_highlight
         ttk::labelframe $::ctdf.theme_list.c.f$counter -text " ${name} " \
@@ -535,7 +538,6 @@ proc ::color-themes::opendialog {} {
         bind $::ctdf.theme_list.c.f$counter <Leave> {
             if {${::color-themes::hover_theme} ne "" && \
                 ${::color-themes::selected_theme} ne ${::color-themes::hover_theme}} {
-                    ::pdwindow::post "left theme: ${::color-themes::hover_theme}\n"
                     $::ctdf.theme_list.c.f${::color-themes::hover_theme} configure -style ${::color-themes::hover_theme}.TLabelframe
             }
             set {::color-themes::hover_theme} ""
@@ -555,7 +557,7 @@ proc ::color-themes::opendialog {} {
     ttk::button $::ctdf.button_frame.apply -text [_ "Apply"] \
          -command [list {::color-themes::apply} $names] -width 5
     ttk::button $::ctdf.button_frame.close -text [_ "Close"] \
-         -command "destroy $::ctdf" -width 5
+         -command "destroy .colortheme_dialog" -width 5
     ttk::button $::ctdf.button_frame.save -text [_ "Save Current"] \
         -command {::color-themes::make_default} -width 12
 
@@ -567,14 +569,15 @@ proc ::color-themes::opendialog {} {
     grid rowconfigure $::ctdf.button_frame 1 -weight 1
 
     if {$::windowingsystem eq "aqua"} {
-        ttk::frame $::ctdf.button_frame.darkmode_buttons
-        ttk::button $::ctdf.button_frame.darkmode_buttons.dark -text [_ "Save as Dark Theme"] \
-            -command [list {::color-themes::save_dark} $names] -width 14
-        ttk::button $::ctdf.button_frame.darkmode_buttons.undark -text [_ "Delete Dark Theme"] \
-            -command {::color-themes::delete_dark} -width 13
-        grid $::ctdf.button_frame.darkmode_buttons -row 1 -column 0 -columnspan 3 -sticky ws -pady 2
-        grid $::ctdf.button_frame.darkmode_buttons.dark -row 0 -column 0
-        grid $::ctdf.button_frame.darkmode_buttons.undark -row 0 -column 1
+        # leaving dark mode buttons out for now
+        # ttk::frame $::ctdf.button_frame.darkmode_buttons
+        # ttk::button $::ctdf.button_frame.darkmode_buttons.dark -text [_ "Save as Dark Theme"] \
+        #     -command [list {::color-themes::save_dark} $names] -width 14
+        # ttk::button $::ctdf.button_frame.darkmode_buttons.undark -text [_ "Delete Dark Theme"] \
+        #     -command {::color-themes::delete_dark} -width 13
+        # grid $::ctdf.button_frame.darkmode_buttons -row 1 -column 0 -columnspan 3 -sticky ws -pady 2
+        # grid $::ctdf.button_frame.darkmode_buttons.dark -row 0 -column 0
+        # grid $::ctdf.button_frame.darkmode_buttons.undark -row 0 -column 1
     } else {
         grid configure $::ctdf.button_frame.apply -pady 5
         grid configure $::ctdf.button_frame.close -pady 5
@@ -604,7 +607,8 @@ proc ::color-themes::init {mymenu} {
         }
         return
     }
-    if {[catch {set fp [open $::current_plugin_loadpath/current-theme.txt r]}]} {
+    # was $::current_plugin_loadpath earlier, now changed to sys_guidir
+    if {[catch {set fp [open $::sys_guidir/current-theme.txt r]}]} {
         return
     }
     ::color-themes::set_theme [read -nonewline $fp]
