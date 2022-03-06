@@ -26,7 +26,7 @@ namespace eval ttk::theme::pedal-light {
     variable I
     array set I [LoadImages \
                      [file join [file dirname [info script]] pedal-light] *.gif]
-    
+
     variable colors
 
     array set colors {
