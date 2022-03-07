@@ -4,7 +4,7 @@
 # msg_box_text - text in a message box
 # comment
 # selected - selection
-# obj_box_outline_broken - outline of "broken" object 
+# obj_box_outline_broken - outline of "broken" object
 #                          (that failed to create)
 # obj_box_outline
 # msg_box_outline
@@ -95,7 +95,7 @@ set ::pd_colors(atom_box_focus_outline) $::pd_colors(atom_box_outline)
 # 				::pdtk_canvas::pdtk_coords {*}$coords $tag $canv
 # 			}
 # 		}
-# 	}	
+# 	}
 # }
-# 
+#
 # trace variable ::curve_cords w redraw_cords
