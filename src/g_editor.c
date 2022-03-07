@@ -1873,8 +1873,8 @@ void canvas_vis(t_canvas *x, t_floatarg f)
              * a gl_editor already, if its not, it will not have a gl_editor.
              * canvas_create_editor(x) checks if a gl_editor is already created,
              * so its ok to run it on a canvas that already has a gl_editor. */
-        if (x->gl_editor && x->gl_havewindow)
-        {           /* just put us in front */
+        if (x->gl_editor && x->gl_havewindow) {
+            /* just put us in front */
             sys_vgui("pdtk_canvas_raise .x%lx\n", x);
         }
         else

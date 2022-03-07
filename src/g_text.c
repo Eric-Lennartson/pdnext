@@ -1551,6 +1551,10 @@ void glist_drawiofor(t_glist *glist, t_object *ob, int firsttime,
     }
 }
 
+// graph on parent is not considered to be a text object.
+// Rather it is considered to be a graph, and a "redrect"
+// canvas_drawredrect and graph_vis is where the drawing of
+// gop is controlled
 void text_drawborder(t_text *x, t_glist *glist, const char *tag, int width2, int height2, int firsttime)
 {
     t_object *ob;
@@ -1866,12 +1870,10 @@ void text_setto(t_text *x, t_glist *glist, const char *buf, int bufsize)
     }
 }
 
-    /* this gets called when a message gets sent to an object whose creation
-    failed, presumably because of loading a patch with a missing extern or
-    abstraction */
-static void text_anything(t_text *x, t_symbol *s, int argc, t_atom *argv)
-{
-}
+/* this gets called when a message gets sent to an object whose creation
+failed, presumably because of loading a patch with a missing extern or
+abstraction */
+static void text_anything(t_text *x, t_symbol *s, int argc, t_atom *argv) {}
 
 void text_getfont(t_text *x, t_glist *thisglist,
     int *fwidthp, int *fheightp, int *guifsize)
