@@ -3,8 +3,6 @@
   - later figure out what to do with the theme state toggle
   - leaving dark mode buttons alone for now.
   - decide what to do about pd dialog themeing vs. pd patch theming
-- graph on parent and abstractions need rounded corners
-  Try this command: grep "graph on parent" ./src/*.c
 - pdwindow needs some help
 - min width of box needs to change if inlets are overlapping?
   - this is annoying and causes strange issues with hitbox, and t_linetraverser
@@ -12,9 +10,6 @@
     having to calculate it all the time.
 - replace iemguis with guis of my own making
 ==== BUGS =================================================================
-- It's really bad to have to update the file path for the tcl plugin to load the themes.
-  - Let's fix this in future versions. Have the plugin be a part of the tcl that comes
-    with my version of pd.
 - radios leave behind inlets when deleted, or when snd and rcv are added
   - doesn't matter, I'm removing iemguis anyways.
 ==== Improvements =========================================================

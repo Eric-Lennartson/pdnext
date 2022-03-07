@@ -745,10 +745,24 @@ static void graph_vis(t_gobj *gr, t_glist *parent_glist, int vis)
             (x->gl_xlabely > 0.5*(x->gl_y1 + x->gl_y2) ? "s" : "n");
         int fs = sys_hostfontsize(glist_getfont(x), glist_getzoom(x));
 
-            /* draw a rectangle around the graph */
-        sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d "
+        /* draw a rectangle around the graph */
+        sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d "
+            "-smooth true -splinesteps 36 "
             "-width %d -capstyle projecting -fill %s -tags [list %s graph]\n",
-            c, x1, y1, x1, y2, x2, y2, x2, y1, x1, y1,
+            c,
+            x1, y1,
+            x1+CORNER_RADIUS, y1,
+            x2-CORNER_RADIUS, y1,
+            x2, y1,
+            x2, y1+CORNER_RADIUS,
+            x2, y2-CORNER_RADIUS,
+            x2, y2,
+            x2-CORNER_RADIUS, y2,
+            x1+CORNER_RADIUS, y2,
+            x1, y2,
+            x1, y2-CORNER_RADIUS,
+            x1, y1+CORNER_RADIUS,
+            x1, y1,
             glist_getzoom(x), selected, tag);
 
             /* if there's just one "garray" in the graph, write its name
