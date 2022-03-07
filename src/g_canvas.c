@@ -776,6 +776,7 @@ void canvas_dirty(t_canvas *x, t_floatarg f)
         canvas_undo_cleardirty(x);
 }
 
+// Called drawredrect, but should actually be called draw_graph_on_parent
 void canvas_drawredrect(t_canvas *x, int doit)
 {
     if (doit)
@@ -784,11 +785,24 @@ void canvas_drawredrect(t_canvas *x, int doit)
             x2 = x1 + x->gl_zoom * x->gl_pixwidth,
             y1 = x->gl_zoom * x->gl_ymargin,
             y2 = y1 + x->gl_zoom * x->gl_pixheight;
-        sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d "
+        sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d "
             "-fill [::pdtk_canvas::get_color gop_box .x%lx] "
-            "-width %d -capstyle projecting -tags GOP\n",
-            glist_getcanvas(x), x1, y1, x1, y2, x2, y2, x2, y1, x1, y1,
-                glist_getcanvas(x), x->gl_zoom);
+            "-width %d -capstyle projecting -tags GOP -smooth true -splinesteps 36\n",
+            glist_getcanvas(x),
+            x1, y1,
+            x1+CORNER_RADIUS, y1,
+            x2-CORNER_RADIUS, y1,
+            x2, y1,
+            x2, y1+CORNER_RADIUS,
+            x2, y2-CORNER_RADIUS,
+            x2, y2,
+            x2-CORNER_RADIUS, y2,
+            x1+CORNER_RADIUS, y2,
+            x1, y2,
+            x1, y2-CORNER_RADIUS,
+            x1, y1+CORNER_RADIUS,
+            x1, y1,
+            glist_getcanvas(x), x->gl_zoom);
     }
     else sys_vgui(".x%lx.c delete GOP\n",  glist_getcanvas(x));
 }
