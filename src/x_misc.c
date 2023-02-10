@@ -362,12 +362,30 @@ static void oscparse_list(t_oscparse *x, t_symbol *s, int argc, t_atom *argv)
         pd_error(x, "oscparse: not an OSC message (no leading slash)");
         return;
     }
+
     for (i = 1; i < argc && argv[i].a_w.w_float != 0; i++)
+    {
+        // post("element is %d", argv[i].a_w.w_float);
         if (argv[i].a_w.w_float == '/')
             outc++;
+    }
+
+    post("\n");
+    post("before rounding i is %d", i);
+
     i = ROUNDUPTO4(i+1);
+
+    post("after rounding i is %d", i);
+    post("argc is %d", argc);
+
     if (argv[i].a_w.w_float != ',' || (i+1) >= argc)
     {
+        if( argv[i].a_w.w_float != ',') {
+            post("argv[%d] was equal to ,", i);
+        }
+        if((i+1) >= argc) {
+            post("%d is greater than %d", i, argc);
+        }
         pd_error(x, "oscparse: malformed type string (char %d, index %d)",
             (int)(argv[i].a_w.w_float), i);
         return;
