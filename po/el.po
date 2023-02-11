@@ -6,89 +6,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pure Data 0.43\n"
 "Report-Msgid-Bugs-To: pd-dev@iem.at\n"
-"POT-Creation-Date: 2017-07-06 18:10+0200\n"
+"POT-Creation-Date: 2023-01-04 02:48-0800\n"
 "PO-Revision-Date: 2009-09-13 01:51+0200\n"
 "Last-Translator: Γεώργιος Κερατζάκης <geokeratz@gmail.com>\n"
-"Language-Team: Greek <pd-dev@iem.at>\n"
+"Language-Team: Greek <https://hosted.weblate.org/projects/pure-data/pure-"
+"data/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "-------dimensions(digits)(pix):-------"
+msgid "linear"
 msgstr ""
 
-msgid "--------dimensions(pix)(pix):--------"
+msgid "logarithmic"
 msgstr ""
 
-msgid "----------dimensions(pix):-----------"
+msgid "new-only"
 msgstr ""
 
-msgid "--------flash-time(ms)(ms):---------"
-msgstr ""
-
-msgid "-----------output-range:-----------"
-msgstr ""
-
-msgid "------selectable_dimensions(pix):------"
-msgstr ""
-
-msgid "------visible_rectangle(pix)(pix):------"
+msgid "new&old"
 msgstr ""
 
 #, fuzzy
-msgid "bottom:"
-msgstr "Κάτω"
+msgid "no scale"
+msgstr "Κλίμακα"
 
 #, fuzzy
-msgid "height:"
-msgstr "Δεξιά"
-
-msgid "hold:"
-msgstr ""
-
-msgid "intrrpt:"
-msgstr ""
-
-msgid "left:"
-msgstr ""
-
-msgid "lin"
-msgstr ""
-
-msgid "log"
-msgstr ""
-
-msgid "log-height:"
-msgstr ""
-
-msgid "max:"
-msgstr ""
-
-msgid "min:"
-msgstr ""
-
-#, fuzzy
-msgid "right:"
-msgstr "Δεξιά"
-
-#, fuzzy
-msgid "size:"
-msgstr "Μέγεθος:"
-
-msgid "top:"
-msgstr ""
-
-msgid "value:"
-msgstr ""
-
-#, fuzzy
-msgid "width:"
-msgstr "Εύρος:"
-
-#, tcl-format
-msgid "Do you want to save the changes you made in '%s'?"
-msgstr "Αποθήκευση αλλαγών που έγιναν στο '%s';"
+msgid "scale"
+msgstr "Κλίμακα"
 
 #, tcl-format
 msgid "Discard changes to '%s'?"
@@ -202,7 +148,158 @@ msgstr "Αντιγραφή"
 msgid "Paste"
 msgstr "Επικόλληση"
 
+msgid "Array Properties"
+msgstr "Ιδιότητες Πίνακα"
+
+msgid "Array"
+msgstr "Πίνακας"
+
+msgid "Name:"
+msgstr "Όνομα:"
+
+msgid "Size:"
+msgstr "Μέγεθος:"
+
+msgid "Save contents"
+msgstr "Αποθήκευση περιεχομένων"
+
+msgid "Draw as:"
+msgstr "Σχεδίαση ως:"
+
+msgid "Polygon"
+msgstr "Πολύγωνο"
+
+msgid "Points"
+msgstr "Σημεία"
+
+msgid "Bezier curve"
+msgstr "Καμπύλη Bezier"
+
+msgid "Put array into:"
+msgstr "Προσθήκη πίνακα σε:"
+
+msgid "New graph"
+msgstr "Νέο γράφημα"
+
+msgid "Last graph"
+msgstr "Τελευταίο γράφημα"
+
+msgid "Options"
+msgstr ""
+
+msgid "Open List View..."
+msgstr "Άνοιγμα Προβολής Λίστας..."
+
+msgid "Delete array"
+msgstr "Διαγραφή πίνακα"
+
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+msgid "Apply"
+msgstr "Εφαρμογή"
+
+msgid "OK"
+msgstr "ΟΚ"
+
+msgid "Audio Settings"
+msgstr "Ρυθμίσεις Ήχου"
+
+#, fuzzy
+msgid "Settings"
+msgstr "Ρυθμίσεις MIDI"
+
+#, fuzzy
+msgid "Sample rate:"
+msgstr "Ταχύτητα δειγματοληψίας:"
+
+msgid "Delay (msec):"
+msgstr "Καθυστέρηση (msec):"
+
+msgid "48k"
+msgstr ""
+
+msgid "44.1k"
+msgstr ""
+
+msgid "96k"
+msgstr ""
+
+msgid "Block size:"
+msgstr ""
+
+msgid "Use callbacks"
+msgstr "Χρήση επανακλήσεων"
+
+msgid "Input Devices"
+msgstr "Συσκευή εισόδου"
+
+msgid "Channels:"
+msgstr "Κανάλια:"
+
+msgid "Output Devices"
+msgstr "Συσκευή εξόδου"
+
+#, fuzzy
+msgid "(same as input device)..."
+msgstr "(ομοίως με συσκευή εισόδου) .............."
+
+#, fuzzy
+msgid "Use Multiple Devices"
+msgstr "Χρήση πολλαπλών συσκευών"
+
+msgid "Save All Settings"
+msgstr "Αποθήκευση όλων των ρυθμίσεων"
+
 msgid "WARNING: unknown graphme flags received in pdtk_canvas_dialog"
+msgstr ""
+
+msgid "Canvas Properties"
+msgstr "Ιδιότητες Καμβά"
+
+msgid "Scale"
+msgstr "Κλίμακα"
+
+msgid "X units per pixel:"
+msgstr "Χ μονάδες ανά εικονοστοιχείο"
+
+msgid "Y units per pixel:"
+msgstr "Υ μονάδες ανά εικονοστοιχείο"
+
+msgid "Appearance on parent patch"
+msgstr "Εμφάνιση στο γονεϊκό patch"
+
+msgid "Graph-On-Parent"
+msgstr ""
+
+msgid "Hide object name and arguments"
+msgstr "Απόκρυψη ονόματος και ορισμάτων του object"
+
+msgid "Range and size"
+msgstr "Περιοχή και μέγεθος"
+
+#, fuzzy
+msgid "X range: from"
+msgstr "περιοχή Χ, από"
+
+msgid "to"
+msgstr "σε"
+
+msgid "Margin:"
+msgstr "Περιθώριο:"
+
+#, fuzzy
+msgid "Y range: from"
+msgstr "περιοχή Y, από"
+
+#, fuzzy
+msgid "Data Properties"
+msgstr "Ιδιότητες Καμβά"
+
+msgid "Send"
+msgstr ""
+
+msgid "Done"
 msgstr ""
 
 #, tcl-format
@@ -231,9 +328,6 @@ msgstr "Παράθυρο Pd"
 msgid "Match whole word only"
 msgstr "Ταύτιση μόνο ολόκληρης λέξης"
 
-msgid "Cancel"
-msgstr "Ακύρωση"
-
 msgid "Close"
 msgstr "Κλείσιμο"
 
@@ -259,15 +353,173 @@ msgstr "Μόνο Χ"
 msgid "Y only"
 msgstr "Μόνο Y"
 
-msgid "Apply"
-msgstr "Εφαρμογή"
+#, fuzzy
+msgid "GUI Box Properties"
+msgstr "Ιδιότητες Atom Box"
+
+msgid "Messages"
+msgstr "Μηνύματα"
+
+msgid "Send symbol:"
+msgstr "Αποστολή symbol:"
+
+msgid "Receive symbol:"
+msgstr "Λήψη συμβόλου:"
+
+msgid "Width:"
+msgstr "Εύρος:"
+
+msgid "Limits"
+msgstr "Όρια"
+
+msgid "Lower:"
+msgstr "Κατώτερο:"
+
+msgid "Upper:"
+msgstr "Ανώτερο:"
+
+msgid "Label"
+msgstr "Ετικέτα"
+
+#, fuzzy
+msgid "Left"
+msgstr "Αριστερά"
+
+msgid "Right"
+msgstr "Δεξιά"
+
+msgid "Top"
+msgstr "Κορυφή"
+
+msgid "Bottom"
+msgstr "Κάτω"
+
+msgid "Background color"
+msgstr "Χρώμα φόντου"
+
+msgid "Foreground color"
+msgstr "Χρώμα πρώτου πλάνου"
 
 msgid "Label color"
 msgstr "Χρώμα ετικέτας"
 
+msgid "Bang"
+msgstr ""
+
+#, fuzzy
+msgid "Flash Time (msec)"
+msgstr "Καθυστέρηση (msec):"
+
+msgid "Min:"
+msgstr ""
+
+msgid "Max:"
+msgstr ""
+
+msgid "Toggle"
+msgstr ""
+
+msgid "Non Zero Value"
+msgstr ""
+
+msgid "Value:"
+msgstr ""
+
+msgid "Number2"
+msgstr ""
+
+msgid "Width (digits):"
+msgstr ""
+
+#, fuzzy
+msgid "Height:"
+msgstr "Δεξιά"
+
+msgid "Output Range"
+msgstr ""
+
+msgid "Log height:"
+msgstr ""
+
+msgid "Vslider"
+msgstr "Κάθετο slider"
+
+msgid "Hslider"
+msgstr "Οριζόντιο slider"
+
+#, fuzzy
+msgid "Vradio"
+msgstr "Κάθετο radio"
+
+msgid "Num cells:"
+msgstr ""
+
+#, fuzzy
+msgid "Hradio"
+msgstr "Οριζόντιο radio"
+
+msgid "VU Meter"
+msgstr "Μετρητής VU"
+
+msgid "Canvas"
+msgstr "Καμβάς"
+
+msgid "Visible Rectangle (pix)"
+msgstr ""
+
 #, tcl-format
 msgid "%s Properties"
 msgstr "%s Ιδιότητες"
+
+msgid "Parameters"
+msgstr ""
+
+msgid "Init"
+msgstr ""
+
+msgid "No init"
+msgstr ""
+
+#, fuzzy
+msgid "Jump on click"
+msgstr "Μεταπήδηση στο κλικ"
+
+#, fuzzy
+msgid "Steady on click"
+msgstr "Σταθερότητα στο κλικ"
+
+#, fuzzy
+msgid "X offset:"
+msgstr "Παράθεση Χ"
+
+#, fuzzy
+msgid "Y offset:"
+msgstr "Παράθεση Υ"
+
+msgid "Colors"
+msgstr "Χρώματα"
+
+msgid "Background"
+msgstr "Φόντο"
+
+msgid "Front"
+msgstr "Πρώτο Πλάνο"
+
+msgid "Compose color"
+msgstr "Σύνθεση χρώματος"
+
+msgid "Test label"
+msgstr ""
+
+#, fuzzy
+msgid "Send a Pd message"
+msgstr "Αποστολή Μηνύματος..."
+
+msgid "(use arrow keys for history)"
+msgstr ""
+
+msgid "MIDI Settings"
+msgstr "Ρυθμίσεις MIDI"
 
 msgid "ALSA MIDI Settings"
 msgstr "Ρυθμίσεις ALSA MIDI"
@@ -278,13 +530,16 @@ msgstr "Θύρες Εισόδου:"
 msgid "Out Ports:"
 msgstr "Θύρες Εξόδου:"
 
-msgid "Save All Settings"
-msgstr "Αποθήκευση όλων των ρυθμίσεων"
+msgid "Pd search path for objects, help, audio, text and other files"
+msgstr ""
 
-msgid "OK"
-msgstr "ΟΚ"
+msgid "Use standard paths"
+msgstr ""
 
-msgid "Search paths for objects, help, audio, text and other files"
+msgid "Verbose"
+msgstr ""
+
+msgid "Pd Documents Directory"
 msgstr ""
 
 msgid "Browse"
@@ -294,6 +549,9 @@ msgid "Reset"
 msgstr ""
 
 msgid "Disable"
+msgstr ""
+
+msgid "Externals Install Directory"
 msgstr ""
 
 #, fuzzy
@@ -309,13 +567,20 @@ msgstr ""
 msgid "Add a new path"
 msgstr ""
 
+#, tcl-format
+msgid "Edit existing path [%s]"
+msgstr ""
+
 msgid "Add new library"
 msgstr ""
 
 msgid "Edit library"
 msgstr ""
 
-msgid "Startup Libraries"
+msgid "Pd libraries to load on startup"
+msgstr ""
+
+msgid "Startup flags:"
 msgstr ""
 
 msgid "Defeat real-time scheduling"
@@ -324,6 +589,68 @@ msgstr ""
 #, fuzzy
 msgid "Help Browser"
 msgstr "Πλοήγηση..."
+
+msgid "Associated Files"
+msgstr "Συνδεόμενα Αρχεία"
+
+#, fuzzy
+msgid "Pd Files"
+msgstr "Αρχεία Pd"
+
+msgid "Max Patch Files"
+msgstr "Αρχεία Patch από MAX"
+
+msgid "Max Text Files"
+msgstr "Αρχεία Κειμένου από MAX"
+
+msgid "Max Patch Files (.pat)"
+msgstr "Αρχεία Patch από MAX (.pat)"
+
+msgid "Max Text Files (.mxt)"
+msgstr "Αρχεία Κειμένου από MAX (.mxt)"
+
+#, tcl-format
+msgid "detected font: %s"
+msgstr ""
+
+#, fuzzy, tcl-format
+msgid "WARNING: font family '%1$s' not found, using default (%2$s)"
+msgstr ""
+"ΠΡΟΣΟΧΗ:  Η οικογένεια γραμματοσειράς '%s' δεν βρέθηκε, χρήση προεπιλογής "
+"(%s)"
+
+#, fuzzy, tcl-format
+msgid "WARNING: font weight '%1$s' not found, using default (%2$s)"
+msgstr ""
+"ΠΡΟΣΟΧΗ:  Το βάρος γραμματοσειράς '%s' δεν βρέθηκε, χρήση προεπιλογής (%s)"
+
+#, tcl-format
+msgid "using font: %1$s %2$s"
+msgstr ""
+
+#, tcl-format
+msgid "'%1$s' already loaded, ignoring: '%2$s'"
+msgstr ""
+
+#, tcl-format
+msgid "Loading plugin: %s"
+msgstr ""
+
+#, tcl-format
+msgid "UNHANDLED ERROR: %s"
+msgstr ""
+
+#, tcl-format
+msgid "FAILED TO LOAD %s"
+msgstr ""
+
+#, tcl-format
+msgid "Failed to read plugin %s ...skipping!"
+msgstr ""
+
+#, tcl-format
+msgid "Failed to find plugins in %s ...skipping!"
+msgstr ""
 
 msgid "(Tcl) MISSING CLOSE-BRACE '}': "
 msgstr ""
@@ -354,15 +681,15 @@ msgstr ""
 msgid "ignoring '%s': doesn't look like a deken package"
 msgstr ""
 
-#, tcl-format
-msgid "Installing %s"
-msgstr ""
+#, fuzzy, tcl-format
+msgid "Installing '%s'"
+msgstr "Απόρριψη αλλαγών σε '%s';"
 
 #, tcl-format
-msgid "[deken] Successfully unzipped %1$s into %2$s."
+msgid "Successfully unzipped %1$s into %2$s."
 msgstr ""
 
-msgid "[deken] Unable to extract package automatically."
+msgid "Unable to extract package automatically."
 msgstr ""
 
 msgid "Please perform the following steps manually:"
@@ -384,7 +711,7 @@ msgid "3. Remove %s. (optional)"
 msgstr ""
 
 #, tcl-format
-msgid "[deken] uninstalling '%s'"
+msgid "Removing '%s'"
 msgstr ""
 
 #, tcl-format
@@ -392,23 +719,23 @@ msgid "Uninstalling %1$s from %2$s failed!"
 msgstr ""
 
 #, tcl-format
-msgid "skipping SHA256 verification of %s."
+msgid "Skipping SHA256 verification of '%s'."
 msgstr ""
 
 #, tcl-format
-msgid "SHA256 verification of %s"
+msgid "SHA256 verification of '%s'"
 msgstr ""
 
 #, tcl-format
-msgid "unable to fetch reference SHA256 for %s."
+msgid "Unable to fetch reference SHA256 for '%s'."
 msgstr ""
 
 #, tcl-format
-msgid "unable to perform SHA256 verification for %s."
+msgid "Unable to perform SHA256 verification for '%s'."
 msgstr ""
 
 #, tcl-format
-msgid "[deken] Unable to download from %1$s [%2$s]"
+msgid "Unable to download from %1$s [%2$s]"
 msgstr ""
 
 #, tcl-format
@@ -419,17 +746,20 @@ msgid "Download failed"
 msgstr ""
 
 #, tcl-format
-msgid "[deken] Unable to remove stray file %s"
+msgid "Unable to remove stray file '%s'"
 msgstr ""
 
 #, tcl-format
-msgid "[deken] Unable to rename downloaded file to %s"
+msgid "Unable to rename downloaded file to '%s'"
 msgstr ""
 
 msgid "Create"
 msgstr ""
 
 msgid "Check"
+msgstr ""
+
+msgid "Installation options:"
 msgstr ""
 
 msgid "Try to verify the libraries' checksum before (re)installing them"
@@ -447,6 +777,9 @@ msgstr ""
 msgid "Add newly installed libraries to Pd's search path"
 msgstr ""
 
+msgid "Platform settings:"
+msgstr ""
+
 #, tcl-format
 msgid "Default platform: %s"
 msgstr ""
@@ -462,6 +795,10 @@ msgid ""
 "(treats other versions like foreign architectures)"
 msgstr ""
 
+#, fuzzy, tcl-format
+msgid "Deken %s Preferences"
+msgstr "Προτιμήσεις"
+
 #, tcl-format
 msgid "Platform re-detected: %s"
 msgstr ""
@@ -471,51 +808,51 @@ msgstr ""
 
 #, fuzzy
 msgid "ZIP Files"
-msgstr "Αρχεία Pd"
+msgstr "Αρχεία ZIP"
 
 #, fuzzy
 msgid "TAR Files"
-msgstr "Αρχεία Pd"
+msgstr "Αρχεία TAR"
 
 #, fuzzy
 msgid "All Files"
-msgstr "Αρχεία Pd"
+msgstr "Ολα τα αρχεία"
 
 #, tcl-format
 msgid "Checksum mismatch for '%s'"
 msgstr ""
 
 #, tcl-format
-msgid "SHA256 verification of %s failed!"
+msgid "SHA256 verification of '%s' failed!"
 msgstr ""
 
 msgid "SHA256 verification failed"
 msgstr ""
 
 #, tcl-format
-msgid "Removing %s"
+msgid "Uninstalling previous installation of '%s'"
 msgstr ""
 
 #, tcl-format
-msgid "[deken] temporarily moving %1$s into %2$s failed."
+msgid "Temporarily moving %1$s into %2$s failed."
 msgstr ""
 
 #, tcl-format
-msgid "Installing package %s"
+msgid "Installing package '%s'"
 msgstr ""
 
 msgid "Installation completed!"
 msgstr ""
 
 #, tcl-format
-msgid "Successfully installed %s!"
+msgid "Successfully installed '%s'!"
 msgstr ""
 
 msgid "Installation failed!"
 msgstr ""
 
 #, tcl-format
-msgid "Failed to install %s!"
+msgid "Failed to install '%s'!"
 msgstr ""
 
 msgid "Package installation failed"
@@ -528,7 +865,7 @@ msgid ""
 msgstr ""
 
 #, tcl-format
-msgid "[deken] Unable to add %s to search paths"
+msgid "Unable to add %s to search paths"
 msgstr ""
 
 #, tcl-format
@@ -536,7 +873,7 @@ msgid "Add %s to the Pd search paths?"
 msgstr ""
 
 #, tcl-format
-msgid "[deken] Added %s to search paths"
+msgid "Added %s to search paths"
 msgstr ""
 
 msgid "No packages selected for installation."
@@ -552,6 +889,13 @@ msgstr ""
 #, fuzzy
 msgid "Search"
 msgstr "Αναζήτηση σε"
+
+#, tcl-format
+msgid "Install (%d)"
+msgstr ""
+
+msgid "Install"
+msgstr ""
 
 #, tcl-format
 msgid "%s%% of download completed"
@@ -578,27 +922,87 @@ msgstr ""
 msgid "Right-clicking a search result will give you more options..."
 msgstr ""
 
-msgid "Deken - A Package Manager for Pure Data Externals"
+msgid "You can also search for libraries & objects via your web browser:"
+msgstr ""
+
+msgid "Find externals"
+msgstr ""
+
+msgid "Install DEK file..."
+msgstr ""
+
+msgid "Preferences..."
+msgstr "Προτιμήσεις..."
+
+#, fuzzy
+msgid "Search for: "
+msgstr "Αναζήτηση σε"
+
+msgid "libraries"
+msgstr ""
+
+msgid "objects"
+msgstr ""
+
+msgid "both"
+msgstr ""
+
+msgid "translations"
+msgstr ""
+
+msgid "Only install externals uploaded by people you trust."
+msgstr ""
+
+msgid "Disabling tabbed view: incompatible Tcl/Tk detected"
+msgstr ""
+
+msgid "Library"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Uploader"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+#, fuzzy
+msgid "Search Results"
+msgstr "Αναζήτηση σε"
+
+msgid "Log"
 msgstr ""
 
 #, fuzzy, tcl-format
-msgid "[deken] Start searching for externals... %s"
+msgid "Searching for \"%s\"..."
 msgstr "Απόρριψη αλλαγών σε '%s';"
 
 #, tcl-format
-msgid "[deken] online? %s"
+msgid "online? %s"
 msgstr ""
 
 msgid "Unable to perform search. Are you online?"
 msgstr ""
 
-msgid "[deken] No matching externals found."
+#, tcl-format
+msgid "Found %1$d usable packages (of %2$d packages in total)."
+msgstr ""
+
+msgid "It appears that there are no matching packages for your architecture."
+msgstr ""
+
+msgid "No matching externals found."
 msgstr ""
 
 msgid "Try using the full name e.g. 'freeverb~'."
 msgstr ""
 
-msgid "No matching externals found."
+msgid "Or use wildcards like 'freeverb*'."
 msgstr ""
 
 msgid "Please select a (writable) installation directory!"
@@ -609,21 +1013,28 @@ msgid "Install %1$s to %2$s?"
 msgstr ""
 
 #, tcl-format
-msgid "Cancelling download of %s: No installation directory given."
+msgid "Cancelling download of '%s': No installation directory given."
 msgstr ""
 
 msgid "Installing to non-existant directory failed"
 msgstr ""
 
 #, tcl-format
-msgid ""
-"Commencing downloading of:\n"
-"%1$s\n"
-"Into %2$s..."
+msgid "Unable to install to '%s'"
+msgstr ""
+
+msgid "Directory does not exist!"
+msgstr ""
+
+msgid "Directory is not writable!"
 msgstr ""
 
 #, tcl-format
 msgid "Downloading '%s'"
+msgstr ""
+
+#, tcl-format
+msgid "Commencing download of '%1$s' into '%2$s'..."
 msgstr ""
 
 #, fuzzy
@@ -640,9 +1051,8 @@ msgstr ""
 msgid "Download completed! Verifying..."
 msgstr ""
 
-#, fuzzy, tcl-format
-msgid "searching for '%s'"
-msgstr "Απόρριψη αλλαγών σε '%s';"
+msgid "Ignoring checksum mismatch"
+msgstr ""
 
 #, tcl-format
 msgid "[deken] deken-plugin.tcl (Pd externals search) loaded from %s."
@@ -652,7 +1062,19 @@ msgstr ""
 msgid "[deken] Platform detected: %s"
 msgstr ""
 
-msgid "Find externals"
+#, fuzzy, tcl-format
+msgid "Searching on %s..."
+msgstr "Απόρριψη αλλαγών σε '%s';"
+
+#, tcl-format
+msgid "Searching on %1$s returned %2$d results"
+msgstr ""
+
+msgid "No usable servers for searching found..."
+msgstr ""
+
+#, tcl-format
+msgid "Uploaded by %1$s @ %2$s"
 msgstr ""
 
 #, fuzzy, tcl-format
@@ -663,23 +1085,13 @@ msgstr "Απόρριψη αλλαγών σε '%s';"
 msgid "Search failed"
 msgstr "Αναζήτηση σε"
 
-msgid "[deken] Unable to perform search."
-msgstr ""
-
-#, tcl-format
-msgid "Uploaded by %1$s @ %2$s"
-msgstr ""
-
-msgid "Deselect package"
+msgid "Unable to perform search."
 msgstr ""
 
 msgid "Select package for installation"
 msgstr ""
 
-msgid "Install selected packages"
-msgstr ""
-
-msgid "Install package"
+msgid "Deselect package"
 msgstr ""
 
 #, fuzzy
@@ -693,6 +1105,10 @@ msgid "Copy SHA256 checksum URL"
 msgstr ""
 
 msgid "Copy OpenGPG signature URL"
+msgstr ""
+
+#, tcl-format
+msgid "Uninstall '%s'"
 msgstr ""
 
 #, tcl-format
@@ -725,11 +1141,11 @@ msgid ""
 msgstr ""
 
 #, tcl-format
-msgid "couldn't create Pd documents directory: %s\n"
+msgid "couldn't create Pd documents directory: %s"
 msgstr ""
 
 #, tcl-format
-msgid "couldn't create \"externals\" directory in: %s\n"
+msgid "couldn't create \"externals\" directory in: %s"
 msgstr ""
 
 msgid "refusing to delete empty domain"
@@ -739,8 +1155,16 @@ msgstr ""
 msgid "Couldn't create preferences \"%1$s\" in %2$s"
 msgstr ""
 
+#, tcl-format
+msgid "ignoring '%s': doesn't exist"
+msgstr ""
+
 msgid "About Pd"
 msgstr "Περί..."
+
+#, tcl-format
+msgid "couldn't read \"%s\" document"
+msgstr ""
 
 msgid "Save"
 msgstr "Αποθήκευση"
@@ -789,6 +1213,10 @@ msgstr "Νέο"
 msgid "Open"
 msgstr "Άνοιγμα"
 
+#, fuzzy
+msgid "Message..."
+msgstr "Μήνυμα"
+
 msgid "Cut"
 msgstr "Αποκοπή"
 
@@ -816,40 +1244,8 @@ msgstr ""
 msgid "Comment"
 msgstr "Σχόλιο"
 
-msgid "Bang"
-msgstr ""
-
-msgid "Toggle"
-msgstr ""
-
-msgid "Number2"
-msgstr ""
-
-msgid "Vslider"
-msgstr "Κάθετο slider"
-
-msgid "Hslider"
-msgstr "Οριζόντιο slider"
-
-#, fuzzy
-msgid "Vradio"
-msgstr "Κάθετο radio"
-
-#, fuzzy
-msgid "Hradio"
-msgstr "Οριζόντιο radio"
-
-msgid "VU Meter"
-msgstr "Μετρητής VU"
-
-msgid "Canvas"
-msgstr "Καμβάς"
-
 msgid "Graph"
 msgstr "Γράφημα"
-
-msgid "Array"
-msgstr "Πίνακας"
 
 msgid "Find..."
 msgstr "Εύρεση..."
@@ -954,9 +1350,6 @@ msgstr "Γονεϊκό Παράθυρο"
 msgid "Bezier Cables"
 msgstr "Καμπύλη Bezier"
 
-msgid "Theme"
-msgstr ""
-
 #, fuzzy
 msgid "Save All Preferences"
 msgstr "Προτιμήσεις"
@@ -979,6 +1372,10 @@ msgstr "Άνοιγμα Πρόσφατου"
 
 msgid "Quit"
 msgstr "Έξοδος"
+
+#, tcl-format
+msgid "Do you want to save the changes you made in '%s'?"
+msgstr "Αποθήκευση αλλαγών που έγιναν στο '%s';"
 
 msgid "Properties"
 msgstr "Ιδιότητες"
@@ -1004,10 +1401,31 @@ msgstr ""
 msgid "Tcl:"
 msgstr ""
 
+msgid "Pd"
+msgstr ""
+
 msgid "DSP"
 msgstr ""
 
+msgid "Audio I/O error"
+msgstr ""
+
 msgid "Log:"
+msgstr ""
+
+msgid "fatal"
+msgstr ""
+
+msgid "error"
+msgstr ""
+
+msgid "normal"
+msgstr ""
+
+msgid "debug"
+msgstr ""
+
+msgid "all"
 msgstr ""
 
 msgid "New..."
@@ -1022,221 +1440,32 @@ msgid "Delete"
 msgstr "Διαγραφή πίνακα"
 
 #, tcl-format
-msgid "ignoring '%s': doesn't exist"
-msgstr ""
-
-#, tcl-format
 msgid "ignoring '%s': doesn't look like a Pd file"
 msgstr ""
 
-#~ msgid "Array Properties"
-#~ msgstr "Ιδιότητες Πίνακα"
-
-#~ msgid "Name:"
-#~ msgstr "Όνομα:"
-
-#~ msgid "Size:"
-#~ msgstr "Μέγεθος:"
-
-#~ msgid "Save contents"
-#~ msgstr "Αποθήκευση περιεχομένων"
-
-#~ msgid "Draw as:"
-#~ msgstr "Σχεδίαση ως:"
-
-#~ msgid "Polygon"
-#~ msgstr "Πολύγωνο"
-
-#~ msgid "Points"
-#~ msgstr "Σημεία"
-
-#~ msgid "Bezier curve"
-#~ msgstr "Καμπύλη Bezier"
-
-#~ msgid "Put array into:"
-#~ msgstr "Προσθήκη πίνακα σε:"
-
-#~ msgid "New graph"
-#~ msgstr "Νέο γράφημα"
-
-#~ msgid "Last graph"
-#~ msgstr "Τελευταίο γράφημα"
-
-#~ msgid "Open List View..."
-#~ msgstr "Άνοιγμα Προβολής Λίστας..."
-
-#~ msgid "Delete array"
-#~ msgstr "Διαγραφή πίνακα"
-
-#~ msgid "Audio Settings"
-#~ msgstr "Ρυθμίσεις Ήχου"
-
 #, fuzzy
-#~ msgid "Settings"
-#~ msgstr "Ρυθμίσεις MIDI"
-
-#, fuzzy
-#~ msgid "Sample rate:"
-#~ msgstr "Ταχύτητα δειγματοληψίας:"
-
-#~ msgid "Delay (msec):"
-#~ msgstr "Καθυστέρηση (msec):"
-
-#~ msgid "Use callbacks"
-#~ msgstr "Χρήση επανακλήσεων"
-
-#~ msgid "Input Devices"
-#~ msgstr "Συσκευή εισόδου"
-
-#~ msgid "Channels:"
-#~ msgstr "Κανάλια:"
-
-#~ msgid "Output Devices"
-#~ msgstr "Συσκευή εξόδου"
-
-#, fuzzy
-#~ msgid "(same as input device)..."
-#~ msgstr "(ομοίως με συσκευή εισόδου) .............."
-
-#, fuzzy
-#~ msgid "Use Multiple Devices"
-#~ msgstr "Χρήση πολλαπλών συσκευών"
-
-#~ msgid "Canvas Properties"
-#~ msgstr "Ιδιότητες Καμβά"
-
-#~ msgid "Scale"
-#~ msgstr "Κλίμακα"
-
-#~ msgid "X units per pixel:"
-#~ msgstr "Χ μονάδες ανά εικονοστοιχείο"
-
-#~ msgid "Y units per pixel:"
-#~ msgstr "Υ μονάδες ανά εικονοστοιχείο"
-
-#~ msgid "Appearance on parent patch"
-#~ msgstr "Εμφάνιση στο γονεϊκό patch"
-
-#~ msgid "Hide object name and arguments"
-#~ msgstr "Απόκρυψη ονόματος και ορισμάτων του object"
-
-#~ msgid "Range and size"
-#~ msgstr "Περιοχή και μέγεθος"
-
-#, fuzzy
-#~ msgid "X range: from"
-#~ msgstr "περιοχή Χ, από"
-
-#~ msgid "to"
-#~ msgstr "σε"
-
-#~ msgid "Margin:"
-#~ msgstr "Περιθώριο:"
-
-#, fuzzy
-#~ msgid "Y range: from"
-#~ msgstr "περιοχή Y, από"
-
-#, fuzzy
-#~ msgid "Data Properties"
-#~ msgstr "Ιδιότητες Καμβά"
-
-#~ msgid "Atom Box Properties"
-#~ msgstr "Ιδιότητες Atom Box"
-
-#~ msgid "Width:"
-#~ msgstr "Εύρος:"
-
-#~ msgid "Limits"
-#~ msgstr "Όρια"
-
-#~ msgid "Lower:"
-#~ msgstr "Κατώτερο:"
-
-#~ msgid "Upper:"
-#~ msgstr "Ανώτερο:"
-
-#~ msgid "Label"
-#~ msgstr "Ετικέτα"
-
-#, fuzzy
-#~ msgid "Left"
-#~ msgstr "Αριστερά"
-
-#~ msgid "Right"
-#~ msgstr "Δεξιά"
-
-#~ msgid "Top"
-#~ msgstr "Κορυφή"
-
-#~ msgid "Bottom"
+#~ msgid "bottom:"
 #~ msgstr "Κάτω"
 
-#~ msgid "Messages"
-#~ msgstr "Μηνύματα"
-
-#~ msgid "Send symbol:"
-#~ msgstr "Αποστολή symbol:"
-
-#~ msgid "Receive symbol:"
-#~ msgstr "Λήψη συμβόλου:"
-
-#~ msgid "Background color"
-#~ msgstr "Χρώμα φόντου"
-
-#~ msgid "Foreground color"
-#~ msgstr "Χρώμα πρώτου πλάνου"
-
 #, fuzzy
-#~ msgid "Jump on click"
-#~ msgstr "Μεταπήδηση στο κλικ"
-
-#, fuzzy
-#~ msgid "Steady on click"
-#~ msgstr "Σταθερότητα στο κλικ"
-
-#, fuzzy
-#~ msgid "Flash Time (msec)"
-#~ msgstr "Καθυστέρηση (msec):"
-
-#, fuzzy
-#~ msgid "Height:"
+#~ msgid "height:"
 #~ msgstr "Δεξιά"
 
 #, fuzzy
-#~ msgid "X offset:"
-#~ msgstr "Παράθεση Χ"
+#~ msgid "right:"
+#~ msgstr "Δεξιά"
 
 #, fuzzy
-#~ msgid "Y offset:"
-#~ msgstr "Παράθεση Υ"
-
-#~ msgid "Colors"
-#~ msgstr "Χρώματα"
-
-#~ msgid "Background"
-#~ msgstr "Φόντο"
-
-#~ msgid "Front"
-#~ msgstr "Πρώτο Πλάνο"
-
-#~ msgid "Compose color"
-#~ msgstr "Σύνθεση χρώματος"
+#~ msgid "size:"
+#~ msgstr "Μέγεθος:"
 
 #, fuzzy
-#~ msgid "Send a Pd message"
-#~ msgstr "Αποστολή Μηνύματος..."
-
-#~ msgid "MIDI Settings"
-#~ msgstr "Ρυθμίσεις MIDI"
+#~ msgid "width:"
+#~ msgstr "Εύρος:"
 
 #, fuzzy
-#~ msgid "Deken %s Preferences"
-#~ msgstr "Προτιμήσεις"
-
-#, fuzzy
-#~ msgid "Message..."
-#~ msgstr "Μήνυμα"
+#~ msgid "start searching for externals..."
+#~ msgstr "Απόρριψη αλλαγών σε '%s';"
 
 #~ msgid "for:"
 #~ msgstr "για:"
@@ -1244,25 +1473,12 @@ msgstr ""
 #~ msgid "Output device 3:"
 #~ msgstr "Συσκευή εξόδου 3:"
 
-#~ msgid "Preferences..."
-#~ msgstr "Προτιμήσεις..."
-
-#~ msgid "Max Text Files (.mxt)"
-#~ msgstr "Αρχεία Κειμένου από MAX (.mxt)"
-
 #~ msgid "Input device 2:"
 #~ msgstr "Συσκευή εισόδου 2:"
 
 #, fuzzy
 #~ msgid "really quit?"
 #~ msgstr "έξοδος οπωσδήποτε;"
-
-#~ msgid "Max Text Files"
-#~ msgstr "Αρχεία Κειμένου από MAX"
-
-#~ msgid "WARNING: Font weight '%s' not found, using default (%s)"
-#~ msgstr ""
-#~ "ΠΡΟΣΟΧΗ:  Το βάρος γραμματοσειράς '%s' δεν βρέθηκε, χρήση προεπιλογής (%s)"
 
 #~ msgid "Generators"
 #~ msgstr "Γεννήτριες"
@@ -1280,11 +1496,6 @@ msgstr ""
 #~ msgid "Output device 2:"
 #~ msgstr "Συσκευή εξόδου 2:"
 
-#~ msgid "WARNING: Font family '%s' not found, using default (%s)"
-#~ msgstr ""
-#~ "ΠΡΟΣΟΧΗ:  Η οικογένεια γραμματοσειράς '%s' δεν βρέθηκε, χρήση προεπιλογής "
-#~ "(%s)"
-
 #~ msgid "Font Properties"
 #~ msgstr "Ιδιότητες Γραμματοσειράς"
 
@@ -1293,9 +1504,6 @@ msgstr ""
 
 #~ msgid "Filters"
 #~ msgstr "Φίλτρα"
-
-#~ msgid "Max Patch Files (.pat)"
-#~ msgstr "Αρχεία Patch από MAX (.pat)"
 
 #~ msgid "Discard changes to this window??"
 #~ msgstr "Απόρριψη αλλαγών σε αυτό το παράθυρο;;"
@@ -1309,14 +1517,8 @@ msgstr ""
 #~ msgid "ERROR: 'pd' never showed up, 'pd-gui' quitting!"
 #~ msgstr "ΣΦΑΛΜΑ: το 'pd' δεν εμφανίστηκε ποτέ, έξοδος του 'pd-gui'!"
 
-#~ msgid "Max Patch Files"
-#~ msgstr "Αρχεία Patch από MAX"
-
 #~ msgid "Input device 3:"
 #~ msgstr "Συσκευή εισόδου 3:"
-
-#~ msgid "Associated Files"
-#~ msgstr "Συνδεόμενα Αρχεία"
 
 #~ msgid "Close this window??"
 #~ msgstr "Κλείσιμο αυτού του παραθύρου;;"

@@ -1,4 +1,4 @@
-#N canvas 683 76 577 831 12;
+#N canvas 677 23 555 657 12;
 #X declare;
 #X obj 29 116 bang;
 #X text 129 116 - output a bang message;
@@ -182,7 +182,7 @@
 #X text 131 2981 - record sound to disk;
 #X obj 28 3086 phasor~;
 #X obj 28 3110 cos~;
-#X obj 28 3084 osc~;
+#X obj 28 3134 osc~;
 #X text 128 3134 - cosine oscillator;
 #X obj 28 3158 tabwrite~;
 #X text 128 3158 - write to a table;
@@ -240,30 +240,25 @@
 #X obj 28 3875 inlet~;
 #X obj 82 3875 outlet~;
 #X obj 29 4010 struct;
-#X text 199 4010 - define a data structure;
-#X obj 29 4034 drawcurve;
-#X obj 106 4034 filledcurve;
-#X obj 29 4058 drawpolygon;
-#X obj 121 4058 filledpolygon;
+#X obj 29 4058 drawcurve;
+#X obj 106 4058 filledcurve;
+#X obj 29 4034 drawpolygon;
+#X obj 121 4034 filledpolygon;
 #X obj 29 4109 plot;
 #X text 69 4109 - plot an array field;
 #X obj 29 4083 drawnumber;
 #X obj 30 4170 pointer;
 #X text 130 4170 - point to an object belonging to a template;
 #X obj 30 4194 get;
-#X text 130 4194 - get numeric fields;
 #X obj 30 4218 set;
-#X text 130 4218 - change numeric fields;
 #X obj 30 4242 element;
-#X text 130 4242 - get an array element;
 #X obj 30 4266 getsize;
 #X text 130 4266 - get the size of an array;
 #X obj 30 4290 setsize;
 #X text 130 4290 - change the size of an array;
 #X obj 30 4314 append;
-#X text 130 4314 - add an element to a list;
 #X obj 30 4338 scalar;
-#X text 151 4754 (use tabwrite~ now);
+#X text 150 4754 (use tabwrite~ now);
 #X obj 144 3626 czero_rev~;
 #X obj 31 2741 threshold~;
 #X text 131 2741 - detect signal thresholds;
@@ -394,9 +389,8 @@ as "switch" \, also switch subpatches on and off;
 #X obj 97 4723 pique;
 #X text 29 86 --------------------- GENERAL --------------------------
 ;
-#X obj 41 678 x_all_guis;
-#X text 120 678 <==;
-#X text 150 671 click and open for all Graphical User Interface (GUI)
+#X text 112 678 <==;
+#X text 142 671 click and open for all Graphical User Interface (GUI)
 objects in Pd, f 34;
 #X text 24 636 -------------------------- GUIs -------------------------
 ;
@@ -404,9 +398,6 @@ objects in Pd, f 34;
 #X text 56 24 The following is a list of built-in objects in Pd. Right-click
 (or control-click on a Macintosh) on any object to get its "help window".
 , f 50;
-#X text 201 4034 - draw a shape with bezier curve;
-#X text 231 4058 - draw a polygon shape;
-#X text 264 4082 - draw number/symbol/text;
 #X text 23 3980 --------------- DATA STRUCTURE TEMPLATES ------------------
 ;
 #X text 23 4140 -------------- ACCESSING DATA STRUCTURES -------------------
@@ -425,14 +416,24 @@ objects in Pd, f 34;
 #X text 22 3033 ------------ AUDIO GENERATORS AND TABLES -------------
 ;
 #X text 31 2590 ------------- GENERAL AUDIO TOOLS --------------;
-#X text 152 4721 (from 'extra': use sigmund~ now);
+#X text 150 4725 (from 'extra': use sigmund~ now);
 #X obj 33 4637 output~;
 #X text 128 4645 - simple stereo output (used in the documentation)
 ;
 #X text 127 748 - send a bang message after a time delay;
 #X text 127 772 - send a bang message periodically (a la metronome)
 ;
+#X obj 41 678 all_guis;
+#X text 130 4242 - get pointer to an array element;
+#X text 223 4034 - draw polygon shapes;
+#X text 101 4010 - define a data structure template;
+#X text 224 4058 - draw shapes with bezier curve;
+#X text 259 4082 - draw number/symbol/text fields;
+#X text 130 4194 - get field values (floats/symbols) from a scalar
+;
+#X text 130 4218 - set field values (floats/symbols) of a scalar;
+#X text 130 4314 - add a scalar to a Data Structure list;
+#X obj 26 1751 closebang;
 #X obj 26 1727 initbang;
-#X obj 26 1749 closebang;
-#X text 126 1727 - bang on init;
-#X text 126 1749 - bang on close;
+#X text 126 1726 - bang on init;
+#X text 126 1751 - bang on close;

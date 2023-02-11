@@ -15,6 +15,7 @@ GNUmakefile
 GNUmakefile.in
 aclocal.m4
 configure
+configure~
 config.log
 config.status
 libtool
@@ -27,6 +28,7 @@ tcl/pd-gui
 
 # build
 *.o
+*.obj
 lib*.a
 
 # libtool
@@ -55,6 +57,7 @@ src/*.a
 # distribution tarballs
 pd-0.*
 msw/0.*
+msw/pdprototype/*
 
 # gettext
 po/*.msg

@@ -4,12 +4,6 @@ package provide pdtk_canvas 0.1
 package require pd_bindings
 
 namespace eval ::pdtk_canvas:: {
-
-    # the untitled name prefix pd checks for using a macro in g_canvas.h,
-    # a saveas panel is shown when saving a file with this name
-    variable untitled_name "PDUNTITLED"
-    variable untitled_len 10
-
     namespace export pdtk_canvas_popup
     namespace export pdtk_canvas_editmode
     namespace export pdtk_canvas_getscroll
@@ -56,7 +50,7 @@ if {$::tcl_version < 8.5 || \
         }
         if {$h > $height} {
             # 30 for window framing
-            set h [expr $height - $::menubarsize]
+            set h [expr $height - $::menubarsize - $::windowframey]
             set y $::menubarsize
         }
 
@@ -77,16 +71,17 @@ if {$::tcl_version < 8.5 || \
 # easy for people to customize these calculations based on their Window
 # Manager, desires, etc.
 proc pdtk_canvas_place_window {width height geometry} {
+    ::pdwindow::configure_window_offset
+
     # read back the current geometry +posx+posy into variables
-    set w $width
-    set h $height
-    set xypos ""
-    if { "" != ${geometry} } {
-        scan $geometry {%[+]%d%[+]%d} - x - y
-        foreach {x y w h} [pdtk_canvas_wrap_window $x $y $width $height] {break}
-        set xypos +${x}+${y}
-    }
-    return [list ${w} ${h} ${w}x${h}${xypos}]
+    scan $geometry {%[+]%d%[+]%d} - x - y
+    set xywh [pdtk_canvas_wrap_window \
+        [expr $x - $::windowframex] [expr $y - $::windowframey] $width $height]
+    set x [lindex $xywh 0]
+    set y [lindex $xywh 1]
+    set w [lindex $xywh 2]
+    set h [lindex $xywh 3]
+    return [list ${w} ${h} ${w}x${h}+${x}+${y}]
 }
 
 
@@ -94,7 +89,10 @@ proc pdtk_canvas_place_window {width height geometry} {
 # canvas new/saveas
 
 proc pdtk_canvas_new {mytoplevel width height geometry editable} {
-    foreach {width height geometry} [pdtk_canvas_place_window $width $height $geometry] {break;}
+    set l [pdtk_canvas_place_window $width $height $geometry]
+    set width [lindex $l 0]
+    set height [lindex $l 1]
+    set geometry [lindex $l 2]
     set ::undo_actions($mytoplevel) no
     set ::redo_actions($mytoplevel) no
 
@@ -112,9 +110,7 @@ proc pdtk_canvas_new {mytoplevel width height geometry editable} {
     # started_loading_file proc.  Perhaps this doesn't make sense tho
     event generate $mytoplevel <<Loading>>
 
-    if { "" != ${geometry} } {
-        wm geometry $mytoplevel $geometry
-    }
+    wm geometry $mytoplevel $geometry
     wm minsize $mytoplevel $::canvas_minwidth $::canvas_minheight
 
     set tkcanvas [tkcanvas_name $mytoplevel]
@@ -122,6 +118,7 @@ proc pdtk_canvas_new {mytoplevel width height geometry editable} {
         -highlightthickness 0 -scrollregion [list 0 0 $width $height] \
         -xscrollcommand "$mytoplevel.xscroll set" \
         -yscrollcommand "$mytoplevel.yscroll set"
+
 
     set tmpcol [::pdtk_canvas::get_color txt_highlight $mytoplevel]
     if {$tmpcol ne ""} {
@@ -178,10 +175,9 @@ proc pdtk_canvas_raise {mytoplevel} {
     focus $mycanvas
 }
 
-proc pdtk_canvas_saveas {mytoplevel initialfile initialdir destroyflag} {
+proc pdtk_canvas_saveas {name initialfile initialdir destroyflag} {
     if { ! [file isdirectory $initialdir]} {set initialdir $::filenewdir}
     set filename [tk_getSaveFile -initialdir $initialdir \
-                      -initialfile [::pdtk_canvas::cleanname "$initialfile"] \
                       -defaultextension .pd -filetypes $::filetypes]
     if {$filename eq ""} return; # they clicked cancel
 
@@ -200,8 +196,8 @@ proc pdtk_canvas_saveas {mytoplevel initialfile initialdir destroyflag} {
     }
     set dirname [file dirname $filename]
     set basename [file tail $filename]
-    pdsend "$mytoplevel savetofile [enquote_path $basename] [enquote_path \
-         $dirname] $destroyflag"
+    pdsend "$name savetofile [enquote_path $basename] [enquote_path $dirname] \
+ $destroyflag"
     set ::filenewdir $dirname
     # add to recentfiles
     ::pd_guiprefs::update_recentfiles $filename
@@ -433,10 +429,9 @@ proc ::pdtk_canvas::pdtk_canvas_setparents {mytoplevel args} {
     }
 }
 
-# receive information for setting the info in the title bar of the window
+# receive information for setting the info the the title bar of the window
 proc ::pdtk_canvas::pdtk_canvas_reflecttitle {mytoplevel \
                                               path name arguments dirty} {
-    set name [::pdtk_canvas::cleanname "$name"]
     set ::windowname($mytoplevel) $name
     set ::pdtk_canvas::::window_fullname($mytoplevel) "$path/$name"
     if {$::windowingsystem eq "aqua"} {
@@ -455,35 +450,34 @@ proc ::pdtk_canvas::pdtk_canvas_reflecttitle {mytoplevel \
 }
 
 #------------------------------------------------------------------------------#
-# utils
-
-# provide a clean filename to avoid saving files with the untitled name prefix
-proc ::pdtk_canvas::cleanname {name} {
-    variable untitled_name
-    variable untitled_len
-    if {[string compare -length $untitled_len "$name" "$untitled_name"] == 0} {
-        # replace untitled prefix with a display name
-        # TODO localize "Untitled" & make sure translations do not contain spaces
-        return [string replace "$name" 0 [expr $untitled_len - 1] "Untitled"]
+# get color value for pd
+proc ::pdtk_canvas::get_color {type {window 0}} {
+    if {$::themeState} {
+        return $::lightTheme($type)
+    } else {
+        return $::darkTheme($type)
     }
-    return $name
 }
 
-set enable_cords_to_foreground false
-
-proc ::pdtk_canvas::cords_to_foreground {mytoplevel {state 1}} {
-    global enable_cords_to_foreground
-    if {$enable_cords_to_foreground eq "true"} {
-        set col black
-        if { $state == 0 } {
-            set col lightgrey
-        }
-        foreach id [$mytoplevel find withtag {cord && !selected}] {
-            # don't apply backgrouding on selected (blue) lines
-            if { [lindex [$mytoplevel itemconfigure $id -fill] 4 ] ne "blue" } {
-                $mytoplevel itemconfigure $id -fill $col
-            }
-        }
+proc ::pdtk_canvas::updateTheme {mytoplevel} {
+    set tkcanvas $mytoplevel
+    set tmpcol [::pdtk_canvas::get_color txt_highlight $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -selectbackground $tmpcol
+    }
+    set tmpcol [::pdtk_canvas::get_color canvas_fill $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -background $tmpcol
+    }
+    set tmpcol [::pdtk_canvas::get_color canvas_text_cursor $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -insertbackground $tmpcol
+    }
+    #in Tk 8.6 the selectforeground is set by the os theme?
+    set tmpcol [::pdtk_canvas::get_color txt_highlight_front $mytoplevel]
+    if {$tmpcol ne ""} {
+        $tkcanvas configure -selectforeground \
+        	[::pdtk_canvas::get_color txt_highlight_front $mytoplevel]
     }
 }
 

@@ -1,5 +1,5 @@
 
-package provide helpbrowser 0.2
+package provide helpbrowser 0.3
 
 namespace eval ::helpbrowser:: {
     variable libdirlist
@@ -29,7 +29,11 @@ proc ::helpbrowser::open_helpbrowser {} {
         if {$::windowingsystem eq "aqua"} {
             .helpbrowser configure -menu $::dialog_menubar
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> upstream/next
         # set the maximum number of parent columns to create
         set ::helpbrowser::maxcols 4
 
@@ -43,13 +47,8 @@ proc ::helpbrowser::open_helpbrowser {} {
 
         # ignore undo bindings?
         # on macOS, this posts a ".helpbrowser: no such object" error
-        bind .helpbrowser <Mod1-z> "break"
-        bind .helpbrowser <Mod1-Z> "break"
-
-        # ignore undo bindings?
-        # on macOS, this posts a ".helpbrowser: no such object" error
-        bind .helpbrowser <Mod1-z> "break"
-        bind .helpbrowser <Mod1-Z> "break"
+        bind .helpbrowser <$::modifier-Key-z> "break"
+        bind .helpbrowser <$::modifier-Key-Z> "break"
 
         position_over_window .helpbrowser .pdwindow
     }
@@ -397,7 +396,7 @@ proc ::helpbrowser::make_doclistbox {dir count {select true}} {
     }
     # force display update
     update idletasks
-    
+
     if {$count <= $::helpbrowser::maxcols} {
         .helpbrowser.c configure -width [winfo width .helpbrowser.c.f]
     } else {
